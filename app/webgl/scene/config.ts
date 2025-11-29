@@ -137,6 +137,7 @@ export function handleFormValidations(userData: userConfigParams) {
   configStore.userConfig = finalUserData;
 
   calculateExperienceSteps();
+  setupObjectsData();
 }
 
 function calculateExperienceSteps() {
@@ -177,6 +178,7 @@ function calculateExperienceSteps() {
     worldStateSteps.push(worldState);
   }
   console.log(worldStateSteps);
+  configStore.worldStateSteps = worldStateSteps;
 }
 
 function calculateMaxTemperature() {
@@ -190,4 +192,26 @@ function calculateMaxTemperature() {
   }, 0);
 
   return (configStore.configParams.maxTemperature * globalPercentage) / 100;
+}
+
+function setupObjectsData() {
+  const worldStore = useWorld();
+  const configStore = useConfig();
+
+  const objectDataMap: Record<string, any> = {
+    trees: configStore.objectsData.trees,
+    grass: configStore.objectsData.grass,
+  };
+
+  worldStore.sceneParts.forEach((scenePart) => {
+    const objectType = Object.keys(objectDataMap).find((key) =>
+      scenePart.name.includes(key)
+    );
+
+    if (objectType) {
+      scenePart.children.forEach((child) => {
+        child.userData = objectDataMap[objectType];
+      });
+    }
+  });
 }

@@ -20,7 +20,14 @@ export const useConfig = defineStore("useConfig", () => {
     },
   };
 
+  const objectsData = {
+    trees: { worst: 2.5, bad: 1.5, normal: 0.5, best: 0 },
+    grass: { worst: 3.5, bad: 2.5, normal: 1.5, best: 0.3 },
+  };
+
   const userConfig: Partial<userConfigParams> = {};
 
-  return { formParams, userConfig, configParams };
+  const worldStateSteps: any[] = [];
+
+  return { formParams, userConfig, configParams, worldStateSteps, objectsData };
 });
