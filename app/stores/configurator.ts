@@ -1,8 +1,26 @@
+import type { userConfigParams } from "~/types/config";
+
 export const useConfig = defineStore("useConfig", () => {
-  const configParams = {
+  const formParams = {
     step: 5,
     currentStep: 0,
   };
 
-  return { configParams };
+  const configParams = {
+    yearsStep: 10, //in years
+    currentYear: 2025,
+    targetYear: 2100,
+    maxTemperature: 7.1,
+    paramsWeight: {
+      plane: 0.03,
+      dailyTransport: 0.2,
+      food: 0.25,
+      energy: 0.35,
+      consumption: 0.17,
+    },
+  };
+
+  const userConfig: Partial<userConfigParams> = {};
+
+  return { formParams, userConfig, configParams };
 });
