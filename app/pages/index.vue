@@ -4,7 +4,7 @@ import {
   initScene,
   revealElements,
 } from "~/webgl/scene/config";
-import { handleCameraMove, moveToStep } from "~/webgl/scene/experience";
+import { handleCameraMovements, moveToStep } from "~/webgl/scene/experience";
 import { useWorld } from "~/stores/world";
 
 onMounted(() => {
@@ -31,28 +31,40 @@ const userData = {
   <h3 @click="moveToStep(2)">validate</h3>
   <div class="controls">
     <p
-      @mousedown="handleCameraMove('forward', true)"
-      @mouseup="handleCameraMove('forward', false)"
+      @mousedown="handleCameraMovements('forward', true)"
+      @mouseup="handleCameraMovements('forward', false)"
     >
       forward
     </p>
     <p
-      @mousedown="handleCameraMove('back', true)"
-      @mouseup="handleCameraMove('back', false)"
+      @mousedown="handleCameraMovements('back', true)"
+      @mouseup="handleCameraMovements('back', false)"
     >
-      forward
+      back
     </p>
     <p
-      @mousedown="handleCameraMove('left', true)"
-      @mouseup="handleCameraMove('left', false)"
+      @mousedown="handleCameraMovements('left', true)"
+      @mouseup="handleCameraMovements('left', false)"
     >
-      forward
+      left
     </p>
     <p
-      @mousedown="handleCameraMove('right', true)"
-      @mouseup="handleCameraMove('right', false)"
+      @mousedown="handleCameraMovements('right', true)"
+      @mouseup="handleCameraMovements('right', false)"
     >
-      forward
+      right
+    </p>
+    <p
+      @mousedown="handleCameraMovements('down', true)"
+      @mouseup="handleCameraMovements('down', false)"
+    >
+      down
+    </p>
+    <p
+      @mousedown="handleCameraMovements('up', true)"
+      @mouseup="handleCameraMovements('up', false)"
+    >
+      up
     </p>
   </div>
 </template>

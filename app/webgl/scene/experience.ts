@@ -46,10 +46,12 @@ const rafIds = {
   back: null as number | null,
   left: null as number | null,
   right: null as number | null,
+  down: null as number | null,
+  up: null as number | null,
 };
 
-export function handleCameraMove(
-  direction: "forward" | "back" | "left" | "right",
+export function handleCameraMovements(
+  direction: "forward" | "back" | "left" | "right" | "down" | "up",
   pressed: boolean
 ) {
   const worldStore = useWorld();
@@ -71,7 +73,15 @@ export function handleCameraMove(
         case "right":
           worldStore.camera?.moveRight();
           break;
+        case "down":
+          worldStore.camera?.moveDown();
+          break;
+        case "up":
+          worldStore.camera?.moveUp();
+          break;
       }
+      console.log(worldStore.camera?.instance);
+
       rafIds[direction] = requestAnimationFrame(loop);
     };
 

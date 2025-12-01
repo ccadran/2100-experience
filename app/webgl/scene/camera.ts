@@ -44,15 +44,29 @@ export default class Camera {
   }
 
   moveForward() {
+    if (this.instance.position.z <= 5) return;
     this.instance.position.z -= 0.5;
+    this.instance.lookAt(0, 0, 0);
   }
   moveBack() {
     this.instance.position.z += 0.5;
+    this.instance.lookAt(0, 0, 0);
   }
   moveLeft() {
     this.instance.position.x -= 0.5;
+    this.instance.lookAt(0, 0, 0);
   }
   moveRight() {
     this.instance.position.x += 0.5;
+    this.instance.lookAt(0, 0, 0);
+  }
+  moveDown() {
+    if (this.instance.position.y <= 5) return;
+    this.instance.position.y -= 0.5;
+    this.instance.lookAt(0, 0, 0);
+  }
+  moveUp() {
+    this.instance.position.y += 0.5;
+    this.instance.lookAt(0, 0, 0);
   }
 }
