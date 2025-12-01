@@ -5,58 +5,67 @@ import { useConfig } from "~/stores/configurator";
 import type { userConfigParams } from "~/types/config";
 import Camera from "./camera";
 
-export function initScene() {
-  const worldStore = useWorld();
-  const container = document.querySelector(".webgl");
-  if (!container) return;
-
-  const globalScene = new THREE.Scene();
-  globalScene.background = new THREE.Color(0xaaaaaa);
-
-  worldStore.camera = new Camera();
-
-  const canvas = container.querySelector("canvas");
-  if (!canvas) return;
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-  renderer.setSize(container.clientWidth, container.clientHeight);
-
-  const light = new THREE.DirectionalLight(0xffffff, 1);
-  light.position.set(5, 10, 7.5);
-  globalScene.add(light);
-
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-  globalScene.add(ambientLight);
-
-  const loader = new GLTFLoader();
-  loader.load("/3d/states.glb", (gltf: any) => {
-    globalScene.add(gltf.scene);
-    const target = globalScene.getObjectByName("Scene");
-
-    worldStore.scene = target as THREE.Group;
-
-    const sceneChildrens = worldStore.scene?.children;
-
-    sceneChildrens?.forEach((child) => {
-      if (child.name.includes("group")) {
-        worldStore.sceneParts.push(child);
-      }
-    });
-    hideElements();
-  });
-
-  function animate() {
-    requestAnimationFrame(animate);
-
-    renderer.render(globalScene, worldStore.camera!.instance);
-  }
-  animate();
-
-  window.addEventListener("resize", () => {
+export function initScene(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const worldStore = useWorld();
+    const container = document.querySelector(".webgl");
     if (!container) return;
-    worldStore.camera!.instance.aspect =
-      container.clientWidth / container.clientHeight;
-    worldStore.camera!.instance.updateProjectionMatrix();
+
+    const globalScene = new THREE.Scene();
+    globalScene.background = new THREE.Color(0xaaaaaa);
+
+    worldStore.camera = new Camera();
+
+    const canvas = container.querySelector("canvas");
+    if (!canvas) return;
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     renderer.setSize(container.clientWidth, container.clientHeight);
+
+    const light = new THREE.DirectionalLight(0xffffff, 1);
+    light.position.set(5, 10, 7.5);
+    globalScene.add(light);
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    globalScene.add(ambientLight);
+
+    const loader = new GLTFLoader();
+    loader.load(
+      "/3d/states.glb",
+      (gltf: any) => {
+        globalScene.add(gltf.scene);
+
+        const target = globalScene.getObjectByName("Scene");
+
+        worldStore.scene = target as THREE.Group;
+
+        const sceneChildrens = worldStore.scene?.children;
+
+        sceneChildrens?.forEach((child) => {
+          if (child.name.includes("group")) {
+            worldStore.sceneParts.push(child);
+          }
+        });
+        hideElements();
+        resolve();
+      },
+      undefined,
+      reject
+    );
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      renderer.render(globalScene, worldStore.camera!.instance);
+    }
+    animate();
+
+    window.addEventListener("resize", () => {
+      if (!container) return;
+      worldStore.camera!.instance.aspect =
+        container.clientWidth / container.clientHeight;
+      worldStore.camera!.instance.updateProjectionMatrix();
+      renderer.setSize(container.clientWidth, container.clientHeight);
+    });
   });
 }
 

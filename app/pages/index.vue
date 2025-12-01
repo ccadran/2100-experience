@@ -7,8 +7,11 @@ import {
 import { handleCameraMovements, moveToStep } from "~/webgl/scene/experience";
 import { useWorld } from "~/stores/world";
 
-onMounted(() => {
-  initScene();
+const isLoading = ref<boolean>(true);
+
+onMounted(async () => {
+  await initScene();
+  isLoading.value = false;
 });
 const worldStore = useWorld();
 
@@ -22,11 +25,16 @@ const userData = {
 </script>
 
 <template>
+  <transition>
+    <div class="loader" v-if="isLoading">
+      <h1>2100 currently loading...</h1>
+    </div>
+  </transition>
   <div class="webgl">
     <canvas></canvas>
   </div>
 
-  <h1 @click="revealElements">REVEAL</h1>
+  <h1 class="reveal" @click="revealElements">REVEAL</h1>
   <h2 @click="handleFormValidations(userData)">validate</h2>
   <h3 @click="moveToStep(2)">validate</h3>
   <div class="controls">
@@ -70,6 +78,16 @@ const userData = {
 </template>
 
 <style lang="scss">
+.loader {
+  height: 100vh;
+  width: 100vw;
+  position: fixed;
+  z-index: 5;
+  background-color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 .controls {
   position: fixed;
   left: 50%;
@@ -80,7 +98,7 @@ const userData = {
   width: 100vw;
   height: 100vh;
 }
-h1 {
+.reveal {
   position: fixed;
   z-index: 1;
   top: 0;
@@ -94,5 +112,15 @@ h3 {
   position: fixed;
   z-index: 1;
   top: 180px;
+}
+
+.v-enter-active,
+.v-leave-active {
+  transition: opacity 0.5s;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
 }
 </style>
