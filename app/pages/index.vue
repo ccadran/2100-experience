@@ -4,6 +4,7 @@ import {
   initScene,
   revealElements,
 } from "~/webgl/scene/config";
+import { moveToStep } from "~/webgl/scene/experience";
 
 onMounted(() => {
   initScene();
@@ -25,6 +26,7 @@ const userData = {
 
   <h1 @click="revealElements">REVEAL</h1>
   <h2 @click="handleFormValidations(userData)">validate</h2>
+  <h3 @click="moveToStep(2)">validate</h3>
 </template>
 
 <style lang="scss">
@@ -41,5 +43,10 @@ h2 {
   position: fixed;
   z-index: 1;
   top: 80px;
+}
+h3 {
+  position: fixed;
+  z-index: 1;
+  top: 180px;
 }
 </style>

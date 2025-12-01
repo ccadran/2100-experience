@@ -18,7 +18,7 @@ export function initScene() {
     0.1,
     1000
   );
-  camera.position.set(0, 8, 10);
+  camera.position.set(0, 28, 40);
   camera.lookAt(0, 0, 0);
 
   const canvas = container.querySelector("canvas");
