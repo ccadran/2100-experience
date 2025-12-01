@@ -40,3 +40,7 @@ function getCurrentState(
       .find(([, threshold]) => temperature >= threshold)?.[0] || null
   );
 }
+
+export function sceneTransition() {
+  // show clouds then hide it
+}

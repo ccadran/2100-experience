@@ -3,6 +3,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { useWorld } from "~/stores/world";
 import { useConfig } from "~/stores/configurator";
 import type { userConfigParams } from "~/types/config";
+import Camera from "./camera";
 
 export function initScene() {
   const worldStore = useWorld();
@@ -12,14 +13,7 @@ export function initScene() {
   const globalScene = new THREE.Scene();
   globalScene.background = new THREE.Color(0xaaaaaa);
 
-  const camera = new THREE.PerspectiveCamera(
-    75,
-    container.clientWidth / container.clientHeight,
-    0.1,
-    1000
-  );
-  camera.position.set(0, 28, 40);
-  camera.lookAt(0, 0, 0);
+  worldStore.camera = new Camera();
 
   const canvas = container.querySelector("canvas");
   if (!canvas) return;
@@ -52,14 +46,15 @@ export function initScene() {
 
   function animate() {
     requestAnimationFrame(animate);
-    renderer.render(globalScene, camera);
+    renderer.render(globalScene, worldStore.camera!.instance);
   }
   animate();
 
   window.addEventListener("resize", () => {
     if (!container) return;
-    camera.aspect = container.clientWidth / container.clientHeight;
-    camera.updateProjectionMatrix();
+    worldStore.camera!.instance.aspect =
+      container.clientWidth / container.clientHeight;
+    worldStore.camera!.instance.updateProjectionMatrix();
     renderer.setSize(container.clientWidth, container.clientHeight);
   });
 }
@@ -95,6 +90,9 @@ export function revealElements() {
 export function handleFormValidations(userData: userConfigParams) {
   const configStore = useConfig();
   const finalUserData: any = {};
+
+  const worldStore = useWorld();
+  worldStore.camera?.entryAnim();
 
   Object.entries(userData).forEach(([key, value]) => {
     switch (key) {
