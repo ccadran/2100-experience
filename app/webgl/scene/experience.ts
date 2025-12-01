@@ -80,7 +80,6 @@ export function handleCameraMovements(
           worldStore.camera?.moveUp();
           break;
       }
-      console.log(worldStore.camera?.instance);
 
       rafIds[direction] = requestAnimationFrame(loop);
     };
