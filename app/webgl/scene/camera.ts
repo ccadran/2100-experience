@@ -42,4 +42,17 @@ export default class Camera {
       { x: this.endPosition.x, y: this.endPosition.y, z: this.endPosition.z }
     );
   }
+
+  moveForward() {
+    this.instance.position.z -= 0.5;
+  }
+  moveBack() {
+    this.instance.position.z += 0.5;
+  }
+  moveLeft() {
+    this.instance.position.x -= 0.5;
+  }
+  moveRight() {
+    this.instance.position.x += 0.5;
+  }
 }

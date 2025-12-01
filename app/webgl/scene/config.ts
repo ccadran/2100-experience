@@ -46,6 +46,7 @@ export function initScene() {
 
   function animate() {
     requestAnimationFrame(animate);
+
     renderer.render(globalScene, worldStore.camera!.instance);
   }
   animate();

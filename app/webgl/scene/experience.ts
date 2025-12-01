@@ -41,6 +41,47 @@ function getCurrentState(
   );
 }
 
-export function sceneTransition() {
-  // show clouds then hide it
+const rafIds = {
+  forward: null as number | null,
+  back: null as number | null,
+  left: null as number | null,
+  right: null as number | null,
+};
+
+export function handleCameraMove(
+  direction: "forward" | "back" | "left" | "right",
+  pressed: boolean
+) {
+  const worldStore = useWorld();
+
+  if (pressed) {
+    if (rafIds[direction]) return;
+
+    const loop = () => {
+      switch (direction) {
+        case "forward":
+          worldStore.camera?.moveForward();
+          break;
+        case "back":
+          worldStore.camera?.moveBack();
+          break;
+        case "left":
+          worldStore.camera?.moveLeft();
+          break;
+        case "right":
+          worldStore.camera?.moveRight();
+          break;
+      }
+      rafIds[direction] = requestAnimationFrame(loop);
+    };
+
+    loop();
+  } else {
+    if (rafIds[direction]) {
+      cancelAnimationFrame(rafIds[direction]!);
+      rafIds[direction] = null;
+    }
+  }
 }
+
+export function sceneTransition() {}
