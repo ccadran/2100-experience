@@ -4,6 +4,7 @@ import { useWorld } from "~/stores/world";
 import { useConfig } from "~/stores/configurator";
 import type { userConfigParams } from "~/types/config";
 import Camera from "./camera";
+import { moveToStep } from "./experience";
 
 export function initScene(): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -76,9 +77,13 @@ export function hideElements() {
   const sceneChildrens = worldStore.scene?.children;
 
   sceneChildrens?.forEach((child) => {
-    if (child.name.includes("group") || child.name.includes("impact")) {
+    if (child.name.includes("group")) {
       worldStore.hiddenSceneParts.push(child);
       child.visible = false;
+    } else if (child.name.includes("impact")) {
+      child.children.forEach((c) => {
+        c.visible = false;
+      });
     }
   });
 }
@@ -88,11 +93,14 @@ export function revealElements() {
   const worldStore = useWorld();
 
   if (configStore.formParams.currentStep <= configStore.formParams.step) {
+    if (worldStore.hiddenSceneParts.length < 1) return;
     const randIndex = Math.floor(
       Math.random() * worldStore.hiddenSceneParts.length
     );
     worldStore.hiddenSceneParts[randIndex].visible = true;
     configStore.formParams.currentStep += 1;
+    worldStore.hiddenSceneParts.splice(randIndex, 1);
+    console.log(worldStore.hiddenSceneParts.length);
   }
 }
 
@@ -145,6 +153,7 @@ export function handleFormValidations(userData: userConfigParams) {
 
   calculateExperienceSteps();
   setupObjectsData();
+  moveToStep(0);
 }
 
 function calculateExperienceSteps() {

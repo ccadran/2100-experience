@@ -17,7 +17,10 @@ export function moveToStep(step: number) {
         firstChild.userData,
         currentTemperature
       );
+
+      console.log(1, part, firstChild.userData);
       if (!currentState) return;
+      console.log(2, part);
 
       part.children.forEach((child) => {
         child.children.forEach((c) => {
