@@ -18,9 +18,7 @@ export function moveToStep(step: number) {
         currentTemperature
       );
 
-      console.log(1, part, firstChild.userData);
       if (!currentState) return;
-      console.log(2, part);
 
       part.children.forEach((child) => {
         child.children.forEach((c) => {
@@ -36,7 +34,6 @@ export function moveToStep(step: number) {
         if (!part.name.includes(key)) return;
 
         const paramValue = currentStep.params[key];
-        console.log(key, paramValue);
 
         const levels = {
           low: paramValue >= 25,

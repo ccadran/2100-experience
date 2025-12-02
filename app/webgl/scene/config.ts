@@ -100,7 +100,6 @@ export function revealElements() {
     worldStore.hiddenSceneParts[randIndex].visible = true;
     configStore.formParams.currentStep += 1;
     worldStore.hiddenSceneParts.splice(randIndex, 1);
-    console.log(worldStore.hiddenSceneParts.length);
   }
 }
 
@@ -193,7 +192,6 @@ function calculateExperienceSteps() {
     worldState.temperature = maxTemperature * progress;
     worldStateSteps.push(worldState);
   }
-  console.log(worldStateSteps);
   configStore.worldStateSteps = worldStateSteps;
 }
 
