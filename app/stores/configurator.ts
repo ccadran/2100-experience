@@ -45,6 +45,8 @@ export const useConfig = defineStore("useConfig", () => {
 
   const worldStateSteps: any[] = [];
 
+  const currentStep = ref<number>(0);
+
   return {
     formParams,
     userConfig,
@@ -52,5 +54,6 @@ export const useConfig = defineStore("useConfig", () => {
     worldParams,
     worldStateSteps,
     objectsData,
+    currentStep,
   };
 });

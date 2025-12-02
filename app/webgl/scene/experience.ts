@@ -1,10 +1,24 @@
 import { useWorld } from "~/stores/world";
 import { useConfig } from "~/stores/configurator";
 
-export function moveToStep(step: number) {
+export function moveToStep(target: number | "next" | "previous") {
   const worldStore = useWorld();
   const configStore = useConfig();
-  const currentStep = configStore.worldStateSteps[step];
+
+  let targetStep: number = configStore.currentStep;
+  if (typeof target === "number") {
+    targetStep = target;
+  } else if (target === "next") {
+    targetStep += 1;
+  } else if (target === "previous") {
+    targetStep -= 1;
+  }
+  if (targetStep <= configStore.worldStateSteps.length - 1 && targetStep >= 0) {
+    configStore.currentStep = targetStep;
+  } else {
+    alert("THIS STEP DOES NOT EXIST");
+  }
+  const currentStep = configStore.worldStateSteps[configStore.currentStep];
 
   const currentTemperature = currentStep.temperature;
 
