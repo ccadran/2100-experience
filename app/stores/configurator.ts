@@ -11,12 +11,28 @@ export const useConfig = defineStore("useConfig", () => {
     currentYear: 2025,
     targetYear: 2100,
     maxTemperature: 7.1,
-    paramsWeight: {
-      plane: 0.03,
-      dailyTransport: 0.2,
-      food: 0.25,
-      energy: 0.35,
-      consumption: 0.17,
+  };
+
+  const worldParams = {
+    plane: {
+      name: "plane",
+      weight: 0.03,
+    },
+    dailyTransport: {
+      name: "dailyTransport",
+      weight: 0.2,
+    },
+    food: {
+      name: "food",
+      weight: 0.25,
+    },
+    energy: {
+      name: "energy",
+      weight: 0.35,
+    },
+    consumption: {
+      name: "consumption",
+      weight: 0.17,
     },
   };
 
@@ -29,5 +45,12 @@ export const useConfig = defineStore("useConfig", () => {
 
   const worldStateSteps: any[] = [];
 
-  return { formParams, userConfig, configParams, worldStateSteps, objectsData };
+  return {
+    formParams,
+    userConfig,
+    configParams,
+    worldParams,
+    worldStateSteps,
+    objectsData,
+  };
 });

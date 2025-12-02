@@ -36,7 +36,7 @@ const userData = {
 
   <h1 class="reveal" @click="revealElements">REVEAL</h1>
   <h2 @click="handleFormValidations(userData)">validate</h2>
-  <h3 @click="moveToStep(2)">validate</h3>
+  <h3 @click="moveToStep(7)">validate</h3>
   <div class="controls">
     <p
       @mousedown="handleCameraMovements('forward', true)"

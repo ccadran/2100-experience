@@ -9,24 +9,46 @@ export function moveToStep(step: number) {
   const currentTemperature = currentStep.temperature;
 
   worldStore.sceneParts.forEach((part) => {
-    const firstChild = part.children[0];
-    if (!firstChild) return;
+    if (part.name.includes("group")) {
+      const firstChild = part.children[0];
+      if (!firstChild) return;
 
-    const currentState = getCurrentState(
-      firstChild.userData,
-      currentTemperature
-    );
-    if (!currentState) return;
-    part.children.forEach((child) => {
-      child.children.forEach((c) => {
-        console.log(c.name);
-        if (c.name.includes(currentState)) {
-          c.visible = true;
-        } else {
-          c.visible = false;
-        }
+      const currentState = getCurrentState(
+        firstChild.userData,
+        currentTemperature
+      );
+      if (!currentState) return;
+
+      part.children.forEach((child) => {
+        child.children.forEach((c) => {
+          if (c.name.includes(currentState)) {
+            c.visible = true;
+          } else {
+            c.visible = false;
+          }
+        });
       });
-    });
+    } else if (part.name.includes("impact")) {
+      Object.entries(configStore.worldParams).forEach(([key, value]) => {
+        if (!part.name.includes(key)) return;
+
+        const paramValue = currentStep.params[key];
+        console.log(key, paramValue);
+
+        const levels = {
+          low: paramValue >= 25,
+          mid: paramValue >= 50,
+          high: paramValue >= 75,
+        };
+
+        part.children.forEach((child) => {
+          const level = Object.keys(levels).find((l) =>
+            child.name.includes(l)
+          ) as keyof typeof levels;
+          child.visible = level ? levels[level] : false;
+        });
+      });
+    }
   });
 }
 
@@ -80,7 +102,6 @@ export function handleCameraMovements(
           worldStore.camera?.moveUp();
           break;
       }
-
       rafIds[direction] = requestAnimationFrame(loop);
     };
 

@@ -41,7 +41,7 @@ export function initScene(): Promise<void> {
         const sceneChildrens = worldStore.scene?.children;
 
         sceneChildrens?.forEach((child) => {
-          if (child.name.includes("group")) {
+          if (child.name.includes("group") || child.name.includes("impact")) {
             worldStore.sceneParts.push(child);
           }
         });
@@ -76,12 +76,11 @@ export function hideElements() {
   const sceneChildrens = worldStore.scene?.children;
 
   sceneChildrens?.forEach((child) => {
-    if (child.name.includes("group")) {
+    if (child.name.includes("group") || child.name.includes("impact")) {
       worldStore.hiddenSceneParts.push(child);
       child.visible = false;
     }
   });
-  console.log(worldStore.hiddenSceneParts);
 }
 
 export function revealElements() {
@@ -108,31 +107,31 @@ export function handleFormValidations(userData: userConfigParams) {
     switch (key) {
       case "plane":
         finalUserData.plane = {
-          weight: configStore.configParams.paramsWeight[key],
+          weight: configStore.worldParams[key].weight,
           percentage: value,
         };
         break;
       case "dailyTransport":
         finalUserData.dailyTransport = {
-          weight: configStore.configParams.paramsWeight[key],
+          weight: configStore.worldParams[key].weight,
           percentage: value,
         };
         break;
       case "food":
         finalUserData.food = {
-          weight: configStore.configParams.paramsWeight[key],
+          weight: configStore.worldParams[key].weight,
           percentage: value,
         };
         break;
       case "energy":
         finalUserData.energy = {
-          weight: configStore.configParams.paramsWeight[key],
+          weight: configStore.worldParams[key].weight,
           percentage: value,
         };
         break;
       case "consumption":
         finalUserData.consumption = {
-          weight: configStore.configParams.paramsWeight[key],
+          weight: configStore.worldParams[key].weight,
           percentage: value,
         };
         break;
