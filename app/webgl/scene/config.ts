@@ -197,7 +197,7 @@ function calculateExperienceSteps() {
 
   const worldStateSteps = [];
 
-  const maxTemperature = calculateMaxTemperature();
+  const targetTemperature = calculateMaxTemperature();
 
   for (let i = 0; i <= totalSteps; i++) {
     const progress = i / totalSteps;
@@ -209,10 +209,14 @@ function calculateExperienceSteps() {
     Object.entries(configStore.userConfig).forEach(([key, value]) => {
       worldState.params[key] = value.percentage * progress;
     });
-    worldState.temperature = maxTemperature * progress;
+    worldState.temperature =
+      configStore.configParams.currentTemperature +
+      progress *
+        (targetTemperature - configStore.configParams.currentTemperature);
     worldStateSteps.push(worldState);
   }
   configStore.worldStateSteps = worldStateSteps;
+  console.log(worldStateSteps);
 }
 
 function calculateMaxTemperature() {
@@ -224,8 +228,39 @@ function calculateMaxTemperature() {
     const weight = value.weight;
     return acc + value.percentage * weight;
   }, 0);
+  let targetTemp: number;
+  if (configStore.configParams.pivotScore >= globalPercentage) {
+    console.log("POLLUE PAS");
+    const improvementRatio =
+      (configStore.configParams.pivotScore - globalPercentage) /
+      configStore.configParams.pivotScore;
+    console.log(improvementRatio);
 
-  return (configStore.configParams.maxTemperature * globalPercentage) / 100;
+    console.log(
+      configStore.configParams.currentTemperature -
+        improvementRatio *
+          (configStore.configParams.currentTemperature -
+            configStore.configParams.minTemperature)
+    );
+
+    targetTemp =
+      configStore.configParams.currentTemperature -
+      improvementRatio *
+        (configStore.configParams.currentTemperature -
+          configStore.configParams.minTemperature);
+  } else {
+    const degradationRatio =
+      (globalPercentage - configStore.configParams.pivotScore) /
+      (100 - configStore.configParams.pivotScore);
+
+    targetTemp =
+      configStore.configParams.currentTemperature +
+      degradationRatio *
+        (configStore.configParams.maxTemperature -
+          configStore.configParams.currentTemperature);
+  }
+
+  return targetTemp;
 }
 
 function setupObjectsData() {
@@ -234,7 +269,9 @@ function setupObjectsData() {
 
   const objectDataMap: Record<string, any> = {
     trees: configStore.objectsData.trees,
-    grass: configStore.objectsData.grass,
+    bushes: configStore.objectsData.bushes,
+    flowers: configStore.objectsData.flowers,
+    water: configStore.objectsData.water,
   };
 
   worldStore.sceneParts.forEach((scenePart) => {

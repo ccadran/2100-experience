@@ -10,7 +10,10 @@ export const useConfig = defineStore("useConfig", () => {
     yearsStep: 10, //in years
     currentYear: 2025,
     targetYear: 2100,
-    maxTemperature: 4.5,
+    maxTemperature: 5.7,
+    currentTemperature: 1.2,
+    minTemperature: 0,
+    pivotScore: 25,
   };
 
   const worldParams = {
