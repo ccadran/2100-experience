@@ -1,7 +1,5 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { useWorld } from "~/stores/world";
-import { useConfig } from "~/stores/configurator";
 import type { userConfigParams } from "~/types/config";
 import Camera from "./camera";
 import { moveToStep } from "./experience";
@@ -31,8 +29,10 @@ export function initScene(): Promise<void> {
 
     const loader = new GLTFLoader();
     loader.load(
-      "/3d/states.glb",
+      // "/3d/states.glb",
+      "/3d/2100-map__V1.glb",
       (gltf: any) => {
+        gltf.scene.scale.set(0.1, 0.1, 0.1);
         globalScene.add(gltf.scene);
 
         const target = globalScene.getObjectByName("Scene");

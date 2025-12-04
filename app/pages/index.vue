@@ -1,21 +1,23 @@
 <script lang="ts" setup>
-import {
-  handleFormValidations,
-  initScene,
-  revealElements,
-} from "~/webgl/scene/config";
+import { initScene } from "~/webgl/scene/config";
 import { handleCameraMovements, moveToStep } from "~/webgl/scene/experience";
-import { useWorld } from "~/stores/world";
 
-const isLoading = ref<boolean>(true);
-const isConnected = ref<boolean>(false);
+import { useSocket } from "~/composables/useSocket";
+import { useSocketHandler } from "~/composables/useSocketHandler";
+
 const isFormValidate = ref<boolean>(false);
+
+const { connect, joinRoom, sendAction, on } = useSocket();
+const { listenForUpdates } = useSocketHandler();
 
 onMounted(async () => {
   await initScene();
-  isLoading.value = false;
+  uiStore.isLoaded = true;
+  listenForUpdates();
 });
 const worldStore = useWorld();
+const webSocketStore = useWebSocket();
+const uiStore = useUi();
 
 const userData = {
   plane: 100,
@@ -25,9 +27,27 @@ const userData = {
   consumption: 44,
 };
 
-function validateForm() {
-  handleFormValidations(userData);
-  isFormValidate.value = true;
+const roomId = "ROOM_1";
+
+function handleWsCo() {
+  connect();
+  on("connect", () => {
+    joinRoom(roomId);
+  });
+}
+
+function revealElementsWs() {
+  sendAction(roomId, {
+    type: "REVEAL",
+    data: { test: "value", test2: "value2" },
+  });
+}
+
+function validateFormWs() {
+  sendAction(roomId, {
+    type: "VALIDATE_FORM",
+    data: { userData },
+  });
 }
 </script>
 
@@ -36,22 +56,22 @@ function validateForm() {
     <canvas></canvas>
   </div>
   <transition>
-    <div class="loader" v-if="isLoading">
+    <div class="loader" v-if="!uiStore.isLoaded">
       <h1>2100 currently loading...</h1>
     </div>
   </transition>
   <transition>
-    <div class="intro" v-if="!isConnected && !isLoading">
+    <div class="intro" v-if="!webSocketStore.isConnected && uiStore.isLoaded">
       <h1>SCAN LE QR CODE POUR COMMENCER L'EXPERIENCE</h1>
-      <button @click="isConnected = true">simulate co</button>
+      <button @click="handleWsCo">simulate co</button>
     </div>
   </transition>
   <transition>
-    <div class="form" v-if="isConnected && !isFormValidate">
+    <div class="form" v-if="webSocketStore.isConnected && !isFormValidate">
       <h2>REMPLISSER LE FORM SUR VORE PHONE</h2>
       <div class="buttons">
-        <button @click="revealElements">formstep validate</button>
-        <button @click="validateForm">VALIDATE FORM</button>
+        <button @click="revealElementsWs">formstep validate</button>
+        <button @click="validateFormWs">VALIDATE FORM</button>
       </div>
     </div>
   </transition>

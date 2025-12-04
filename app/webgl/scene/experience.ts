@@ -1,6 +1,3 @@
-import { useWorld } from "~/stores/world";
-import { useConfig } from "~/stores/configurator";
-
 export function moveToStep(target: number | "next" | "previous") {
   const worldStore = useWorld();
   const configStore = useConfig();
