@@ -10,7 +10,7 @@ export const useConfig = defineStore("useConfig", () => {
     yearsStep: 10, //in years
     currentYear: 2025,
     targetYear: 2100,
-    maxTemperature: 7.1,
+    maxTemperature: 4.5,
   };
 
   const worldParams = {
@@ -64,8 +64,27 @@ export const useConfig = defineStore("useConfig", () => {
   };
 
   const objectsData = {
-    trees: { worst: 2.5, bad: 1.5, normal: 0.5, best: 0 },
-    grass: { worst: 3.5, bad: 2.5, normal: 1.5, best: 0 },
+    trees: {
+      worst: 3.5,
+      bad: 2.0,
+      normal: 1.2,
+      best: 0.8,
+    },
+    bushes: {
+      worst: 4.0,
+      normal: 1.5,
+      best: 1.0,
+    },
+    flowers: {
+      worst: 2.0,
+      normal: 1.2,
+      best: 0.2,
+    },
+    water: {
+      worst: 2.5,
+      normal: 1.2,
+      best: 0.5,
+    },
   };
 
   const userConfig: Partial<userConfigParams> = {};
