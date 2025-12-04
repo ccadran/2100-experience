@@ -120,14 +120,32 @@ export function handleFormValidations(userData: userConfigParams) {
           percentage: value,
         };
         break;
-      case "dailyTransport":
-        finalUserData.dailyTransport = {
+      case "transport":
+        finalUserData.transport = {
           weight: configStore.worldParams[key].weight,
           percentage: value,
         };
         break;
-      case "food":
-        finalUserData.food = {
+      case "meat":
+        finalUserData.meat = {
+          weight: configStore.worldParams[key].weight,
+          percentage: value,
+        };
+        break;
+      case "promptIA":
+        finalUserData.promptIA = {
+          weight: configStore.worldParams[key].weight,
+          percentage: value,
+        };
+        break;
+      case "products":
+        finalUserData.products = {
+          weight: configStore.worldParams[key].weight,
+          percentage: value,
+        };
+        break;
+      case "phone":
+        finalUserData.phone = {
           weight: configStore.worldParams[key].weight,
           percentage: value,
         };
@@ -138,14 +156,14 @@ export function handleFormValidations(userData: userConfigParams) {
           percentage: value,
         };
         break;
-      case "consumption":
-        finalUserData.consumption = {
+      case "clothes":
+        finalUserData.clothes = {
           weight: configStore.worldParams[key].weight,
           percentage: value,
         };
         break;
-
       default:
+        console.log("unknow param");
         break;
     }
   });

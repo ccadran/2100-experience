@@ -16,23 +16,50 @@ export const useConfig = defineStore("useConfig", () => {
   const worldParams = {
     plane: {
       name: "plane",
-      weight: 0.03,
+      description: "Impact des vols long et court-courriers.",
+      weight: 0.1, // 10%
     },
-    dailyTransport: {
-      name: "dailyTransport",
-      weight: 0.2,
+    transport: {
+      name: "transport",
+      description:
+        "Impact de la voiture individuelle, bus, train (hors avion).",
+      weight: 0.25, // 25%
     },
-    food: {
-      name: "food",
-      weight: 0.25,
+    meat: {
+      name: "meat",
+      description:
+        "Impact lié à la production de viande et produits animaux (méthane, déforestation).",
+      weight: 0.15, // 15%
+    },
+    promptIA: {
+      name: "promptIA",
+      description:
+        "Impact lié aux data centers, streaming, et requêtes IA/ChatGPT.",
+      weight: 0.02, // 2%
+    },
+    products: {
+      name: "products",
+      description:
+        "Impact lié à l'importation de nourriture et à la fabrication de produits manufacturés (hors textile et tech).",
+      weight: 0.15, // 15%
+    },
+    phone: {
+      name: "phone",
+      description:
+        "Impact lié à la fabrication (extraction de métaux) et à l'infrastructure des appareils électroniques (téléphones, PC).",
+      weight: 0.05, // 5%
     },
     energy: {
       name: "energy",
-      weight: 0.35,
+      description:
+        "Impact lié au chauffage (gaz, fioul) et à l'électricité domestique.",
+      weight: 0.2, // 20%
     },
-    consumption: {
-      name: "consumption",
-      weight: 0.17,
+    clothes: {
+      name: "clothes",
+      description:
+        "Impact lié à la production, la teinture et le transport des textiles (Fast Fashion).",
+      weight: 0.08, // 8%
     },
   };
 

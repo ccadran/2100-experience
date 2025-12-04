@@ -26,11 +26,14 @@ const webSocketStore = useWebSocket();
 const uiStore = useUi();
 
 const userData = {
-  plane: 100,
-  dailyTransport: 70,
-  food: 30,
-  energy: 80,
-  consumption: 44,
+  plane: 42,
+  transport: 85,
+  meat: 70,
+  promptIA: 55,
+  products: 30,
+  phone: 10,
+  energy: 68,
+  clothes: 90,
 };
 
 const roomId = "ROOM_1";
