@@ -5,19 +5,23 @@ interface CameraParams {
   startPosition?: THREE.Vector3;
   endPosition?: THREE.Vector3;
   fov?: number;
+  zoomRangeMultiplier?: number;
 }
 
 export default class Camera {
   instance: THREE.PerspectiveCamera;
   startPosition: THREE.Vector3;
   endPosition: THREE.Vector3;
+  zoomRangeMultiplier: number;
   constructor({
     startPosition = new THREE.Vector3(0, 38, 60),
     endPosition = new THREE.Vector3(0, 28, 40),
     fov = 75,
+    zoomRangeMultiplier = 0.1,
   }: CameraParams = {}) {
     this.startPosition = startPosition;
     this.endPosition = endPosition;
+    this.zoomRangeMultiplier = zoomRangeMultiplier;
     const container = document.querySelector(".webgl")!;
 
     this.instance = new THREE.PerspectiveCamera(
@@ -60,13 +64,17 @@ export default class Camera {
     this.instance.position.x += 0.5;
     this.instance.lookAt(0, 0, 0);
   }
-  moveDown() {
+  moveDown(percent: number) {
+    const target = percent;
     if (this.instance.position.y <= 5) return;
-    this.instance.position.y -= 0.5;
+    this.instance.position.y = target;
+    console.log(this.instance.position.y);
+
     this.instance.lookAt(0, 0, 0);
   }
-  moveUp() {
-    this.instance.position.y += 0.5;
+  moveUp(percent: number) {
+    const target = percent;
+    this.instance.position.y = target;
     this.instance.lookAt(0, 0, 0);
   }
 }

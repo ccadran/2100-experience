@@ -1,11 +1,17 @@
 <script lang="ts" setup>
-import { initScene } from "~/webgl/scene/config";
-import { handleCameraMovements, moveToStep } from "~/webgl/scene/experience";
+import {
+  handleFormValidations,
+  initScene,
+  revealElements,
+} from "~/webgl/scene/config";
+import {
+  handleCameraMovements,
+  handleCameraZoom,
+  moveToStep,
+} from "~/webgl/scene/experience";
 
 import { useSocket } from "~/composables/useSocket";
 import { useSocketHandler } from "~/composables/useSocketHandler";
-
-const isFormValidate = ref<boolean>(false);
 
 const { connect, joinRoom, sendAction, on } = useSocket();
 const { listenForUpdates } = useSocketHandler();
@@ -34,6 +40,7 @@ function handleWsCo() {
   on("connect", () => {
     joinRoom(roomId);
   });
+  console.log(webSocketStore.isConnected);
 }
 
 function revealElementsWs() {
@@ -43,11 +50,22 @@ function revealElementsWs() {
   });
 }
 
+const zoomState = ref<number>(28);
+
 function validateFormWs() {
   sendAction(roomId, {
     type: "VALIDATE_FORM",
     data: { userData },
   });
+}
+
+function zoomUp() {
+  zoomState.value += 1;
+  handleCameraZoom("up", zoomState.value);
+}
+function zoomDown() {
+  zoomState.value -= 1;
+  handleCameraZoom("down", zoomState.value);
 }
 </script>
 
@@ -67,16 +85,19 @@ function validateFormWs() {
     </div>
   </transition>
   <transition>
-    <div class="form" v-if="webSocketStore.isConnected && !isFormValidate">
+    <div
+      class="form"
+      v-if="webSocketStore.isConnected && !uiStore.isFormValidated"
+    >
       <h2>REMPLISSER LE FORM SUR VORE PHONE</h2>
       <div class="buttons">
-        <button @click="revealElementsWs">formstep validate</button>
-        <button @click="validateFormWs">VALIDATE FORM</button>
+        <button @click="revealElements">formstep validate</button>
+        <button @click="handleFormValidations(userData)">VALIDATE FORM</button>
       </div>
     </div>
   </transition>
   <transition>
-    <div class="experience" v-if="isFormValidate">
+    <div class="experience" v-if="uiStore.isFormValidated">
       <div class="controls">
         <div class="step">
           <button @click="moveToStep('previous')">previous</button>
@@ -110,18 +131,8 @@ function validateFormWs() {
             </button>
           </div>
           <div class="zoom">
-            <button
-              @mousedown="handleCameraMovements('down', true)"
-              @mouseup="handleCameraMovements('down', false)"
-            >
-              down
-            </button>
-            <button
-              @mousedown="handleCameraMovements('up', true)"
-              @mouseup="handleCameraMovements('up', false)"
-            >
-              up
-            </button>
+            <button @mousedown="zoomUp">down</button>
+            <button @mousedown="zoomDown">up</button>
           </div>
         </div>
       </div>

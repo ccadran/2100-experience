@@ -1,5 +1,9 @@
 import { handleFormValidations, revealElements } from "~/webgl/scene/config";
-import { handleCameraMovements, moveToStep } from "~/webgl/scene/experience";
+import {
+  handleCameraMovements,
+  handleCameraZoom,
+  moveToStep,
+} from "~/webgl/scene/experience";
 
 interface IncomingPayload {
   type: string;
@@ -82,17 +86,13 @@ export function useSocketHandler() {
         handleCameraMovements("right", false);
         break;
       //UP
-      case "CAMERA_UP_PRESSED":
-        console.log("PAYLOAD SEND A CAMERA UP PRESSED TASK");
-        break;
-      case "CAMERA_UP_RELEASED":
+      case "CAMERA_UP":
+        handleCameraZoom("up", payload.data.percent);
         console.log("PAYLOAD SEND A CAMERA UP PRESSED TASK");
         break;
       //DOWN
-      case "CAMERA_DOWN_PRESSED":
-        console.log("PAYLOAD SEND A CAMERA DOWN PRESSED TASK");
-        break;
-      case "CAMERA_DOWN_RELEASED":
+      case "CAMERA_DOWN":
+        handleCameraZoom("down", payload.data.percent);
         console.log("PAYLOAD SEND A CAMERA DOWN PRESSED TASK");
         break;
 

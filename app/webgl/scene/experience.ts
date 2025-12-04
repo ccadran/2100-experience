@@ -79,12 +79,10 @@ const rafIds = {
   back: null as number | null,
   left: null as number | null,
   right: null as number | null,
-  down: null as number | null,
-  up: null as number | null,
 };
 
 export function handleCameraMovements(
-  direction: "forward" | "back" | "left" | "right" | "down" | "up",
+  direction: "forward" | "back" | "left" | "right",
   pressed: boolean
 ) {
   const worldStore = useWorld();
@@ -106,22 +104,24 @@ export function handleCameraMovements(
         case "right":
           worldStore.camera?.moveRight();
           break;
-        case "down":
-          worldStore.camera?.moveDown();
-          break;
-        case "up":
-          worldStore.camera?.moveUp();
-          break;
       }
       rafIds[direction] = requestAnimationFrame(loop);
     };
-
     loop();
   } else {
     if (rafIds[direction]) {
       cancelAnimationFrame(rafIds[direction]!);
       rafIds[direction] = null;
     }
+  }
+}
+
+export function handleCameraZoom(direction: "up" | "down", percent: number) {
+  const worldStore = useWorld();
+  if (direction === "up") {
+    worldStore.camera?.moveUp(percent);
+  } else {
+    worldStore.camera?.moveDown(percent);
   }
 }
 

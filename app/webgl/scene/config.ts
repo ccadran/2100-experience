@@ -104,9 +104,11 @@ export function revealElements() {
 }
 
 export function handleFormValidations(userData: userConfigParams) {
+  const uiStore = useUi();
   const configStore = useConfig();
   const finalUserData: any = {};
 
+  uiStore.isFormValidated = true;
   const worldStore = useWorld();
   worldStore.camera?.entryAnim();
 
