@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { gsap } from "gsap";
+import { lerp } from "../utils";
 
 interface CameraParams {
   startPosition?: THREE.Vector3;
@@ -58,10 +59,6 @@ export default class Camera {
     );
   }
 
-  lerp(start: number, end: number, t: number) {
-    return start * (1 - t) + end * t;
-  }
-
   startLoop() {
     const loop = () => {
       if (this.movementState.forward > 0) {
@@ -82,12 +79,12 @@ export default class Camera {
       }
 
       // Lerp
-      this.instance.position.x = this.lerp(
+      this.instance.position.x = lerp(
         this.instance.position.x,
         this.targetPosition.x,
         this.lerpFactor
       );
-      this.instance.position.z = this.lerp(
+      this.instance.position.z = lerp(
         this.instance.position.z,
         this.targetPosition.z,
         this.lerpFactor
