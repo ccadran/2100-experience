@@ -70,23 +70,26 @@ export function useSocketHandler() {
         console.log("PAYLOAD SEND A CAMERA RIGHT TASK");
         break;
       //UP
-      case "CAMERA_UP":
-        handleCameraZoom("up", payload.data.percent);
+      case "CAMERA_ZOOM":
+        handleCameraZoom("up", payload.data.value);
         console.log("PAYLOAD SEND A CAMERA UP PRESSED TASK");
         break;
-      //DOWN
-      case "CAMERA_DOWN":
-        handleCameraZoom("down", payload.data.percent);
-        console.log("PAYLOAD SEND A CAMERA DOWN PRESSED TASK");
-        break;
-
       default:
         break;
     }
   }
 
+  function handleRoomCo(payload: IncomingPayload) {
+    console.log(payload);
+
+    if (payload.type === "ROOM_COUNT") {
+      webSocketStore.isRoomFull = true;
+    }
+  }
+
   const listenForUpdates = () => {
     on("update-client", handleIncomingPayload);
+    on("room-count", handleRoomCo);
     console.log("Écouteur 'update-client' activé.");
   };
 

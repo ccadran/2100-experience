@@ -9,17 +9,35 @@ import {
   handleCameraZoom,
   moveToStep,
 } from "~/webgl/scene/experience";
-
 import { useSocket } from "~/composables/useSocket";
 import { useSocketHandler } from "~/composables/useSocketHandler";
+import QRCode from "qrcode";
 
 const { connect, joinRoom, sendAction, on } = useSocket();
 const { listenForUpdates } = useSocketHandler();
+
+const id = Math.random().toString(36).substring(2, 10);
+const roomId = id;
 
 onMounted(async () => {
   await initScene();
   uiStore.isLoaded = true;
   listenForUpdates();
+  connect();
+  on("connect", () => {
+    joinRoom(roomId);
+
+    nextTick(() => {
+      const canvasQr = document.querySelector(".qrcode") as HTMLCanvasElement;
+      if (canvasQr) {
+        QRCode.toCanvas(canvasQr, roomId, function (error: any) {
+          if (error) console.error(error);
+        });
+      } else {
+        console.error("Canvas .qrcode introuvable");
+      }
+    });
+  });
 });
 const worldStore = useWorld();
 const webSocketStore = useWebSocket();
@@ -57,7 +75,7 @@ const userData = {
 //   clothes: 100,
 // };
 
-const roomId = "ROOM_1";
+// const roomId = "ROOM_1";
 
 function handleWsCo() {
   connect();
@@ -67,21 +85,7 @@ function handleWsCo() {
   console.log(webSocketStore.isConnected);
 }
 
-function revealElementsWs() {
-  sendAction(roomId, {
-    type: "REVEAL",
-    data: { test: "value", test2: "value2" },
-  });
-}
-
 const zoomState = ref<number>(28);
-
-function validateFormWs() {
-  sendAction(roomId, {
-    type: "VALIDATE_FORM",
-    data: { userData },
-  });
-}
 
 function zoomUp() {
   zoomState.value += 1;
@@ -103,15 +107,15 @@ function zoomDown() {
     </div>
   </transition>
   <transition>
-    <div class="intro" v-if="!webSocketStore.isConnected && uiStore.isLoaded">
+    <div class="intro" v-if="webSocketStore.isConnected && uiStore.isLoaded">
       <h1>SCAN LE QR CODE POUR COMMENCER L'EXPERIENCE</h1>
-      <button @click="handleWsCo">simulate co</button>
+      <canvas class="qrcode" style="width: 200px; height: 200px"></canvas>
     </div>
   </transition>
   <transition>
     <div
       class="form"
-      v-if="webSocketStore.isConnected && !uiStore.isFormValidated"
+      v-if="webSocketStore.isRoomFull && !uiStore.isFormValidated"
     >
       <h2>REMPLISSER LE FORM SUR VORE PHONE</h2>
       <div class="buttons">
