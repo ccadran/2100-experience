@@ -17,7 +17,9 @@ export default class Camera {
   targetPosition: THREE.Vector3 = new THREE.Vector3(0, 0, 0);
   isMoving: boolean;
   lerpFactor: number = 0.1;
+  strengthMultiplier: number = 0.1;
   movementState: any = { forward: 0, back: 0, left: 0, right: 0 };
+  lookAtZ: number = 60;
   constructor({
     startPosition = new THREE.Vector3(0, 38, 60),
     endPosition = new THREE.Vector3(0, 28, 40),
@@ -48,37 +50,36 @@ export default class Camera {
   }
 
   entryAnim() {
-    gsap.fromTo(
-      this.instance.position,
-      {
-        x: this.startPosition.x,
-        y: this.startPosition.y,
-        z: this.startPosition.z,
-      },
-      { x: this.endPosition.x, y: this.endPosition.y, z: this.endPosition.z }
-    );
+    // gsap.fromTo(
+    //   this.instance.position,
+    //   {
+    //     x: this.startPosition.x,
+    //     y: this.startPosition.y,
+    //     z: this.startPosition.z,
+    //   },
+    //   { x: this.endPosition.x, y: this.endPosition.y, z: this.endPosition.z }
+    // );
   }
 
   startLoop() {
     const loop = () => {
       if (this.movementState.forward > 0) {
-        const delta = 0.1 * this.movementState.forward;
+        const delta = this.strengthMultiplier * this.movementState.forward;
         this.targetPosition.z -= delta;
       }
       if (this.movementState.back > 0) {
-        const delta = 0.1 * this.movementState.back;
+        const delta = this.strengthMultiplier * this.movementState.back;
         this.targetPosition.z += delta;
       }
       if (this.movementState.left > 0) {
-        const delta = 0.1 * this.movementState.left;
+        const delta = this.strengthMultiplier * this.movementState.left;
         this.targetPosition.x -= delta;
       }
       if (this.movementState.right > 0) {
-        const delta = 0.1 * this.movementState.right;
+        const delta = this.strengthMultiplier * this.movementState.right;
         this.targetPosition.x += delta;
       }
 
-      // Lerp
       this.instance.position.x = lerp(
         this.instance.position.x,
         this.targetPosition.x,
@@ -88,6 +89,18 @@ export default class Camera {
         this.instance.position.z,
         this.targetPosition.z,
         this.lerpFactor
+      );
+
+      this.instance.position.y = lerp(
+        this.instance.position.y,
+        this.targetPosition.y,
+        this.lerpFactor
+      );
+
+      this.instance.lookAt(
+        this.instance.position.x,
+        0,
+        this.instance.position.z - this.lookAtZ
       );
 
       requestAnimationFrame(loop);
@@ -108,23 +121,20 @@ export default class Camera {
     this.movementState.right = strength;
   }
 
+  moveDown(percent: number) {
+    if (this.instance.position.y <= 30) return;
+    console.log(this.instance.position.y);
+
+    this.targetPosition.y = this.instance.position.y - percent / 10;
+  }
+  moveUp(percent: number) {
+    this.targetPosition.y = this.instance.position.y + percent / 10;
+  }
+
   stopMoving() {
     this.movementState.forward = 0;
     this.movementState.back = 0;
     this.movementState.left = 0;
     this.movementState.right = 0;
-  }
-  moveDown(percent: number) {
-    const target = percent;
-    if (this.instance.position.y <= 5) return;
-    this.instance.position.y = target;
-    console.log(this.instance.position.y);
-
-    this.instance.lookAt(0, 0, 0);
-  }
-  moveUp(percent: number) {
-    const target = percent;
-    this.instance.position.y = target;
-    this.instance.lookAt(0, 0, 0);
   }
 }

@@ -155,8 +155,8 @@ function zoomDown() {
             </button>
           </div>
           <div class="zoom">
-            <button @mousedown="zoomUp">down</button>
-            <button @mousedown="zoomDown">up</button>
+            <button @mousedown="zoomDown">down</button>
+            <button @mousedown="zoomUp">up</button>
           </div>
         </div>
       </div>
