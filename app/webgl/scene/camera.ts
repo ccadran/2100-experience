@@ -13,6 +13,10 @@ export default class Camera {
   startPosition: THREE.Vector3;
   endPosition: THREE.Vector3;
   zoomRangeMultiplier: number;
+  targetPosition: THREE.Vector3 = new THREE.Vector3(0, 0, 0);
+  isMoving: boolean;
+  lerpFactor: number = 0.1;
+  movementState: any = { forward: 0, back: 0, left: 0, right: 0 };
   constructor({
     startPosition = new THREE.Vector3(0, 38, 60),
     endPosition = new THREE.Vector3(0, 28, 40),
@@ -22,6 +26,8 @@ export default class Camera {
     this.startPosition = startPosition;
     this.endPosition = endPosition;
     this.zoomRangeMultiplier = zoomRangeMultiplier;
+    this.isMoving = false;
+
     const container = document.querySelector(".webgl")!;
 
     this.instance = new THREE.PerspectiveCamera(
@@ -33,6 +39,11 @@ export default class Camera {
 
     this.instance.position.copy(startPosition);
     this.instance.lookAt(0, 0, 0);
+
+    console.log(this.instance.position);
+
+    this.targetPosition.copy(this.instance.position);
+    this.startLoop();
   }
 
   entryAnim() {
@@ -47,22 +58,64 @@ export default class Camera {
     );
   }
 
-  moveForward() {
-    if (this.instance.position.z <= 5) return;
-    this.instance.position.z -= 0.5;
-    this.instance.lookAt(0, 0, 0);
+  lerp(start: number, end: number, t: number) {
+    return start * (1 - t) + end * t;
   }
-  moveBack() {
-    this.instance.position.z += 0.5;
-    this.instance.lookAt(0, 0, 0);
+
+  startLoop() {
+    const loop = () => {
+      if (this.movementState.forward > 0) {
+        const delta = 0.1 * this.movementState.forward;
+        this.targetPosition.z -= delta;
+      }
+      if (this.movementState.back > 0) {
+        const delta = 0.1 * this.movementState.back;
+        this.targetPosition.z += delta;
+      }
+      if (this.movementState.left > 0) {
+        const delta = 0.1 * this.movementState.left;
+        this.targetPosition.x -= delta;
+      }
+      if (this.movementState.right > 0) {
+        const delta = 0.1 * this.movementState.right;
+        this.targetPosition.x += delta;
+      }
+
+      // Lerp
+      this.instance.position.x = this.lerp(
+        this.instance.position.x,
+        this.targetPosition.x,
+        this.lerpFactor
+      );
+      this.instance.position.z = this.lerp(
+        this.instance.position.z,
+        this.targetPosition.z,
+        this.lerpFactor
+      );
+
+      requestAnimationFrame(loop);
+    };
+    loop();
   }
-  moveLeft() {
-    this.instance.position.x -= 0.5;
-    this.instance.lookAt(0, 0, 0);
+
+  moveForward(strength: number) {
+    this.movementState.forward = strength;
   }
-  moveRight() {
-    this.instance.position.x += 0.5;
-    this.instance.lookAt(0, 0, 0);
+  moveBack(strength: number) {
+    this.movementState.back = strength;
+  }
+  moveLeft(strength: number) {
+    this.movementState.left = strength;
+  }
+  moveRight(strength: number) {
+    this.movementState.right = strength;
+  }
+
+  stopMoving() {
+    this.movementState.forward = 0;
+    this.movementState.back = 0;
+    this.movementState.left = 0;
+    this.movementState.right = 0;
   }
   moveDown(percent: number) {
     const target = percent;

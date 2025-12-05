@@ -130,26 +130,26 @@ function zoomDown() {
         <div class="camera">
           <div class="direction">
             <button
-              @mousedown="handleCameraMovements('forward', true)"
-              @mouseup="handleCameraMovements('forward', false)"
+              @mousedown="handleCameraMovements('forward', 5)"
+              @mouseup="handleCameraMovements('forward', 0)"
             >
               forward
             </button>
             <button
-              @mousedown="handleCameraMovements('back', true)"
-              @mouseup="handleCameraMovements('back', false)"
+              @mousedown="handleCameraMovements('back', 5)"
+              @mouseup="handleCameraMovements('back', 0)"
             >
               back
             </button>
             <button
-              @mousedown="handleCameraMovements('left', true)"
-              @mouseup="handleCameraMovements('left', false)"
+              @mousedown="handleCameraMovements('left', 5)"
+              @mouseup="handleCameraMovements('left', 0)"
             >
               left
             </button>
             <button
-              @mousedown="handleCameraMovements('right', true)"
-              @mouseup="handleCameraMovements('right', false)"
+              @mousedown="handleCameraMovements('right', 5)"
+              @mouseup="handleCameraMovements('right', 0)"
             >
               right
             </button>

@@ -83,36 +83,28 @@ const rafIds = {
 
 export function handleCameraMovements(
   direction: "forward" | "back" | "left" | "right",
-  pressed: boolean
+  strength: number
 ) {
   const worldStore = useWorld();
 
-  if (pressed) {
-    if (rafIds[direction]) return;
+  if (strength === 0) {
+    worldStore.camera?.stopMoving();
+    return;
+  }
 
-    const loop = () => {
-      switch (direction) {
-        case "forward":
-          worldStore.camera?.moveForward();
-          break;
-        case "back":
-          worldStore.camera?.moveBack();
-          break;
-        case "left":
-          worldStore.camera?.moveLeft();
-          break;
-        case "right":
-          worldStore.camera?.moveRight();
-          break;
-      }
-      rafIds[direction] = requestAnimationFrame(loop);
-    };
-    loop();
-  } else {
-    if (rafIds[direction]) {
-      cancelAnimationFrame(rafIds[direction]!);
-      rafIds[direction] = null;
-    }
+  switch (direction) {
+    case "forward":
+      worldStore.camera?.moveForward(strength);
+      break;
+    case "back":
+      worldStore.camera?.moveBack(strength);
+      break;
+    case "left":
+      worldStore.camera?.moveLeft(strength);
+      break;
+    case "right":
+      worldStore.camera?.moveRight(strength);
+      break;
   }
 }
 

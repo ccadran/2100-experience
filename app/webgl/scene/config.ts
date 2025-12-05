@@ -31,9 +31,11 @@ export function initScene(): Promise<void> {
     loader.load(
       // "/3d/states.glb",
       "/3d/2100-map__V1.glb",
+      // "/3d/Map-V3-test.glb",
       (gltf: any) => {
         gltf.scene.scale.set(0.1, 0.1, 0.1);
         globalScene.add(gltf.scene);
+        console.log(gltf.scene);
 
         const target = globalScene.getObjectByName("Scene");
 
