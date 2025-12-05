@@ -50,40 +50,24 @@ export function useSocketHandler() {
 
       /*__________CAMERA CONTOLS_______*/
       //FORWARD
-      case "CAMERA_FORWARD_PRESSED":
-        handleCameraMovements("forward", true);
-        console.log("PAYLOAD SEND A CAMERA FORWARD PRESSED TASK");
-        break;
-      case "CAMERA_FORWARD_RELEASED":
-        handleCameraMovements("forward", false);
-        console.log("PAYLOAD SEND A CAMERA FORWARD PRESSED TASK");
+      case "CAMERA_FORWARD":
+        handleCameraMovements("forward", payload.data.strength);
+        console.log("PAYLOAD SEND A CAMERA FORWARD TASK");
         break;
       //BACK
-      case "CAMERA_BACK_PRESSED":
-        handleCameraMovements("back", true);
-        console.log("PAYLOAD SEND A CAMERA BACK PRESSED TASK");
-        break;
-      case "CAMERA_BACK_RELEASED":
-        handleCameraMovements("back", false);
-        console.log("PAYLOAD SEND A CAMERA BACK PRESSED TASK");
+      case "CAMERA_BACK":
+        handleCameraMovements("back", payload.data.strength);
+        console.log("PAYLOAD SEND A CAMERA BACK TASK");
         break;
       //LEFT
-      case "CAMERA_LEFT_PRESSED":
-        handleCameraMovements("left", true);
-        console.log("PAYLOAD SEND A CAMERA LEFT PRESSED TASK");
-        break;
-      case "CAMERA_LEFT_RELEASED":
-        console.log("PAYLOAD SEND A CAMERA LEFT PRESSED TASK");
-        handleCameraMovements("left", false);
+      case "CAMERA_LEFT":
+        handleCameraMovements("left", payload.data.strength);
+        console.log("PAYLOAD SEND A CAMERA LEFT TASK");
         break;
       //RIGHT
-      case "CAMERA_RIGHT_PRESSED":
-        handleCameraMovements("right", true);
-        console.log("PAYLOAD SEND A CAMERA RIGHT PRESSED TASK");
-        break;
-      case "CAMERA_RIGHT_RELEASED":
-        console.log("PAYLOAD SEND A CAMERA RIGHT PRESSED TASK");
-        handleCameraMovements("right", false);
+      case "CAMERA_RIGHT":
+        handleCameraMovements("right", payload.data.strength);
+        console.log("PAYLOAD SEND A CAMERA RIGHT TASK");
         break;
       //UP
       case "CAMERA_UP":
