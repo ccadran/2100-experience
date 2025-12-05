@@ -107,9 +107,9 @@ function zoomDown() {
     </div>
   </transition>
   <transition>
-    <div class="intro" v-if="webSocketStore.isConnected && uiStore.isLoaded">
+    <div class="intro" v-if="!webSocketStore.isRoomFull && uiStore.isLoaded">
       <h1>SCAN LE QR CODE POUR COMMENCER L'EXPERIENCE</h1>
-      <canvas class="qrcode" style="width: 200px; height: 200px"></canvas>
+      <canvas class="qrcode" style="width: 500px; height: 500px"></canvas>
     </div>
   </transition>
   <transition>

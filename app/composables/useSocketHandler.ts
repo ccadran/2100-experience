@@ -83,7 +83,9 @@ export function useSocketHandler() {
     console.log(payload);
 
     if (payload.type === "ROOM_COUNT") {
-      webSocketStore.isRoomFull = true;
+      if (payload.count > 1) {
+        webSocketStore.isRoomFull = true;
+      }
     }
   }
 
