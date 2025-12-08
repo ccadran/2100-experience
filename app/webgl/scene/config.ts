@@ -30,12 +30,11 @@ export function initScene(): Promise<void> {
     const loader = new GLTFLoader();
     loader.load(
       // "/3d/states.glb",
-      "/3d/2100-map__V1.glb",
-      // "/3d/Map-V3-test.glb",
+      // "/3d/2100-map__V1.glb",
+      "/3d/Map-V3-group.glb",
       (gltf: any) => {
         gltf.scene.scale.set(0.1, 0.1, 0.1);
         globalScene.add(gltf.scene);
-        console.log(gltf.scene);
 
         const target = globalScene.getObjectByName("Scene");
 
@@ -49,6 +48,8 @@ export function initScene(): Promise<void> {
           }
         });
         hideElements();
+        setupInstances();
+
         resolve();
       },
       undefined,
@@ -70,6 +71,145 @@ export function initScene(): Promise<void> {
       renderer.setSize(container.clientWidth, container.clientHeight);
     });
   });
+}
+
+function setupInstances() {
+  const worldStore = useWorld();
+
+  const allMeshes: Record<string, any> = {};
+  worldStore.sceneParts.forEach((group) => {
+    allMeshes[group.name] = {};
+    worldStore.sceneParts2[group.name] = {};
+    group.children.forEach((child) => {
+      child.children.forEach((c) => {
+        if (c instanceof THREE.Mesh) {
+          c.visible = false;
+          console.log(c.parent?.parent?.name);
+
+          if (c.name.includes("best")) {
+            if (!allMeshes[c.parent!.parent!.name].best) {
+              allMeshes[c.parent!.parent!.name].best = [];
+              worldStore.sceneParts2[c.parent!.parent!.name].best = [];
+            }
+            allMeshes[c.parent!.parent!.name].best.push(c);
+
+            // createInstance();
+          } else if (c.name.includes("normal")) {
+            if (!allMeshes[c.parent!.parent!.name].normal) {
+              allMeshes[c.parent!.parent!.name].normal = [];
+              worldStore.sceneParts2[c.parent!.parent!.name].normal = [];
+            }
+            allMeshes[c.parent!.parent!.name].normal.push(c);
+          } else if (c.name.includes("bad")) {
+            if (!allMeshes[c.parent!.parent!.name].bad) {
+              allMeshes[c.parent!.parent!.name].bad = [];
+              worldStore.sceneParts2[c.parent!.parent!.name].bad = [];
+            }
+            allMeshes[c.parent!.parent!.name].bad.push(c);
+          } else if (c.name.includes("worst")) {
+            if (!allMeshes[c.parent!.parent!.name].worst) {
+              allMeshes[c.parent!.parent!.name].worst = [];
+              worldStore.sceneParts2[c.parent!.parent!.name].worst = [];
+            }
+            allMeshes[c.parent!.parent!.name].worst.push(c);
+          }
+        }
+      });
+    });
+  });
+
+  console.log(allMeshes);
+
+  Object.values(allMeshes).forEach((meshesType) => {
+    Object.values(meshesType as THREE.Mesh[][]).forEach((meshGroup) => {
+      if (!meshGroup[0]) return;
+      const mesheNumbers = meshGroup.length;
+      const taregtGroup = meshGroup[0]?.parent?.parent?.name;
+      const targetType = meshGroup[0].name;
+      console.log(targetType);
+
+      const instancedMesh = new THREE.InstancedMesh(
+        meshGroup[0]?.geometry,
+        meshGroup[0]?.material,
+        mesheNumbers
+      );
+      instancedMesh.name = targetType;
+
+      if (worldStore.scene) worldStore.scene.updateMatrixWorld(true);
+
+      const parentMatrix = worldStore.scene!.matrixWorld;
+      const parentInverse = new THREE.Matrix4().copy(parentMatrix).invert();
+
+      const tempMatrix = new THREE.Matrix4();
+
+      for (let i = 0; i < mesheNumbers; i++) {
+        const ogObject = meshGroup[i];
+        if (!ogObject) continue;
+
+        ogObject.updateMatrixWorld();
+
+        tempMatrix.copy(ogObject.matrixWorld);
+        tempMatrix.premultiply(parentInverse);
+
+        instancedMesh.setMatrixAt(i, tempMatrix);
+      }
+
+      instancedMesh.instanceMatrix.needsUpdate = true;
+      instancedMesh.frustumCulled = false;
+
+      worldStore.scene?.add(instancedMesh);
+      console.log(meshGroup[0]?.parent?.parent?.name);
+      if (taregtGroup && targetType) {
+        worldStore.sceneParts2[taregtGroup][targetType] = instancedMesh;
+      }
+    });
+  });
+
+  console.log(worldStore.sceneParts2.trees_group);
+  Object.values(worldStore.sceneParts2.trees_group).forEach((tree_group) => {
+    console.log(tree_group.name);
+
+    tree_group.visible = tree_group.name === "worst";
+    console.log(tree_group);
+  });
+
+  // // 3. Positionner chaque instance
+  // // On utilise un objet "dummy" (fictif) pour calculer facilement les matrices
+  // if (worldStore.scene) worldStore.scene.updateMatrixWorld(true);
+
+  // // 2. On calcule l'inverse de la matrice du parent (le conteneur)
+  // // Cela nous permet d'annuler les transformations du parent (comme le scale 0.1)
+  // const parentMatrix = worldStore.scene!.matrixWorld;
+  // const parentInverse = new THREE.Matrix4().copy(parentMatrix).invert();
+
+  // // On crée une matrice temporaire pour les calculs
+  // const tempMatrix = new THREE.Matrix4();
+
+  // for (let i = 0; i < compte; i++) {
+  //   const objetOriginal = objetsIndividuels[i];
+  //   if (!objetOriginal) continue;
+
+  //   objetOriginal.updateMatrixWorld();
+
+  //   // 3. Le calcul magique :
+  //   // Matrice Finale = (Inverse du Parent) * (Monde de l'objet)
+  //   // Cela transforme les coordonnées "Monde" en coordonnées "Locales" pour ce parent
+  //   tempMatrix.copy(objetOriginal.matrixWorld);
+  //   tempMatrix.premultiply(parentInverse);
+
+  //   instancedMesh.setMatrixAt(i, tempMatrix);
+  // }
+
+  // instancedMesh.instanceMatrix.needsUpdate = true;
+  // instancedMesh.frustumCulled = false; // Gardez le désactivé pour tester au début
+
+  // worldStore.scene?.add(instancedMesh);
+  // console.log(worldStore.scene);
+
+  // Retirez les anciens objets lourds de la scène (ou ne les ajoutez pas du tout)
+  // objetsIndividuels.forEach((obj) => {
+  //   if (obj.parent) obj.parent.remove(obj);
+  // });
 }
 
 export function hideElements() {

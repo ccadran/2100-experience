@@ -16,7 +16,7 @@ import QRCode from "qrcode";
 const { connect, joinRoom, sendAction, on } = useSocket();
 const { listenForUpdates } = useSocketHandler();
 
-const isDebug = ref<boolean>(false);
+const isDebug = ref<boolean>(true);
 
 const id = Math.random().toString(36).substring(2, 10);
 const roomId = id;
@@ -98,7 +98,6 @@ function zoom(direction: string) {
   }
   zoomState.value = Math.max(zoomState.value, -10);
   zoomState.value = Math.min(zoomState.value, 10);
-  console.log(zoomState.value);
 
   handleCameraZoom(zoomState.value);
 }

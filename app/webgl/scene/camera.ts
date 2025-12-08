@@ -22,7 +22,8 @@ export default class Camera {
   lookAtZ: number = 60;
   constructor({
     startPosition = new THREE.Vector3(0, 38, 60),
-    endPosition = new THREE.Vector3(0, 28, 40),
+    // endPosition = new THREE.Vector3(0, 28, 40),
+    endPosition = new THREE.Vector3(0, 1, 10),
     fov = 75,
     zoomRangeMultiplier = 0.035,
   }: CameraParams = {}) {
@@ -42,8 +43,6 @@ export default class Camera {
 
     this.instance.position.copy(endPosition);
     this.instance.lookAt(0, 0, 0);
-
-    console.log(this.instance.position);
 
     this.targetPosition.copy(this.instance.position);
     this.startLoop();

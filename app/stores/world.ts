@@ -6,6 +6,7 @@ export const useWorld = defineStore("useWorld", () => {
   const sceneParts = ref<THREE.Object3D[]>([]);
   const hiddenSceneParts = ref<any[]>([]);
   const camera = ref<Camera>();
+  const sceneParts2 = ref<Record<string, any>>({}); // ← Objet, pas tableau
 
-  return { scene, sceneParts, hiddenSceneParts, camera };
+  return { scene, sceneParts, hiddenSceneParts, camera, sceneParts2 };
 });
