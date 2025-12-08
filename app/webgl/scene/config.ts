@@ -79,6 +79,8 @@ function setupInstances() {
   const worldStore = useWorld();
 
   const allMeshes: Record<string, any> = {};
+
+  //stock meshes in objects
   worldStore.sceneParts.forEach((group) => {
     allMeshes[group.name] = {};
     worldStore.sceneMeshes[group.name] = {};
@@ -100,6 +102,7 @@ function setupInstances() {
     });
   });
 
+  //create instances
   Object.values(allMeshes).forEach((meshesType) => {
     Object.values(meshesType as THREE.Mesh[][]).forEach((meshGroup) => {
       if (!meshGroup[0]) return;
@@ -139,10 +142,12 @@ function setupInstances() {
 
       worldStore.scene3d?.add(instancedMesh);
 
+      //stock mesh in store object
       if (taregtGroup && targetType) {
         worldStore.sceneMeshes[taregtGroup][targetType] = instancedMesh;
       }
 
+      //delete old meshes
       meshGroup.forEach((mesh) => {
         const parent = mesh.parent;
         mesh.removeFromParent();
@@ -151,8 +156,7 @@ function setupInstances() {
           parent.removeFromParent();
         }
       });
-
-      //DELETE THE BASE ONE
+      //DELETE THE BASE mesh
       const objectsToRemove = [] as any[];
 
       worldStore.scene3d?.traverse((o) => {
@@ -170,26 +174,24 @@ function setupInstances() {
     });
   });
 
-  console.log(worldStore.sceneMeshes.trees_group);
+  //TODO remove
   Object.values(
     worldStore.sceneMeshes.trees_group as THREE.InstancedMesh[]
   ).forEach((tree_group) => {
     tree_group.visible = tree_group.name === "worst";
   });
 
-  worldStore.scene3d?.traverse((o) => {
-    console.log(o);
-  });
+  /*functions*/
 
   function stockMesh(
     type: "best" | "normal" | "bad" | "worst",
     object: THREE.Mesh
   ) {
-    if (!allMeshes[object.parent!.parent!.name].best) {
-      allMeshes[object.parent!.parent!.name].best = [];
-      worldStore.sceneMeshes[object.parent!.parent!.name].best = [];
+    if (!allMeshes[object.parent!.parent!.name][type]) {
+      allMeshes[object.parent!.parent!.name][type] = [];
+      worldStore.sceneMeshes[object.parent!.parent!.name][type] = [];
     }
-    allMeshes[object.parent!.parent!.name].best.push(object);
+    allMeshes[object.parent!.parent!.name][type].push(object);
   }
 }
 
