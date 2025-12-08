@@ -49,8 +49,8 @@ export function initScene(): Promise<void> {
             worldStore.sceneParts.push(child);
           }
         });
-        hideElements();
         setupInstances();
+        hideElements();
 
         resolve();
       },
@@ -79,11 +79,12 @@ function setupInstances() {
   const worldStore = useWorld();
 
   const allMeshes: Record<string, any> = {};
+  const targetGroups: Record<string, THREE.Group> = {};
 
   //stock meshes in objects
   worldStore.sceneParts.forEach((group) => {
     allMeshes[group.name] = {};
-    worldStore.sceneMeshes[group.name] = {};
+    // worldStore.sceneMeshes[group.name] = {};
     group.children.forEach((child) => {
       child.children.forEach((c) => {
         if (c instanceof THREE.Mesh) {
@@ -109,7 +110,15 @@ function setupInstances() {
       const mesheNumbers = meshGroup.length;
       const taregtGroup = meshGroup[0]?.parent?.parent?.name;
       const targetType = meshGroup[0].name;
-      console.log(targetType);
+
+      if (!taregtGroup) return;
+
+      if (!targetGroups[taregtGroup]) {
+        const newGroup = new THREE.Group();
+        newGroup.name = taregtGroup;
+        targetGroups[taregtGroup] = newGroup;
+        worldStore.scene3d?.add(newGroup);
+      }
 
       const instancedMesh = new THREE.InstancedMesh(
         meshGroup[0]?.geometry,
@@ -140,12 +149,10 @@ function setupInstances() {
       instancedMesh.instanceMatrix.needsUpdate = true;
       instancedMesh.frustumCulled = false;
 
-      worldStore.scene3d?.add(instancedMesh);
+      targetGroups[taregtGroup].add(instancedMesh);
 
       //stock mesh in store object
-      if (taregtGroup && targetType) {
-        worldStore.sceneMeshes[taregtGroup][targetType] = instancedMesh;
-      }
+      worldStore.sceneMeshes[taregtGroup] = targetGroups[taregtGroup];
 
       //delete old meshes
       meshGroup.forEach((mesh) => {
@@ -164,32 +171,23 @@ function setupInstances() {
           objectsToRemove.push(o);
         }
       });
-
-      objectsToRemove.forEach((object) => {
-        if (object.parent) {
-          object.removeFromParent();
-          console.log(`Supprimé : ${object.name}`);
-        }
-      });
     });
   });
 
   //TODO remove
-  Object.values(
-    worldStore.sceneMeshes.trees_group as THREE.InstancedMesh[]
-  ).forEach((tree_group) => {
-    tree_group.visible = tree_group.name === "worst";
-  });
+  // worldStore.sceneMeshes.trees_group?.children.forEach((c) => {
+  //   c.visible = c.name === "worst";
+  // });
 
   /*functions*/
 
+  //stock mesh & create objects
   function stockMesh(
     type: "best" | "normal" | "bad" | "worst",
     object: THREE.Mesh
   ) {
     if (!allMeshes[object.parent!.parent!.name][type]) {
       allMeshes[object.parent!.parent!.name][type] = [];
-      worldStore.sceneMeshes[object.parent!.parent!.name][type] = [];
     }
     allMeshes[object.parent!.parent!.name][type].push(object);
   }
@@ -199,17 +197,9 @@ export function hideElements() {
   const worldStore = useWorld();
   worldStore.hiddenSceneParts = [];
 
-  const sceneChildrens = worldStore.scene3d?.children;
-
-  sceneChildrens?.forEach((child) => {
-    if (child.name.includes("group")) {
-      worldStore.hiddenSceneParts.push(child);
-      child.visible = false;
-    } else if (child.name.includes("impact")) {
-      child.children.forEach((c) => {
-        c.visible = false;
-      });
-    }
+  Object.values(worldStore.sceneMeshes).forEach((meshGroup) => {
+    meshGroup.visible = false;
+    worldStore.hiddenSceneParts.push(meshGroup);
   });
 }
 

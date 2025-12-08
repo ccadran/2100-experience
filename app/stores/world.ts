@@ -7,7 +7,7 @@ export const useWorld = defineStore("useWorld", () => {
   const sceneParts = ref<THREE.Object3D[]>([]);
   const hiddenSceneParts = ref<any[]>([]);
   const camera = ref<Camera>();
-  const sceneMeshes = ref<Record<string, any>>({});
+  const sceneMeshes = ref<Record<string, THREE.Group>>({});
 
   return {
     globalScene,
