@@ -22,6 +22,8 @@ export function moveToStep(target: number | "next" | "previous") {
   worldStore.sceneParts.forEach((part) => {
     if (part.name.includes("group")) {
       const firstChild = part.children[0];
+      console.log(firstChild);
+
       if (!firstChild) return;
 
       const currentState = getCurrentState(
@@ -32,15 +34,16 @@ export function moveToStep(target: number | "next" | "previous") {
       if (!currentState) return;
 
       part.children.forEach((child) => {
-        child.children.forEach((c) => {
-          if (c.name.includes(currentState)) {
-            c.visible = true;
-          } else {
-            c.visible = false;
-          }
-        });
+        if (child.name.includes(currentState)) {
+          child.visible = true;
+        } else {
+          child.visible = false;
+        }
       });
-    } else if (part.name.includes("impact")) {
+    }
+
+    //TODO regarder la hiérarchie du part.children.forEach
+    else if (part.name.includes("impact")) {
       Object.entries(configStore.worldParams).forEach(([key, value]) => {
         if (!part.name.includes(key)) return;
 

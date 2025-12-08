@@ -84,7 +84,9 @@ function setupInstances() {
   //stock meshes in objects
   worldStore.sceneParts.forEach((group) => {
     allMeshes[group.name] = {};
-    // worldStore.sceneMeshes[group.name] = {};
+
+    if (!group.name.includes("group")) return;
+
     group.children.forEach((child) => {
       child.children.forEach((c) => {
         if (c instanceof THREE.Mesh) {
@@ -102,6 +104,7 @@ function setupInstances() {
       });
     });
   });
+  worldStore.sceneParts = [];
 
   //create instances
   Object.values(allMeshes).forEach((meshesType) => {
@@ -153,6 +156,9 @@ function setupInstances() {
 
       //stock mesh in store object
       worldStore.sceneMeshes[taregtGroup] = targetGroups[taregtGroup];
+      if (!worldStore.sceneParts.includes(targetGroups[taregtGroup])) {
+        worldStore.sceneParts.push(targetGroups[taregtGroup]);
+      }
 
       //delete old meshes
       meshGroup.forEach((mesh) => {
@@ -191,6 +197,8 @@ function setupInstances() {
     }
     allMeshes[object.parent!.parent!.name][type].push(object);
   }
+
+  console.log(worldStore.sceneParts);
 }
 
 export function hideElements() {
