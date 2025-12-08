@@ -87,29 +87,13 @@ function setupInstances() {
         if (c instanceof THREE.Mesh) {
           c.visible = false;
           if (c.name.includes("best")) {
-            if (!allMeshes[c.parent!.parent!.name].best) {
-              allMeshes[c.parent!.parent!.name].best = [];
-              worldStore.sceneMeshes[c.parent!.parent!.name].best = [];
-            }
-            allMeshes[c.parent!.parent!.name].best.push(c);
+            stockMesh("best", c);
           } else if (c.name.includes("normal")) {
-            if (!allMeshes[c.parent!.parent!.name].normal) {
-              allMeshes[c.parent!.parent!.name].normal = [];
-              worldStore.sceneMeshes[c.parent!.parent!.name].normal = [];
-            }
-            allMeshes[c.parent!.parent!.name].normal.push(c);
+            stockMesh("normal", c);
           } else if (c.name.includes("bad")) {
-            if (!allMeshes[c.parent!.parent!.name].bad) {
-              allMeshes[c.parent!.parent!.name].bad = [];
-              worldStore.sceneMeshes[c.parent!.parent!.name].bad = [];
-            }
-            allMeshes[c.parent!.parent!.name].bad.push(c);
+            stockMesh("bad", c);
           } else if (c.name.includes("worst")) {
-            if (!allMeshes[c.parent!.parent!.name].worst) {
-              allMeshes[c.parent!.parent!.name].worst = [];
-              worldStore.sceneMeshes[c.parent!.parent!.name].worst = [];
-            }
-            allMeshes[c.parent!.parent!.name].worst.push(c);
+            stockMesh("worst", c);
           }
         }
       });
@@ -196,6 +180,17 @@ function setupInstances() {
   worldStore.scene3d?.traverse((o) => {
     console.log(o);
   });
+
+  function stockMesh(
+    type: "best" | "normal" | "bad" | "worst",
+    object: THREE.Mesh
+  ) {
+    if (!allMeshes[object.parent!.parent!.name].best) {
+      allMeshes[object.parent!.parent!.name].best = [];
+      worldStore.sceneMeshes[object.parent!.parent!.name].best = [];
+    }
+    allMeshes[object.parent!.parent!.name].best.push(object);
+  }
 }
 
 export function hideElements() {
