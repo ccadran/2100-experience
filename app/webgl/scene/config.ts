@@ -79,7 +79,7 @@ function setupInstances() {
   const allMeshes: Record<string, any> = {};
   worldStore.sceneParts.forEach((group) => {
     allMeshes[group.name] = {};
-    worldStore.sceneParts2[group.name] = {};
+    worldStore.sceneMeshes[group.name] = {};
     group.children.forEach((child) => {
       child.children.forEach((c) => {
         if (c instanceof THREE.Mesh) {
@@ -89,27 +89,25 @@ function setupInstances() {
           if (c.name.includes("best")) {
             if (!allMeshes[c.parent!.parent!.name].best) {
               allMeshes[c.parent!.parent!.name].best = [];
-              worldStore.sceneParts2[c.parent!.parent!.name].best = [];
+              worldStore.sceneMeshes[c.parent!.parent!.name].best = [];
             }
             allMeshes[c.parent!.parent!.name].best.push(c);
-
-            // createInstance();
           } else if (c.name.includes("normal")) {
             if (!allMeshes[c.parent!.parent!.name].normal) {
               allMeshes[c.parent!.parent!.name].normal = [];
-              worldStore.sceneParts2[c.parent!.parent!.name].normal = [];
+              worldStore.sceneMeshes[c.parent!.parent!.name].normal = [];
             }
             allMeshes[c.parent!.parent!.name].normal.push(c);
           } else if (c.name.includes("bad")) {
             if (!allMeshes[c.parent!.parent!.name].bad) {
               allMeshes[c.parent!.parent!.name].bad = [];
-              worldStore.sceneParts2[c.parent!.parent!.name].bad = [];
+              worldStore.sceneMeshes[c.parent!.parent!.name].bad = [];
             }
             allMeshes[c.parent!.parent!.name].bad.push(c);
           } else if (c.name.includes("worst")) {
             if (!allMeshes[c.parent!.parent!.name].worst) {
               allMeshes[c.parent!.parent!.name].worst = [];
-              worldStore.sceneParts2[c.parent!.parent!.name].worst = [];
+              worldStore.sceneMeshes[c.parent!.parent!.name].worst = [];
             }
             allMeshes[c.parent!.parent!.name].worst.push(c);
           }
@@ -117,8 +115,6 @@ function setupInstances() {
       });
     });
   });
-
-  console.log(allMeshes);
 
   Object.values(allMeshes).forEach((meshesType) => {
     Object.values(meshesType as THREE.Mesh[][]).forEach((meshGroup) => {
@@ -160,56 +156,17 @@ function setupInstances() {
       worldStore.scene?.add(instancedMesh);
       console.log(meshGroup[0]?.parent?.parent?.name);
       if (taregtGroup && targetType) {
-        worldStore.sceneParts2[taregtGroup][targetType] = instancedMesh;
+        worldStore.sceneMeshes[taregtGroup][targetType] = instancedMesh;
       }
     });
   });
 
-  console.log(worldStore.sceneParts2.trees_group);
-  Object.values(worldStore.sceneParts2.trees_group).forEach((tree_group) => {
-    console.log(tree_group.name);
-
+  console.log(worldStore.sceneMeshes.trees_group);
+  Object.values(
+    worldStore.sceneMeshes.trees_group as THREE.InstancedMesh[]
+  ).forEach((tree_group) => {
     tree_group.visible = tree_group.name === "worst";
-    console.log(tree_group);
   });
-
-  // // 3. Positionner chaque instance
-  // // On utilise un objet "dummy" (fictif) pour calculer facilement les matrices
-  // if (worldStore.scene) worldStore.scene.updateMatrixWorld(true);
-
-  // // 2. On calcule l'inverse de la matrice du parent (le conteneur)
-  // // Cela nous permet d'annuler les transformations du parent (comme le scale 0.1)
-  // const parentMatrix = worldStore.scene!.matrixWorld;
-  // const parentInverse = new THREE.Matrix4().copy(parentMatrix).invert();
-
-  // // On crée une matrice temporaire pour les calculs
-  // const tempMatrix = new THREE.Matrix4();
-
-  // for (let i = 0; i < compte; i++) {
-  //   const objetOriginal = objetsIndividuels[i];
-  //   if (!objetOriginal) continue;
-
-  //   objetOriginal.updateMatrixWorld();
-
-  //   // 3. Le calcul magique :
-  //   // Matrice Finale = (Inverse du Parent) * (Monde de l'objet)
-  //   // Cela transforme les coordonnées "Monde" en coordonnées "Locales" pour ce parent
-  //   tempMatrix.copy(objetOriginal.matrixWorld);
-  //   tempMatrix.premultiply(parentInverse);
-
-  //   instancedMesh.setMatrixAt(i, tempMatrix);
-  // }
-
-  // instancedMesh.instanceMatrix.needsUpdate = true;
-  // instancedMesh.frustumCulled = false; // Gardez le désactivé pour tester au début
-
-  // worldStore.scene?.add(instancedMesh);
-  // console.log(worldStore.scene);
-
-  // Retirez les anciens objets lourds de la scène (ou ne les ajoutez pas du tout)
-  // objetsIndividuels.forEach((obj) => {
-  //   if (obj.parent) obj.parent.remove(obj);
-  // });
 }
 
 export function hideElements() {
