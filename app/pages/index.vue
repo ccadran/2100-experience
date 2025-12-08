@@ -16,6 +16,8 @@ import QRCode from "qrcode";
 const { connect, joinRoom, sendAction, on } = useSocket();
 const { listenForUpdates } = useSocketHandler();
 
+const isDebug = ref<boolean>(true);
+
 const id = Math.random().toString(36).substring(2, 10);
 const roomId = id;
 
@@ -101,71 +103,142 @@ function zoomDown() {
   <div class="webgl">
     <canvas></canvas>
   </div>
-  <transition>
-    <div class="loader" v-if="!uiStore.isLoaded">
-      <h1>2100 currently loading...</h1>
-    </div>
-  </transition>
-  <transition>
-    <div class="intro" v-if="!webSocketStore.isRoomFull && uiStore.isLoaded">
-      <h1>SCAN LE QR CODE POUR COMMENCER L'EXPERIENCE</h1>
-      <canvas class="qrcode" style="width: 500px; height: 500px"></canvas>
-    </div>
-  </transition>
-  <transition>
-    <div
-      class="form"
-      v-if="webSocketStore.isRoomFull && !uiStore.isFormValidated"
-    >
-      <h2>REMPLISSER LE FORM SUR VORE PHONE</h2>
-      <div class="buttons">
-        <button @click="revealElements">formstep validate</button>
-        <button @click="handleFormValidations(userData)">VALIDATE FORM</button>
+  <section v-if="isDebug">
+    <transition>
+      <div class="loader" v-if="!uiStore.isLoaded">
+        <h1>2100 currently loading...</h1>
       </div>
-    </div>
-  </transition>
-  <transition>
-    <div class="experience" v-if="uiStore.isFormValidated">
-      <div class="controls">
-        <div class="step">
-          <button @click="moveToStep('previous')">previous</button>
-          <button @click="moveToStep('next')">next</button>
-        </div>
-        <div class="camera">
-          <div class="direction">
-            <button
-              @mousedown="handleCameraMovements('forward', 5)"
-              @mouseup="handleCameraMovements('forward', 0)"
-            >
-              forward
-            </button>
-            <button
-              @mousedown="handleCameraMovements('back', 5)"
-              @mouseup="handleCameraMovements('back', 0)"
-            >
-              back
-            </button>
-            <button
-              @mousedown="handleCameraMovements('left', 5)"
-              @mouseup="handleCameraMovements('left', 0)"
-            >
-              left
-            </button>
-            <button
-              @mousedown="handleCameraMovements('right', 5)"
-              @mouseup="handleCameraMovements('right', 0)"
-            >
-              right
-            </button>
-          </div>
-          <div class="zoom">
-            <button @mousedown="zoomDown">down</button>
-            <button @mousedown="zoomUp">up</button>
-          </div>
+    </transition>
+    <transition>
+      <div class="intro" v-if="!webSocketStore.isConnected && uiStore.isLoaded">
+        <button @click="handleWsCo">Co to server</button>
+      </div>
+    </transition>
+    <transition>
+      <div
+        class="form"
+        v-if="webSocketStore.isConnected && !uiStore.isFormValidated"
+      >
+        <div class="buttons">
+          <button @click="revealElements">formstep validate</button>
+          <button @click="handleFormValidations(userData)">
+            VALIDATE FORM
+          </button>
         </div>
       </div>
-    </div>
-  </transition>
+    </transition>
+    <transition>
+      <div class="experience" v-if="uiStore.isFormValidated">
+        <div class="controls">
+          <div class="step">
+            <button @click="moveToStep('previous')">previous</button>
+            <button @click="moveToStep('next')">next</button>
+          </div>
+          <div class="camera">
+            <div class="direction">
+              <button
+                @mousedown="handleCameraMovements('forward', 5)"
+                @mouseup="handleCameraMovements('forward', 0)"
+              >
+                forward
+              </button>
+              <button
+                @mousedown="handleCameraMovements('back', 5)"
+                @mouseup="handleCameraMovements('back', 0)"
+              >
+                back
+              </button>
+              <button
+                @mousedown="handleCameraMovements('left', 5)"
+                @mouseup="handleCameraMovements('left', 0)"
+              >
+                left
+              </button>
+              <button
+                @mousedown="handleCameraMovements('right', 5)"
+                @mouseup="handleCameraMovements('right', 0)"
+              >
+                right
+              </button>
+            </div>
+            <div class="zoom">
+              <button @mousedown="zoomDown">down</button>
+              <button @mousedown="zoomUp">up</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </transition>
+  </section>
+  <section v-else>
+    <transition>
+      <div class="loader" v-if="!uiStore.isLoaded">
+        <h1>2100 currently loading...</h1>
+      </div>
+    </transition>
+    <transition>
+      <div class="intro" v-if="!webSocketStore.isRoomFull && uiStore.isLoaded">
+        <h1>SCAN LE QR CODE POUR COMMENCER L'EXPERIENCE</h1>
+        <canvas class="qrcode" style="width: 500px; height: 500px"></canvas>
+      </div>
+    </transition>
+    <transition>
+      <div
+        class="form"
+        v-if="webSocketStore.isRoomFull && !uiStore.isFormValidated"
+      >
+        <h2>REMPLISSER LE FORM SUR VORE PHONE</h2>
+        <div class="buttons">
+          <button @click="revealElements">formstep validate</button>
+          <button @click="handleFormValidations(userData)">
+            VALIDATE FORM
+          </button>
+        </div>
+      </div>
+    </transition>
+    <transition>
+      <div class="experience" v-if="uiStore.isFormValidated">
+        <div class="controls">
+          <div class="step">
+            <button @click="moveToStep('previous')">previous</button>
+            <button @click="moveToStep('next')">next</button>
+          </div>
+          <div class="camera">
+            <div class="direction">
+              <button
+                @mousedown="handleCameraMovements('forward', 5)"
+                @mouseup="handleCameraMovements('forward', 0)"
+              >
+                forward
+              </button>
+              <button
+                @mousedown="handleCameraMovements('back', 5)"
+                @mouseup="handleCameraMovements('back', 0)"
+              >
+                back
+              </button>
+              <button
+                @mousedown="handleCameraMovements('left', 5)"
+                @mouseup="handleCameraMovements('left', 0)"
+              >
+                left
+              </button>
+              <button
+                @mousedown="handleCameraMovements('right', 5)"
+                @mouseup="handleCameraMovements('right', 0)"
+              >
+                right
+              </button>
+            </div>
+            <div class="zoom">
+              <button @mousedown="zoomDown">down</button>
+              <button @mousedown="zoomUp">up</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </transition>
+  </section>
 </template>
 
 <style lang="scss">
