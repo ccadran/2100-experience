@@ -24,7 +24,7 @@ export default class Camera {
     startPosition = new THREE.Vector3(0, 38, 60),
     endPosition = new THREE.Vector3(0, 28, 40),
     fov = 75,
-    zoomRangeMultiplier = 0.1,
+    zoomRangeMultiplier = 0.035,
   }: CameraParams = {}) {
     this.startPosition = startPosition;
     this.endPosition = endPosition;
@@ -40,7 +40,7 @@ export default class Camera {
       1000
     );
 
-    this.instance.position.copy(startPosition);
+    this.instance.position.copy(endPosition);
     this.instance.lookAt(0, 0, 0);
 
     console.log(this.instance.position);
@@ -121,14 +121,10 @@ export default class Camera {
     this.movementState.right = strength;
   }
 
-  moveDown(percent: number) {
-    if (this.instance.position.y <= 30) return;
-    console.log(this.instance.position.y);
+  zoom(value: number) {
+    const zoomFactor = 1 + value * this.zoomRangeMultiplier;
 
-    this.targetPosition.y = this.instance.position.y - percent / 10;
-  }
-  moveUp(percent: number) {
-    this.targetPosition.y = this.instance.position.y + percent / 10;
+    this.targetPosition.y = this.endPosition.y * zoomFactor;
   }
 
   stopMoving() {

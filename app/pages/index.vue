@@ -16,13 +16,14 @@ import QRCode from "qrcode";
 const { connect, joinRoom, sendAction, on } = useSocket();
 const { listenForUpdates } = useSocketHandler();
 
-const isDebug = ref<boolean>(true);
+const isDebug = ref<boolean>(false);
 
 const id = Math.random().toString(36).substring(2, 10);
 const roomId = id;
 
 onMounted(async () => {
   await initScene();
+
   uiStore.isLoaded = true;
   listenForUpdates();
   connect();
@@ -87,15 +88,19 @@ function handleWsCo() {
   console.log(webSocketStore.isConnected);
 }
 
-const zoomState = ref<number>(28);
+const zoomState = ref<number>(0);
 
-function zoomUp() {
-  zoomState.value += 1;
-  handleCameraZoom("up", zoomState.value);
-}
-function zoomDown() {
-  zoomState.value -= 1;
-  handleCameraZoom("down", zoomState.value);
+function zoom(direction: string) {
+  if (direction === "up") {
+    zoomState.value += 1;
+  } else {
+    zoomState.value -= 1;
+  }
+  zoomState.value = Math.max(zoomState.value, -10);
+  zoomState.value = Math.min(zoomState.value, 10);
+  console.log(zoomState.value);
+
+  handleCameraZoom(zoomState.value);
 }
 </script>
 
@@ -162,8 +167,8 @@ function zoomDown() {
               </button>
             </div>
             <div class="zoom">
-              <button @mousedown="zoomDown">down</button>
-              <button @mousedown="zoomUp">up</button>
+              <button @mousedown="zoom('down')">down</button>
+              <button @mousedown="zoom('up')">up</button>
             </div>
           </div>
         </div>
@@ -231,8 +236,8 @@ function zoomDown() {
               </button>
             </div>
             <div class="zoom">
-              <button @mousedown="zoomDown">down</button>
-              <button @mousedown="zoomUp">up</button>
+              <button @mousedown="zoom('down')">down</button>
+              <button @mousedown="zoom('up')">up</button>
             </div>
           </div>
         </div>

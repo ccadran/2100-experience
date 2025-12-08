@@ -71,7 +71,7 @@ export function useSocketHandler() {
         break;
       //UP
       case "CAMERA_ZOOM":
-        handleCameraZoom("up", payload.data.value);
+        handleCameraZoom(payload.data.value);
         console.log("PAYLOAD SEND A CAMERA UP PRESSED TASK");
         break;
       default:

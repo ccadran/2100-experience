@@ -108,13 +108,9 @@ export function handleCameraMovements(
   }
 }
 
-export function handleCameraZoom(direction: "up" | "down", percent: number) {
+export function handleCameraZoom(value: number) {
   const worldStore = useWorld();
-  if (direction === "up") {
-    worldStore.camera?.moveUp(percent);
-  } else {
-    worldStore.camera?.moveDown(percent);
-  }
+  worldStore.camera?.zoom(value);
 }
 
 export function sceneTransition() {}
