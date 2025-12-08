@@ -2,11 +2,19 @@ import * as THREE from "three";
 import type Camera from "~/webgl/scene/camera";
 
 export const useWorld = defineStore("useWorld", () => {
-  const scene = ref<THREE.Group | null>(null);
+  const globalScene = ref<THREE.Scene>();
+  const scene3d = ref<THREE.Group | null>(null);
   const sceneParts = ref<THREE.Object3D[]>([]);
   const hiddenSceneParts = ref<any[]>([]);
   const camera = ref<Camera>();
-  const sceneParts2 = ref<Record<string, any>>({}); // ← Objet, pas tableau
+  const sceneMeshes = ref<Record<string, any>>({});
 
-  return { scene, sceneParts, hiddenSceneParts, camera, sceneParts2 };
+  return {
+    globalScene,
+    scene3d,
+    sceneParts,
+    hiddenSceneParts,
+    camera,
+    sceneMeshes,
+  };
 });

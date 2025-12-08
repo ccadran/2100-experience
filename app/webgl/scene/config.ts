@@ -3,6 +3,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import type { userConfigParams } from "~/types/config";
 import Camera from "./camera";
 import { moveToStep } from "./experience";
+import { log } from "three/src/nodes/TSL.js";
 
 export function initScene(): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -12,6 +13,7 @@ export function initScene(): Promise<void> {
 
     const globalScene = new THREE.Scene();
     globalScene.background = new THREE.Color(0xaaaaaa);
+    worldStore.globalScene = globalScene;
 
     worldStore.camera = new Camera();
 
@@ -38,9 +40,9 @@ export function initScene(): Promise<void> {
 
         const target = globalScene.getObjectByName("Scene");
 
-        worldStore.scene = target as THREE.Group;
+        worldStore.scene3d = target as THREE.Group;
 
-        const sceneChildrens = worldStore.scene?.children;
+        const sceneChildrens = worldStore.scene3d?.children;
 
         sceneChildrens?.forEach((child) => {
           if (child.name.includes("group") || child.name.includes("impact")) {
@@ -84,8 +86,6 @@ function setupInstances() {
       child.children.forEach((c) => {
         if (c instanceof THREE.Mesh) {
           c.visible = false;
-          console.log(c.parent?.parent?.name);
-
           if (c.name.includes("best")) {
             if (!allMeshes[c.parent!.parent!.name].best) {
               allMeshes[c.parent!.parent!.name].best = [];
@@ -131,9 +131,9 @@ function setupInstances() {
       );
       instancedMesh.name = targetType;
 
-      if (worldStore.scene) worldStore.scene.updateMatrixWorld(true);
+      if (worldStore.scene3d) worldStore.scene3d.updateMatrixWorld(true);
 
-      const parentMatrix = worldStore.scene!.matrixWorld;
+      const parentMatrix = worldStore.scene3d!.matrixWorld;
       const parentInverse = new THREE.Matrix4().copy(parentMatrix).invert();
 
       const tempMatrix = new THREE.Matrix4();
@@ -153,11 +153,36 @@ function setupInstances() {
       instancedMesh.instanceMatrix.needsUpdate = true;
       instancedMesh.frustumCulled = false;
 
-      worldStore.scene?.add(instancedMesh);
-      console.log(meshGroup[0]?.parent?.parent?.name);
+      worldStore.scene3d?.add(instancedMesh);
+
       if (taregtGroup && targetType) {
         worldStore.sceneMeshes[taregtGroup][targetType] = instancedMesh;
       }
+
+      meshGroup.forEach((mesh) => {
+        const parent = mesh.parent;
+        mesh.removeFromParent();
+
+        if (parent && parent.children.length === 0) {
+          parent.removeFromParent();
+        }
+      });
+
+      //DELETE THE BASE ONE
+      const objectsToRemove = [] as any[];
+
+      worldStore.scene3d?.traverse((o) => {
+        if (o.name.includes(mesheNumbers.toString())) {
+          objectsToRemove.push(o);
+        }
+      });
+
+      objectsToRemove.forEach((object) => {
+        if (object.parent) {
+          object.removeFromParent();
+          console.log(`Supprimé : ${object.name}`);
+        }
+      });
     });
   });
 
@@ -167,13 +192,17 @@ function setupInstances() {
   ).forEach((tree_group) => {
     tree_group.visible = tree_group.name === "worst";
   });
+
+  worldStore.scene3d?.traverse((o) => {
+    console.log(o);
+  });
 }
 
 export function hideElements() {
   const worldStore = useWorld();
   worldStore.hiddenSceneParts = [];
 
-  const sceneChildrens = worldStore.scene?.children;
+  const sceneChildrens = worldStore.scene3d?.children;
 
   sceneChildrens?.forEach((child) => {
     if (child.name.includes("group")) {
