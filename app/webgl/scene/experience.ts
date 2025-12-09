@@ -77,13 +77,6 @@ function getCurrentState(
   );
 }
 
-const rafIds = {
-  forward: null as number | null,
-  back: null as number | null,
-  left: null as number | null,
-  right: null as number | null,
-};
-
 export function handleCameraMovements(
   direction: "forward" | "back" | "left" | "right",
   strength: number

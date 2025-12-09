@@ -3,7 +3,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import type { userConfigParams } from "~/types/config";
 import Camera from "./camera";
 import { moveToStep } from "./experience";
-import { log } from "three/src/nodes/TSL.js";
+import gsap from "gsap";
 
 export function initScene(): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -206,6 +206,8 @@ export function hideElements() {
   worldStore.hiddenSceneParts = [];
 
   Object.values(worldStore.sceneMeshes).forEach((meshGroup) => {
+    meshGroup.position.y = -10;
+
     meshGroup.visible = false;
     worldStore.hiddenSceneParts.push(meshGroup);
   });
@@ -221,6 +223,11 @@ export function revealElements() {
       Math.random() * worldStore.hiddenSceneParts.length
     );
     worldStore.hiddenSceneParts[randIndex].visible = true;
+    gsap.to(worldStore.hiddenSceneParts[randIndex].position, {
+      y: 0,
+      duration: 1,
+      ease: "power2.inOut",
+    });
     configStore.formParams.currentStep += 1;
     worldStore.hiddenSceneParts.splice(randIndex, 1);
   }
