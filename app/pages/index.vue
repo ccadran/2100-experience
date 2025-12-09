@@ -8,6 +8,7 @@ import {
   handleCameraMovements,
   handleCameraZoom,
   moveToStep,
+  sceneTransition,
 } from "~/webgl/scene/experience";
 import { useSocket } from "~/composables/useSocket";
 import { useSocketHandler } from "~/composables/useSocketHandler";
@@ -23,6 +24,10 @@ const roomId = id;
 
 onMounted(async () => {
   await initScene();
+
+  setTimeout(() => {
+    sceneTransition();
+  }, 500);
 
   uiStore.isLoaded = true;
   listenForUpdates();
@@ -173,6 +178,12 @@ function zoom(direction: string) {
         </div>
       </div>
     </transition>
+    <div class="clouds-transition">
+      <img class="cloud" src="/assets/cloud.webp" alt="" />
+      <img class="cloud" src="/assets/cloud.webp" alt="" />
+      <img class="cloud" src="/assets/cloud.webp" alt="" />
+      <img class="cloud" src="/assets/cloud.webp" alt="" />
+    </div>
   </section>
   <section v-else>
     <transition>
@@ -246,6 +257,36 @@ function zoom(direction: string) {
 </template>
 
 <style lang="scss">
+.clouds-transition {
+  height: 100vh;
+  width: 100vw;
+  position: fixed;
+  z-index: 100;
+  top: 0;
+  display: none;
+
+  > .cloud {
+    position: absolute;
+    width: 130vw;
+    &:nth-of-type(1) {
+      left: -16%;
+    }
+    &:nth-of-type(2) {
+      right: -17%;
+      top: -37%;
+      transform: rotate(180deg);
+    }
+    &:nth-of-type(3) {
+      left: -50%;
+      bottom: -50%;
+    }
+    &:nth-of-type(4) {
+      left: 30%;
+      bottom: -20%;
+    }
+  }
+}
+
 button {
   width: fit-content;
   padding: 12px 16px;

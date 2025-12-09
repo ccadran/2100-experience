@@ -1,3 +1,5 @@
+import gsap from "gsap";
+
 export function moveToStep(target: number | "next" | "previous") {
   const worldStore = useWorld();
   const configStore = useConfig();
@@ -109,4 +111,55 @@ export function handleCameraZoom(value: number) {
   worldStore.camera?.zoom(value);
 }
 
-export function sceneTransition() {}
+export function sceneTransition() {
+  const cloud1 = document.querySelector(
+    ".clouds-transition .cloud:nth-of-type(1)"
+  );
+  const cloud2 = document.querySelector(
+    ".clouds-transition .cloud:nth-of-type(2)"
+  );
+  const cloud3 = document.querySelector(
+    ".clouds-transition .cloud:nth-of-type(3)"
+  );
+  const cloud4 = document.querySelector(
+    ".clouds-transition .cloud:nth-of-type(4)"
+  );
+
+  const cloudsContainer = document.querySelector(
+    ".clouds-transition"
+  ) as HTMLElement;
+  cloudsContainer.style.display = "block";
+  const cloudsTimeline = gsap.timeline();
+
+  cloudsTimeline
+    .fromTo(
+      cloud1,
+      { x: "100%" },
+      { x: "0%", duration: 0.75, ease: "power2.out" },
+      0
+    )
+    .fromTo(
+      cloud2,
+      { x: "-100%" },
+      { x: "0%", duration: 0.75, ease: "power2.out" },
+      0.15
+    )
+    .fromTo(
+      cloud3,
+      { x: "120%" },
+      { x: "0%", duration: 0.75, ease: "power2.out" },
+      0.25
+    )
+    .fromTo(
+      cloud4,
+      { x: "100%" },
+      { x: "0%", duration: 0.75, ease: "power2.out" },
+      0.3
+    );
+
+  cloudsTimeline.then(() => {
+    setTimeout(() => {
+      cloudsTimeline.reverse();
+    }, 200);
+  });
+}
