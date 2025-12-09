@@ -13,9 +13,12 @@ import {
 import { useSocket } from "~/composables/useSocket";
 import { useSocketHandler } from "~/composables/useSocketHandler";
 import QRCode from "qrcode";
+import CloudsTransition from "~/webgl/scene/Clouds";
 
 const { connect, joinRoom, sendAction, on } = useSocket();
 const { listenForUpdates } = useSocketHandler();
+
+const uiStore = useUi();
 
 const isDebug = ref<boolean>(true);
 
@@ -24,32 +27,35 @@ const roomId = id;
 
 onMounted(async () => {
   await initScene();
+  uiStore.cloudsTransition = new CloudsTransition();
 
-  setTimeout(() => {
-    sceneTransition();
-  }, 500);
+  // setTimeout(() => {
+  //   uiStore.cloudsTransition?.showClouds();
+  //   //   sceneTransition();
+  // }, 500);
 
   uiStore.isLoaded = true;
   listenForUpdates();
-  connect();
-  on("connect", () => {
-    joinRoom(roomId);
+  if (!isDebug) {
+    connect();
+    on("connect", () => {
+      joinRoom(roomId);
 
-    nextTick(() => {
-      const canvasQr = document.querySelector(".qrcode") as HTMLCanvasElement;
-      if (canvasQr) {
-        QRCode.toCanvas(canvasQr, roomId, function (error: any) {
-          if (error) console.error(error);
-        });
-      } else {
-        console.error("Canvas .qrcode introuvable");
-      }
+      nextTick(() => {
+        const canvasQr = document.querySelector(".qrcode") as HTMLCanvasElement;
+        if (canvasQr) {
+          QRCode.toCanvas(canvasQr, roomId, function (error: any) {
+            if (error) console.error(error);
+          });
+        } else {
+          console.error("Canvas .qrcode introuvable");
+        }
+      });
     });
-  });
+  }
 });
 const worldStore = useWorld();
 const webSocketStore = useWebSocket();
-const uiStore = useUi();
 
 const userData = {
   plane: 42,
@@ -89,6 +95,7 @@ function handleWsCo() {
   connect();
   on("connect", () => {
     joinRoom(roomId);
+    console.log("test");
   });
   console.log(webSocketStore.isConnected);
 }
@@ -264,6 +271,7 @@ function zoom(direction: string) {
   z-index: 100;
   top: 0;
   display: none;
+  pointer-events: none;
 
   > .cloud {
     position: absolute;

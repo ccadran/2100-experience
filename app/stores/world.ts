@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import type Camera from "~/webgl/scene/camera";
+import type Camera from "~/webgl/scene/Camera";
 
 export const useWorld = defineStore("useWorld", () => {
   const globalScene = ref<THREE.Scene>();
