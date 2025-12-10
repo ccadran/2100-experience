@@ -246,49 +246,49 @@ export function handleFormValidations(userData: userConfigParams) {
     switch (key) {
       case "plane":
         finalUserData.plane = {
-          weight: configStore.worldParams[key].weight,
+          weight: configStore.worldParams[key].globalWeight,
           percentage: value,
         };
         break;
       case "transport":
         finalUserData.transport = {
-          weight: configStore.worldParams[key].weight,
+          weight: configStore.worldParams[key].globalWeight,
           percentage: value,
         };
         break;
       case "meat":
         finalUserData.meat = {
-          weight: configStore.worldParams[key].weight,
+          weight: configStore.worldParams[key].globalWeight,
           percentage: value,
         };
         break;
       case "promptIA":
         finalUserData.promptIA = {
-          weight: configStore.worldParams[key].weight,
+          weight: configStore.worldParams[key].globalWeight,
           percentage: value,
         };
         break;
       case "products":
         finalUserData.products = {
-          weight: configStore.worldParams[key].weight,
+          weight: configStore.worldParams[key].globalWeight,
           percentage: value,
         };
         break;
       case "phone":
         finalUserData.phone = {
-          weight: configStore.worldParams[key].weight,
+          weight: configStore.worldParams[key].globalWeight,
           percentage: value,
         };
         break;
       case "energy":
         finalUserData.energy = {
-          weight: configStore.worldParams[key].weight,
+          weight: configStore.worldParams[key].globalWeight,
           percentage: value,
         };
         break;
       case "clothes":
         finalUserData.clothes = {
-          weight: configStore.worldParams[key].weight,
+          weight: configStore.worldParams[key].globalWeight,
           percentage: value,
         };
         break;
@@ -334,6 +334,7 @@ function calculateExperienceSteps() {
 
     const worldState: any = {
       params: {},
+      impacts: {},
     };
     worldState.year = stepYears[i];
     Object.entries(configStore.userConfig).forEach(([key, value]) => {
@@ -343,6 +344,23 @@ function calculateExperienceSteps() {
       configStore.configParams.currentTemperature +
       progress *
         (targetTemperature - configStore.configParams.currentTemperature);
+    const currentWorldImpacts = {};
+    console.log(worldState.params);
+
+    Object.keys(configStore.worldImpacts).forEach((impactName) => {
+      Object.values(configStore.worldParams).filter((param) =>
+        param.impacts.forEach((impact) => {
+          if (impact.type === impactName) {
+            currentWorldImpacts[impact.type] = {
+              value: worldState.params[param.name],
+            };
+          }
+        })
+      );
+    });
+    worldState.impacts = currentWorldImpacts;
+    console.log(worldState.impacts);
+
     worldStateSteps.push(worldState);
   }
   configStore.worldStateSteps = worldStateSteps;

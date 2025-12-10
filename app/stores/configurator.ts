@@ -19,50 +19,65 @@ export const useConfig = defineStore("useConfig", () => {
   const worldParams = {
     plane: {
       name: "plane",
-      description: "Impact des vols long et court-courriers.",
-      weight: 0.1, // 10%
+      globalWeight: 0.1, // 10%
+      impacts: [{ type: "fog", weight: 0 }],
     },
     transport: {
       name: "transport",
-      description:
-        "Impact de la voiture individuelle, bus, train (hors avion).",
-      weight: 0.25, // 25%
+      globalWeight: 0.25, // 25%
+      impacts: [{ type: "fog", weight: 0 }],
     },
     meat: {
       name: "meat",
-      description:
-        "Impact lié à la production de viande et produits animaux (méthane, déforestation).",
-      weight: 0.15, // 15%
+      globalWeight: 0.15, // 15%
+      impacts: [{ type: "waterLevel", weight: 0 }],
     },
     promptIA: {
       name: "promptIA",
-      description:
-        "Impact lié aux data centers, streaming, et requêtes IA/ChatGPT.",
-      weight: 0.02, // 2%
+      globalWeight: 0.02, // 2%
+      impacts: [{ type: "waterLevel", weight: 0 }],
     },
     products: {
       name: "products",
-      description:
-        "Impact lié à l'importation de nourriture et à la fabrication de produits manufacturés (hors textile et tech).",
-      weight: 0.15, // 15%
+      globalWeight: 0.15, // 15%
+      impacts: [{ type: "factory", weight: 0 }],
     },
     phone: {
       name: "phone",
-      description:
-        "Impact lié à la fabrication (extraction de métaux) et à l'infrastructure des appareils électroniques (téléphones, PC).",
-      weight: 0.05, // 5%
+      globalWeight: 0.05, // 5%
+      impacts: [
+        { type: "factory", weight: 0 },
+        { type: "rocks", weight: 0 },
+      ],
     },
     energy: {
       name: "energy",
-      description:
-        "Impact lié au chauffage (gaz, fioul) et à l'électricité domestique.",
-      weight: 0.2, // 20%
+      globalWeight: 0.2, // 20%
+      impacts: [{ type: "fog", weight: 0 }],
     },
     clothes: {
       name: "clothes",
-      description:
-        "Impact lié à la production, la teinture et le transport des textiles (Fast Fashion).",
-      weight: 0.08, // 8%
+      globalWeight: 0.08, // 8%
+      impacts: [{ type: "factory", weight: 0 }],
+    },
+  };
+
+  const worldImpacts = {
+    fog: {
+      name: "fog",
+      value: 0,
+    },
+    waterLevel: {
+      name: "waterLevel",
+      value: 0,
+    },
+    factory: {
+      name: "factory",
+      value: 0,
+    },
+    rocks: {
+      name: "rocks",
+      value: 0,
     },
   };
 
@@ -101,6 +116,7 @@ export const useConfig = defineStore("useConfig", () => {
     userConfig,
     configParams,
     worldParams,
+    worldImpacts,
     worldStateSteps,
     objectsData,
     currentStep,

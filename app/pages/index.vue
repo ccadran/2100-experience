@@ -8,7 +8,6 @@ import {
   handleCameraMovements,
   handleCameraZoom,
   moveToStep,
-  sceneTransition,
 } from "~/webgl/scene/experience";
 import { useSocket } from "~/composables/useSocket";
 import { useSocketHandler } from "~/composables/useSocketHandler";
@@ -57,16 +56,16 @@ onMounted(async () => {
 const worldStore = useWorld();
 const webSocketStore = useWebSocket();
 
-const userData = {
-  plane: 42,
-  transport: 85,
-  meat: 70,
-  promptIA: 55,
-  products: 30,
-  phone: 10,
-  energy: 68,
-  clothes: 90,
-};
+// const userData = {
+//   plane: 42,
+//   transport: 85,
+//   meat: 70,
+//   promptIA: 55,
+//   products: 30,
+//   phone: 10,
+//   energy: 68,
+//   clothes: 90,
+// };
 
 // const userData = {
 //   plane: 0,
@@ -78,16 +77,16 @@ const userData = {
 //   energy: 0,
 //   clothes: 0,
 // };
-// const userData = {
-//   plane: 100,
-//   transport: 100,
-//   meat: 100,
-//   promptIA: 100,
-//   products: 100,
-//   phone: 100,
-//   energy: 100,
-//   clothes: 100,
-// };
+const userData = {
+  plane: 100,
+  transport: 100,
+  meat: 100,
+  promptIA: 100,
+  products: 100,
+  phone: 100,
+  energy: 100,
+  clothes: 100,
+};
 
 // const roomId = "ROOM_1";
 
