@@ -20,45 +20,45 @@ export const useConfig = defineStore("useConfig", () => {
     plane: {
       name: "plane",
       globalWeight: 0.1, // 10%
-      impacts: [{ type: "fog", weight: 0 }],
+      impacts: [{ type: "fog", weight: 0.5 }],
     },
     transport: {
       name: "transport",
       globalWeight: 0.25, // 25%
-      impacts: [{ type: "fog", weight: 0 }],
+      impacts: [{ type: "fog", weight: 0.2 }],
     },
     meat: {
       name: "meat",
       globalWeight: 0.15, // 15%
-      impacts: [{ type: "waterLevel", weight: 0 }],
+      impacts: [{ type: "waterLevel", weight: 0.7 }],
     },
     promptIA: {
       name: "promptIA",
       globalWeight: 0.02, // 2%
-      impacts: [{ type: "waterLevel", weight: 0 }],
+      impacts: [{ type: "waterLevel", weight: 0.3 }],
     },
     products: {
       name: "products",
       globalWeight: 0.15, // 15%
-      impacts: [{ type: "factory", weight: 0 }],
+      impacts: [{ type: "factory", weight: 0.5 }],
     },
     phone: {
       name: "phone",
       globalWeight: 0.05, // 5%
       impacts: [
-        { type: "factory", weight: 0 },
-        { type: "rocks", weight: 0 },
+        { type: "factory", weight: 0.15 },
+        { type: "rocks", weight: 1 },
       ],
     },
     energy: {
       name: "energy",
       globalWeight: 0.2, // 20%
-      impacts: [{ type: "fog", weight: 0 }],
+      impacts: [{ type: "fog", weight: 0.3 }],
     },
     clothes: {
       name: "clothes",
       globalWeight: 0.08, // 8%
-      impacts: [{ type: "factory", weight: 0 }],
+      impacts: [{ type: "factory", weight: 0.35 }],
     },
   };
 

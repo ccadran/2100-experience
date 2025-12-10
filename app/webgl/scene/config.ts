@@ -344,20 +344,28 @@ function calculateExperienceSteps() {
       configStore.configParams.currentTemperature +
       progress *
         (targetTemperature - configStore.configParams.currentTemperature);
-    const currentWorldImpacts = {};
-    console.log(worldState.params);
 
-    Object.keys(configStore.worldImpacts).forEach((impactName) => {
-      Object.values(configStore.worldParams).filter((param) =>
-        param.impacts.forEach((impact) => {
-          if (impact.type === impactName) {
-            currentWorldImpacts[impact.type] = {
-              value: worldState.params[param.name],
-            };
-          }
-        })
-      );
+    const currentWorldImpacts = {};
+    Object.keys(configStore.worldImpacts).forEach((impactKey) => {
+      currentWorldImpacts[impactKey] = {
+        name: configStore.worldImpacts[impactKey].name,
+        value: 0,
+      };
     });
+
+    Object.values(configStore.worldParams).forEach((param: any) => {
+      const paramValue = worldState.params[param.name];
+
+      if (paramValue !== undefined) {
+        param.impacts.forEach((impact) => {
+          if (currentWorldImpacts[impact.type]) {
+            currentWorldImpacts[impact.type].value +=
+              paramValue * impact.weight;
+          }
+        });
+      }
+    });
+
     worldState.impacts = currentWorldImpacts;
     console.log(worldState.impacts);
 
