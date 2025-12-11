@@ -22,10 +22,10 @@ const uiStore = useUi();
 
 const isDebug = ref<boolean>(true);
 
-const id = Math.random().toString(36).substring(2, 10);
-const roomId = id;
-
 const loaderProgress = ref<HTMLElement>();
+const appLogo = ref<HTMLElement>();
+const qrCodeContainer = ref<HTMLElement>();
+
 const webglContainer = ref<HTMLElement>();
 
 const isSceneLoaded = ref<boolean>(false);
@@ -51,28 +51,57 @@ async function loaderAnim() {
     );
 }
 
-function completeLoader() {
-  gsap
-    .timeline({
-      onComplete() {
-        uiStore.isLoaded = true;
-      },
-    })
+async function completeLoader() {
+  return gsap
+    .timeline()
     .to(loaderProgress.value!, {
       width: "100%",
       backgroundColor: "var(--green)",
+      onComplete: () => {
+        uiStore.isLoaded = true;
+      },
     })
-    .fromTo(webglContainer.value!, { opacity: 0 }, { opacity: 1, duration: 2 });
+    .fromTo(webglContainer.value!, { opacity: 0 }, { opacity: 1, duration: 1 });
+}
+
+function revealQr() {
+  const qrCode = document.querySelector(".qrcode");
+  const qrCodeText = document.querySelector(".qr-text");
+
+  gsap
+    .timeline({ defaults: { duration: 1 } })
+    .to(appLogo.value!, { top: "80px" }, 0)
+    .fromTo(
+      qrCode,
+      {
+        scale: 0.3,
+        opacity: 0,
+        rotation: -180,
+        transform: "translate(-50%, -50%)  scale(0.3)",
+      },
+      {
+        opacity: 1,
+        rotation: 0,
+        transform: "translate(-50%, -50%)  scale(1.0)",
+      },
+      0
+    )
+    .to(qrCodeText, { opacity: 1 }, 0);
 }
 
 onMounted(async () => {
+  connectToWsServer();
   const tl = loaderAnim();
 
   isSceneLoaded.value = true;
 
   await Promise.all([initScene(), tl.then()]);
 
-  completeLoader();
+  console.log("before______");
+  await completeLoader();
+  console.log("after______");
+
+  revealQr();
 
   uiStore.cloudsTransition = new CloudsTransition();
 
@@ -82,26 +111,30 @@ onMounted(async () => {
   // }, 500);
 
   listenForUpdates();
-  if (!isDebug) {
-    connect();
-    on("connect", () => {
-      joinRoom(roomId);
-
-      nextTick(() => {
-        const canvasQr = document.querySelector(".qrcode") as HTMLCanvasElement;
-        if (canvasQr) {
-          QRCode.toCanvas(canvasQr, roomId, function (error: any) {
-            if (error) console.error(error);
-          });
-        } else {
-          console.error("Canvas .qrcode introuvable");
-        }
-      });
-    });
-  }
 });
 const worldStore = useWorld();
 const webSocketStore = useWebSocket();
+
+function connectToWsServer() {
+  nextTick(() => {
+    const id = Math.random().toString(36).substring(2, 10);
+    const roomId = id;
+    connect();
+    on("connect", () => {
+      joinRoom(roomId);
+      const canvasQr = document.querySelector(
+        ".qrcode .inner"
+      ) as HTMLCanvasElement;
+      if (canvasQr) {
+        QRCode.toCanvas(canvasQr, roomId, function (error: any) {
+          if (error) console.error(error);
+        });
+      } else {
+        console.error("Canvas .qrcode introuvable");
+      }
+    });
+  });
+}
 
 const userData = {
   plane: 100,
@@ -142,15 +175,14 @@ function zoom(direction: string) {
 
 <template>
   <main>
-    <div class="loader">
-      <div class="logo">
+    <div class="intro">
+      <div class="logo" ref="appLogo">
         <img src="/images/logo.webp" alt="" />
       </div>
       <div class="loader-progress">
         <div class="inner" ref="loaderProgress"></div>
       </div>
-    </div>
-    <div class="qrcode-container">
+
       <div class="qrcode">
         <canvas class="inner"></canvas>
       </div>
@@ -159,6 +191,7 @@ function zoom(direction: string) {
         pour te connecter
       </p>
     </div>
+
     <div class="clouds-transition">
       <div class="cloud">
         <img src="/images/cloud.webp" alt="" />
@@ -323,19 +356,18 @@ main {
   width: 100vw;
 
   position: fixed;
-  > .loader {
+  > .intro {
     z-index: 2;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    display: flex;
-    gap: 140px;
-    align-items: center;
-    flex-direction: column;
+    position: fixed;
+    height: 100vh;
+    width: 100vw;
     > .logo {
       transform: rotate(-5.65deg);
       width: 30vw;
+      position: absolute;
+      top: 28vh;
+      left: 50%;
+      transform: translateX(-50%);
       > img {
         width: 100%;
         height: 100%;
@@ -343,6 +375,10 @@ main {
       }
     }
     > .loader-progress {
+      position: absolute;
+      bottom: 28vh;
+      left: 50%;
+      transform: translateX(-50%);
       width: 25vw;
 
       height: 52px;
@@ -374,17 +410,24 @@ main {
           -1px 3px 8px 0 rgba(0, 0, 0, 0.02);
       }
     }
-  }
-  .qrcode-container {
-    position: absolute;
-    height: 100vh;
-    width: 100vw;
-    z-index: 2;
+
     > .qrcode {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
+      opacity: 0;
+      width: 19vw;
+      height: auto;
+      aspect-ratio: 1/1;
+      box-shadow: 0 1.8px 7.2px 0 rgba(0, 0, 0, 0.25);
+      border-radius: 32px;
+      background-color: #fff;
+      > canvas {
+        border-radius: 32px;
+        width: 100% !important;
+        height: 100% !important;
+      }
     }
     > .qr-text {
       font-size: 48px;
@@ -394,9 +437,11 @@ main {
       bottom: 100px;
       transform: translateX(-50%);
       text-align: center;
+      opacity: 0;
     }
   }
 }
+
 .webgl {
   height: 100vh;
   width: 100vw;
