@@ -345,10 +345,9 @@ function calculateExperienceSteps() {
       progress *
         (targetTemperature - configStore.configParams.currentTemperature);
 
-    const currentWorldImpacts = {};
+    const currentWorldImpacts = {} as any;
     Object.keys(configStore.worldImpacts).forEach((impactKey) => {
       currentWorldImpacts[impactKey] = {
-        name: configStore.worldImpacts[impactKey].name,
         value: 0,
       };
     });
@@ -357,7 +356,7 @@ function calculateExperienceSteps() {
       const paramValue = worldState.params[param.name];
 
       if (paramValue !== undefined) {
-        param.impacts.forEach((impact) => {
+        param.impacts.forEach((impact: any) => {
           if (currentWorldImpacts[impact.type]) {
             currentWorldImpacts[impact.type].value +=
               paramValue * impact.weight;
