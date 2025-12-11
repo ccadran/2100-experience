@@ -23,6 +23,7 @@ const uiStore = useUi();
 const isDebug = ref<boolean>(true);
 
 const loaderProgress = ref<HTMLElement>();
+const loaderContainer = ref<HTMLElement>();
 const appLogo = ref<HTMLElement>();
 const qrCodeContainer = ref<HTMLElement>();
 
@@ -69,14 +70,15 @@ function revealQr() {
   const qrCodeText = document.querySelector(".qr-text");
 
   gsap
-    .timeline({ defaults: { duration: 1 } })
-    .to(appLogo.value!, { top: "80px" }, 0)
+    .timeline({ defaults: { duration: 0.5 } })
+    .to(appLogo.value!, { top: "80px", width: "24vw", ease: "power1.inOut" }, 0)
+    .to(loaderContainer.value!, { opacity: 0 }, 0)
     .fromTo(
       qrCode,
       {
         scale: 0.3,
         opacity: 0,
-        rotation: -180,
+        rotation: -90,
         transform: "translate(-50%, -50%)  scale(0.3)",
       },
       {
@@ -84,7 +86,7 @@ function revealQr() {
         rotation: 0,
         transform: "translate(-50%, -50%)  scale(1.0)",
       },
-      0
+      0.15
     )
     .to(qrCodeText, { opacity: 1 }, 0);
 }
@@ -179,7 +181,7 @@ function zoom(direction: string) {
       <div class="logo" ref="appLogo">
         <img src="/images/logo.webp" alt="" />
       </div>
-      <div class="loader-progress">
+      <div class="loader-progress" ref="loaderContainer">
         <div class="inner" ref="loaderProgress"></div>
       </div>
 
@@ -363,7 +365,7 @@ main {
     width: 100vw;
     > .logo {
       transform: rotate(-5.65deg);
-      width: 30vw;
+      width: 28vw;
       position: absolute;
       top: 28vh;
       left: 50%;

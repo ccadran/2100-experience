@@ -98,11 +98,6 @@ export const useConfig = defineStore("useConfig", () => {
       normal: 1.2,
       best: 0.2,
     },
-    water: {
-      worst: 2.5,
-      normal: 1.2,
-      best: 0.5,
-    },
   };
 
   const userConfig: Partial<UserConfigType> = {};
