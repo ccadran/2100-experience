@@ -114,27 +114,6 @@ const userData = {
   clothes: 90,
 };
 
-// const userData = {
-//   plane: 0,
-//   transport: 0,
-//   meat: 100,
-//   promptIA: 0,
-//   products: 0,
-//   phone: 0,
-//   energy: 0,
-//   clothes: 0,
-// };
-// const userData = {
-//   plane: 100,
-//   transport: 100,
-//   meat: 100,
-//   promptIA: 100,
-//   products: 100,
-//   phone: 100,
-//   energy: 100,
-//   clothes: 100,
-// };
-
 // const roomId = "ROOM_1";
 
 function handleWsCo() {
@@ -170,6 +149,15 @@ function zoom(direction: string) {
       <div class="loader-progress">
         <div class="inner" ref="loaderProgress"></div>
       </div>
+    </div>
+    <div class="qrcode-container">
+      <div class="qrcode">
+        <canvas class="inner"></canvas>
+      </div>
+      <p class="qr-text">
+        Scan le code QR <br />
+        pour te connecter
+      </p>
     </div>
     <div class="clouds-transition">
       <div class="cloud">
@@ -385,6 +373,27 @@ main {
           -4px 13px 14px 0 rgba(0, 0, 0, 0.01),
           -1px 3px 8px 0 rgba(0, 0, 0, 0.02);
       }
+    }
+  }
+  .qrcode-container {
+    position: absolute;
+    height: 100vh;
+    width: 100vw;
+    z-index: 2;
+    > .qrcode {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    > .qr-text {
+      font-size: 48px;
+      letter-spacing: 0.96px;
+      left: 50%;
+      position: absolute;
+      bottom: 100px;
+      transform: translateX(-50%);
+      text-align: center;
     }
   }
 }
