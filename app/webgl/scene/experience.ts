@@ -23,53 +23,72 @@ export async function moveToStep(target: number | "next" | "previous") {
 
   const currentTemperature = currentStep.temperature;
 
-  worldStore.sceneParts.forEach((part) => {
-    if (part.name.includes("group")) {
-      const firstChild = part.children[0];
-      console.log(firstChild);
+  worldStore.paramsParts.forEach((part) => {
+    const firstChild = part.children[0];
+    console.log(firstChild);
 
-      if (!firstChild) return;
+    if (!firstChild) return;
 
-      const currentState = getCurrentState(
-        firstChild.userData,
-        currentTemperature
-      );
+    const currentState = getCurrentState(
+      firstChild.userData,
+      currentTemperature
+    );
 
-      if (!currentState) return;
+    if (!currentState) return;
 
-      part.children.forEach((child) => {
-        if (child.name.includes(currentState)) {
-          child.visible = true;
-        } else {
-          child.visible = false;
-        }
-      });
-    }
+    part.children.forEach((child) => {
+      if (child.name.includes(currentState)) {
+        child.visible = true;
+      } else {
+        child.visible = false;
+      }
+    });
+  });
 
-    //TODO regarder la hiérarchie du part.children.forEach
-    else if (part.name.includes("impact")) {
-      Object.entries(configStore.worldParams).forEach(([key, value]) => {
-        if (!part.name.includes(key)) return;
-
-        const paramValue = currentStep.params[key];
-
-        const levels = {
-          low: paramValue >= 25,
-          mid: paramValue >= 50,
-          high: paramValue >= 75,
-        };
-
-        part.children.forEach((child) => {
-          const level = Object.keys(levels).find((l) =>
-            child.name.includes(l)
-          ) as keyof typeof levels;
-          child.visible = level ? levels[level] : false;
-        });
-      });
-    }
+  Object.values(configStore.worldImpacts).forEach((impact) => {
+    updateImact(impact.name, currentStep.impacts[impact.name]);
   });
 
   await uiStore.cloudsTransition?.hideClouds();
+}
+
+function updateImact(
+  type: "fog" | "waterLevel" | "factory" | "rocks",
+  evolution: number
+) {
+  const worldStore = useWorld();
+  switch (type) {
+    case "fog":
+      // worldStore.impactsParts.fog.update(evolution) //function de la classe fog
+      break;
+    case "waterLevel":
+      const levelWater = getLevel(evolution);
+      worldStore.impactsParts.waterLevel?.children.forEach((child) => {
+        child.visible = child.name === levelWater;
+      });
+      break;
+    case "factory":
+      const levelFactory = getLevel(evolution);
+      worldStore.impactsParts.waterLevel?.children.forEach((child) => {
+        child.visible = child.name === levelFactory;
+      });
+      break;
+    case "rocks":
+      const levelRocks = getLevel(evolution);
+      worldStore.impactsParts.waterLevel?.children.forEach((child) => {
+        child.visible = child.name === levelRocks;
+      });
+      break;
+    default:
+      break;
+  }
+}
+
+function getLevel(evolution: number) {
+  if (evolution >= 75) return "high";
+  if (evolution >= 50) return "mid";
+  if (evolution >= 25) return "low";
+  return "normal";
 }
 
 function getCurrentState(

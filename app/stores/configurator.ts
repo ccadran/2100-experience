@@ -1,4 +1,4 @@
-import type { userConfigParams } from "~/types/config";
+import type { UserConfigType, worldImpactsType } from "~/types/config";
 
 export const useConfig = defineStore("useConfig", () => {
   const formParams = {
@@ -62,7 +62,7 @@ export const useConfig = defineStore("useConfig", () => {
     },
   };
 
-  const worldImpacts = {
+  const worldImpacts: worldImpactsType = {
     fog: {
       name: "fog",
       value: 0,
@@ -105,7 +105,7 @@ export const useConfig = defineStore("useConfig", () => {
     },
   };
 
-  const userConfig: Partial<userConfigParams> = {};
+  const userConfig: Partial<UserConfigType> = {};
 
   const worldStateSteps: any[] = [];
 
