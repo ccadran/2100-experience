@@ -13,6 +13,7 @@ import { useSocket } from "~/composables/useSocket";
 import { useSocketHandler } from "~/composables/useSocketHandler";
 import QRCode from "qrcode";
 import CloudsTransition from "~/webgl/scene/Clouds";
+import gsap from "gsap";
 
 const { connect, joinRoom, sendAction, on } = useSocket();
 const { listenForUpdates } = useSocketHandler();
@@ -24,8 +25,55 @@ const isDebug = ref<boolean>(true);
 const id = Math.random().toString(36).substring(2, 10);
 const roomId = id;
 
+const loaderProgress = ref<HTMLElement>();
+const webglContainer = ref<HTMLElement>();
+
+const isSceneLoaded = ref<boolean>(false);
+
+async function loaderAnim() {
+  return gsap
+    .timeline({
+      defaults: { ease: "power1.inOut" },
+    })
+    .to(loaderProgress.value!, { width: "19%" })
+    .to(
+      loaderProgress.value!,
+      { width: "42%", backgroundColor: "var(--pink)" },
+      ">0.3"
+    )
+    .to(
+      loaderProgress.value!,
+      {
+        width: "84%",
+        backgroundColor: "var(--yellow)",
+      },
+      ">0.3"
+    );
+}
+
+function completeLoader() {
+  gsap
+    .timeline({
+      onComplete() {
+        uiStore.isLoaded = true;
+      },
+    })
+    .to(loaderProgress.value!, {
+      width: "100%",
+      backgroundColor: "var(--green)",
+    })
+    .fromTo(webglContainer.value!, { opacity: 0 }, { opacity: 1, duration: 2 });
+}
+
 onMounted(async () => {
-  await initScene();
+  const tl = loaderAnim();
+
+  isSceneLoaded.value = true;
+
+  await Promise.all([initScene(), tl.then()]);
+
+  completeLoader();
+
   uiStore.cloudsTransition = new CloudsTransition();
 
   // setTimeout(() => {
@@ -33,7 +81,6 @@ onMounted(async () => {
   //   //   sceneTransition();
   // }, 500);
 
-  uiStore.isLoaded = true;
   listenForUpdates();
   if (!isDebug) {
     connect();
@@ -118,24 +165,32 @@ function zoom(direction: string) {
   <main>
     <div class="loader">
       <div class="logo">
-        <img src="/assets/logo.webp" alt="" />
+        <img src="/images/logo.webp" alt="" />
       </div>
       <div class="loader-progress">
-        <div class="inner"></div>
+        <div class="inner" ref="loaderProgress"></div>
       </div>
     </div>
     <div class="clouds-transition">
-      <img class="cloud" src="/assets/cloud.webp" alt="" />
-      <img class="cloud" src="/assets/cloud.webp" alt="" />
-      <img class="cloud" src="/assets/cloud.webp" alt="" />
-      <img class="cloud" src="/assets/cloud.webp" alt="" />
+      <div class="cloud">
+        <img src="/images/cloud.webp" alt="" />
+      </div>
+      <div class="cloud">
+        <img src="/images/cloud.webp" alt="" />
+      </div>
+      <div class="cloud">
+        <img src="/images/cloud.webp" alt="" />
+      </div>
+      <div class="cloud">
+        <img src="/images/cloud.webp" alt="" />
+      </div>
     </div>
     <!-- <section class="loader"></section> -->
+    <div class="webgl" ref="webglContainer">
+      <canvas></canvas>
+    </div>
   </main>
-  <!-- <div class="webgl">
-    <canvas></canvas>
-  </div>
-  <section v-if="isDebug">
+  <!--<section v-if="isDebug">
     <transition>
       <div class="loader" v-if="!uiStore.isLoaded">
         <h1>2100 currently loading...</h1>
@@ -278,9 +333,10 @@ function zoom(direction: string) {
 main {
   height: 100vh;
   width: 100vw;
+
   position: fixed;
   > .loader {
-    z-index: 1;
+    z-index: 2;
     position: absolute;
     top: 50%;
     left: 50%;
@@ -320,7 +376,7 @@ main {
       );
       > .inner {
         border-radius: 16px;
-        width: 20%;
+        width: 0%;
         height: 100%;
         background-color: var(--blue);
         box-shadow: 0 -2px 4px 0 rgba(0, 0, 0, 0.25) inset,
@@ -332,31 +388,47 @@ main {
     }
   }
 }
-.clouds-transition {
+.webgl {
   height: 100vh;
   width: 100vw;
   position: fixed;
   z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+}
+.clouds-transition {
+  height: 100vh;
+  width: 100vw;
+  position: fixed;
+  z-index: 1;
   top: 0;
   pointer-events: none;
+
   > .cloud {
     position: absolute;
-    width: 130vw;
+    width: 150vw;
+    height: 100%;
     &:nth-of-type(1) {
-      left: -16%;
+      left: -40%;
+      top: -22%;
     }
     &:nth-of-type(2) {
-      right: -17%;
+      right: -46%;
       top: -37%;
       transform: rotate(180deg);
     }
     &:nth-of-type(3) {
-      left: -50%;
-      bottom: -50%;
+      left: -39%;
+      bottom: -31%;
     }
     &:nth-of-type(4) {
       left: 30%;
       bottom: -20%;
+    }
+    > img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
     }
   }
 }
