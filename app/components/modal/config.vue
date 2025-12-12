@@ -7,7 +7,10 @@ const modal2 = ref<HTMLElement>();
 const modal3 = ref<HTMLElement>();
 const mascot = ref<HTMLElement>();
 
-function animModals() {
+const isModal2revealed = ref<boolean>(false);
+const isModal3revealed = ref<boolean>(false);
+
+function revealContainer() {
   gsap.set(modals.value!, { display: "flex" });
   gsap
     .timeline({ defaults: { ease: "cubic-bezier(0.25, 0.95, 0, 1)" } })
@@ -17,22 +20,55 @@ function animModals() {
       { rotation: 30, opacity: 0 },
       { rotation: 0, opacity: 1 },
       0
-    )
-    .fromTo(
-      modal2.value!,
-      { x: "150%", rotation: 0 },
-      { x: "0%", rotation: -4 },
-      1
-    )
-    .fromTo(
-      modal3.value!,
-      { x: "150%", rotation: 0 },
-      { x: "0%", rotation: 4 },
-      2
     );
 }
 
-defineExpose({ animModals });
+function revealModal2() {
+  gsap.fromTo(
+    modal2.value!,
+    { x: "150%", rotation: 0 },
+    {
+      x: "0%",
+      rotation: -4,
+      onComplete() {
+        isModal2revealed.value = true;
+      },
+    }
+  );
+}
+
+function revealModal3() {
+  gsap.fromTo(
+    modal3.value!,
+    { x: "150%", rotation: 0 },
+    {
+      x: "0%",
+      rotation: 4,
+      onComplete() {
+        isModal3revealed.value = true;
+      },
+    }
+  );
+}
+
+function hideModals() {
+  const hideTl = gsap.timeline({
+    defaults: { ease: "cubic-bezier(0.25, 0.95, 0, 1)" },
+    overwrite: true,
+  });
+
+  if (isModal3revealed.value) {
+    hideTl.add(gsap.to(modal3.value!, { x: "150%" }), 0);
+  }
+  if (isModal2revealed.value) {
+    hideTl.add(gsap.to(modal2.value!, { x: "150%" }), 0.05);
+  }
+  hideTl
+    .to(modals.value!, { x: "150%" }, 0.125)
+    .to(mascot.value!, { rotation: 30, opacity: 0 }, 0.125);
+}
+
+defineExpose({ revealContainer, revealModal2, revealModal3, hideModals });
 </script>
 
 <template>
@@ -109,6 +145,8 @@ defineExpose({ animModals });
     width: auto;
     height: 28vh;
     aspect-ratio: 459/334;
+    left: 50%;
+    transform: translateX(-50%);
     z-index: -1;
     > img {
       width: 100%;

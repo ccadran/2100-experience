@@ -58,21 +58,24 @@ async function loaderAnim() {
 }
 
 async function completeLoader() {
-  return gsap
-    .timeline()
-    .to(loaderProgress.value!, {
-      width: "100%",
-      backgroundColor: "var(--green)",
-      onComplete: () => {
-        uiStore.isLoaded = true;
-      },
-    })
-    .fromTo(webglContainer.value!, { opacity: 0 }, { opacity: 1, duration: 1 });
+  return gsap.timeline().to(loaderProgress.value!, {
+    width: "100%",
+    backgroundColor: "var(--green)",
+    onComplete: () => {
+      uiStore.isLoaded = true;
+    },
+  });
 }
 
 async function revealQr() {
   return gsap
     .timeline({ defaults: { duration: 0.5 } })
+    .fromTo(
+      webglContainer.value!,
+      { opacity: 0 },
+      { opacity: 1, duration: 1 },
+      0
+    )
     .to(
       appLogo.value!,
       { top: "100px", width: "24vw", ease: "power1.inOut" },
@@ -121,11 +124,30 @@ watch(
       await delay(1000);
       revealMap();
       await delay(1400);
-      await modalPhone.value.revealModal();
-      await delay(600);
-      await modalPhone.value.hideModal();
-      await delay(1000);
-      await modalConfig.value.animModals();
+      animConfigModals();
+    }
+  }
+);
+
+async function animConfigModals() {
+  await modalPhone.value.revealModal();
+  await delay(600);
+  await modalPhone.value.hideModal();
+  await delay(1000);
+  await modalConfig.value.revealContainer();
+  await delay(500);
+  if (uiStore.isFormValidated) return;
+  await modalConfig.value.revealModal2();
+  await delay(500);
+  if (uiStore.isFormValidated) return;
+  await modalConfig.value.revealModal3();
+}
+
+watch(
+  () => uiStore.isFormValidated,
+  async (newValue) => {
+    if (newValue) {
+      modalConfig.value.hideModals();
     }
   }
 );
@@ -140,19 +162,10 @@ onMounted(async () => {
   await Promise.all([initScene(), tl.then()]);
 
   uiStore.cloudsTransition = new CloudsTransition();
-  console.log("before______");
+
   await completeLoader();
-  console.log("after______");
 
   await revealQr();
-
-  await delay(1000);
-
-  // setTimeout(() => {
-  //   uiStore.cloudsTransition?.showClouds();
-  //   //   sceneTransition();
-  // }, 500);
-
   listenForUpdates();
 });
 const worldStore = useWorld();
@@ -189,23 +202,15 @@ const userData = {
   energy: 100,
   clothes: 90,
 };
-
-const zoomState = ref<number>(0);
-
-function zoom(direction: string) {
-  if (direction === "up") {
-    zoomState.value += 1;
-  } else {
-    zoomState.value -= 1;
-  }
-  zoomState.value = Math.max(zoomState.value, -10);
-  zoomState.value = Math.min(zoomState.value, 10);
-
-  handleCameraZoom(zoomState.value);
-}
 </script>
 
 <template>
+  <button
+    @click="handleFormValidations(userData)"
+    style="position: fixed; top: 0; z-index: 2"
+  >
+    FORM validation
+  </button>
   <main>
     <div class="intro">
       <div class="logo" ref="appLogo">
