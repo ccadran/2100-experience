@@ -106,6 +106,8 @@ export const useConfig = defineStore("useConfig", () => {
 
   const currentStep = ref<number>(0);
 
+  const isFormValidated = ref<boolean>(false);
+
   return {
     formParams,
     userConfig,
@@ -115,5 +117,6 @@ export const useConfig = defineStore("useConfig", () => {
     worldStateSteps,
     objectsData,
     currentStep,
+    isFormValidated,
   };
 });

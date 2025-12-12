@@ -20,6 +20,7 @@ const { connect, joinRoom, sendAction, on } = useSocket();
 const { listenForUpdates } = useSocketHandler();
 
 const uiStore = useUi();
+const configStore = useConfig();
 
 const isDebug = ref<boolean>(true);
 
@@ -136,15 +137,15 @@ async function animConfigModals() {
   await delay(1000);
   await modalConfig.value.revealContainer();
   await delay(500);
-  if (uiStore.isFormValidated) return;
+  if (configStore.isFormValidated) return;
   await modalConfig.value.revealModal2();
   await delay(500);
-  if (uiStore.isFormValidated) return;
+  if (configStore.isFormValidated) return;
   await modalConfig.value.revealModal3();
 }
 
 watch(
-  () => uiStore.isFormValidated,
+  () => configStore.isFormValidated,
   async (newValue) => {
     if (newValue) {
       modalConfig.value.hideModals();
@@ -153,6 +154,9 @@ watch(
 );
 
 onMounted(async () => {
+  // return;
+  console.log("______");
+
   connectToWsServer();
 
   const tl = loaderAnim();
@@ -168,7 +172,6 @@ onMounted(async () => {
   await revealQr();
   listenForUpdates();
 });
-const worldStore = useWorld();
 
 function connectToWsServer() {
   nextTick(() => {
@@ -211,6 +214,9 @@ const userData = {
   >
     FORM validation
   </button>
+  <button @click="moveToStep(2)" style="position: fixed; top: 0; z-index: 2">
+    next step
+  </button>
   <main>
     <div class="intro">
       <div class="logo" ref="appLogo">
@@ -230,6 +236,7 @@ const userData = {
     </div>
     <ModalPhone ref="modalPhone" />
     <ModalConfig ref="modalConfig" />
+    <Timeline />
 
     <!-- <section class="loader"></section> -->
     <div class="webgl" ref="webglContainer">

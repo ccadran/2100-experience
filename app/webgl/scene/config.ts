@@ -246,7 +246,7 @@ export function handleFormValidations(userData: UserConfigType) {
   const configStore = useConfig();
   const finalUserData: any = {};
 
-  uiStore.isFormValidated = true;
+  configStore.isFormValidated = true;
   const worldStore = useWorld();
   worldStore.camera?.entryAnim();
 
