@@ -27,6 +27,7 @@ const loaderContainer = ref<HTMLElement>();
 const appLogo = ref<HTMLElement>();
 const qrCode = ref<HTMLElement>();
 const qrCodeText = ref<HTMLElement>();
+const modalPhone = ref();
 
 const webglContainer = ref<HTMLElement>();
 
@@ -138,6 +139,8 @@ onMounted(async () => {
 
   await revealQr();
 
+  modalPhone.value.revealModal();
+
   // setTimeout(() => {
   //   uiStore.cloudsTransition?.showClouds();
   //   //   sceneTransition();
@@ -213,7 +216,7 @@ function zoom(direction: string) {
         pour te connecter
       </p>
     </div>
-    <ModalsPhone key="modalPhone" />
+    <ModalPhone ref="modalPhone" />
 
     <!-- <section class="loader"></section> -->
     <div class="webgl" ref="webglContainer">

@@ -1,16 +1,37 @@
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+import gsap from "gsap";
+
+const modalPhone = ref<HTMLElement>();
+const mascot = ref<HTMLElement>();
+
+function revealModal() {
+  gsap.set(modalPhone.value!, { display: "flex" });
+  gsap.set(mascot.value!, { display: "flex" });
+  gsap
+    .timeline()
+    .fromTo(
+      modalPhone.value!,
+      { opacity: 0, rotate: -30 },
+      { opacity: 1, rotate: 0 }
+    )
+    .fromTo(mascot.value!, { y: "100%" }, { y: "0%" });
+}
+
+defineExpose({ revealModal });
+</script>
 
 <template>
-  <div class="modalsPhone">
+  <div class="modalPhone" ref="modalPhone">
     <p>
       Ton téléphone a <br />
       rejoint la partie
     </p>
   </div>
+  <img ref="mascot" class="mascot" src="/images/mascot.webp" alt="" />
 </template>
 
 <style lang="scss">
-.modalsPhone {
+.modalPhone {
   z-index: 2;
   position: absolute;
   left: 50%;
@@ -19,7 +40,6 @@
   padding: 60px;
   border-radius: 32px;
   min-width: 28vw;
-
   background: var(
     --white-gradient,
     linear-gradient(
@@ -33,7 +53,8 @@
     -26px 82px 24px 0 rgba(0, 0, 0, 0), -17px 52px 22px 0 rgba(0, 0, 0, 0),
     -9px 29px 19px 0 rgba(0, 0, 0, 0.01), -4px 13px 14px 0 rgba(0, 0, 0, 0.01),
     -1px 3px 8px 0 rgba(0, 0, 0, 0.02);
-  display: flex;
+  display: none;
+
   justify-content: center;
   > p {
     font-size: 1.6vw;
@@ -51,5 +72,13 @@
     top: -50%;
     transform: scale(0.8);
   }
+}
+.mascot {
+  display: none;
+  z-index: 2;
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
 }
 </style>
