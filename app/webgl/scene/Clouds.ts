@@ -51,21 +51,25 @@ export default class CloudsTransition {
     // Timeline pour hide
     this.hideTimeline = gsap.timeline({ paused: true });
     this.hideTimeline
-      .to(this.clouds[0]!, { x: "-100%", duration: 0.75, ease: "power2.in" }, 0)
+      .to(
+        this.clouds[0]!,
+        { x: "-100%", duration: 0.75, ease: "cubic-bezier(0.25, 0.95, 0, 1)" },
+        0
+      )
       .to(
         this.clouds[1]!,
-        { x: "100%", duration: 0.75, ease: "power2.in" },
+        { y: "-100%", duration: 0.75, ease: "cubic-bezier(0.25, 0.95, 0, 1)" },
         0.15
       )
       .to(
         this.clouds[2]!,
-        { x: "-120%", duration: 0.75, ease: "power2.in" },
-        0.25
+        { x: "-120%", duration: 0.75, ease: "cubic-bezier(0.25, 0.95, 0, 1)" },
+        0.2
       )
       .to(
         this.clouds[3]!,
-        { x: "-100%", duration: 0.75, ease: "power2.in" },
-        0.3
+        { x: "100%", duration: 0.75, ease: "cubic-bezier(0.25, 0.95, 0, 1)" },
+        0.25
       );
   }
 

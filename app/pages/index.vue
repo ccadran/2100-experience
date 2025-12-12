@@ -25,12 +25,14 @@ const isDebug = ref<boolean>(true);
 const loaderProgress = ref<HTMLElement>();
 const loaderContainer = ref<HTMLElement>();
 const appLogo = ref<HTMLElement>();
-const qrCodeContainer = ref<HTMLElement>();
+const qrCode = ref<HTMLElement>();
+const qrCodeText = ref<HTMLElement>();
 
 const webglContainer = ref<HTMLElement>();
 
 const isSceneLoaded = ref<boolean>(false);
 
+const webSocketStore = useWebSocket();
 async function loaderAnim() {
   return gsap
     .timeline({
@@ -65,16 +67,17 @@ async function completeLoader() {
     .fromTo(webglContainer.value!, { opacity: 0 }, { opacity: 1, duration: 1 });
 }
 
-function revealQr() {
-  const qrCode = document.querySelector(".qrcode");
-  const qrCodeText = document.querySelector(".qr-text");
-
-  gsap
+async function revealQr() {
+  return gsap
     .timeline({ defaults: { duration: 0.5 } })
-    .to(appLogo.value!, { top: "80px", width: "24vw", ease: "power1.inOut" }, 0)
+    .to(
+      appLogo.value!,
+      { top: "100px", width: "24vw", ease: "power1.inOut" },
+      0
+    )
     .to(loaderContainer.value!, { opacity: 0 }, 0)
     .fromTo(
-      qrCode,
+      qrCode.value!,
       {
         scale: 0.3,
         opacity: 0,
@@ -88,11 +91,41 @@ function revealQr() {
       },
       0.15
     )
-    .to(qrCodeText, { opacity: 1 }, 0);
+    .to(qrCodeText.value!, { opacity: 1 }, 0);
 }
+
+async function revealMap() {
+  return gsap
+    .timeline({
+      defaults: { ease: "cubic-bezier(0.25, 0.95, 0, 1)", duration: 0.75 },
+      onStart() {
+        uiStore.cloudsTransition?.hideClouds();
+      },
+    })
+    .to(qrCode.value!, {
+      scale: 0.6,
+      opacity: 0,
+      rotation: -90,
+    })
+    .to(qrCodeText.value!, { opacity: 0 }, 0)
+    .to(appLogo.value!, { top: 0, width: "18vw" }, 0);
+}
+
+watch(
+  () => webSocketStore.isRoomFull,
+  (newValue) => {
+    if (newValue) {
+      setTimeout(() => {
+        revealMap();
+      }, 1000);
+    }
+  }
+);
 
 onMounted(async () => {
   connectToWsServer();
+  uiStore.cloudsTransition = new CloudsTransition();
+
   const tl = loaderAnim();
 
   isSceneLoaded.value = true;
@@ -103,9 +136,7 @@ onMounted(async () => {
   await completeLoader();
   console.log("after______");
 
-  revealQr();
-
-  uiStore.cloudsTransition = new CloudsTransition();
+  await revealQr();
 
   // setTimeout(() => {
   //   uiStore.cloudsTransition?.showClouds();
@@ -115,12 +146,12 @@ onMounted(async () => {
   listenForUpdates();
 });
 const worldStore = useWorld();
-const webSocketStore = useWebSocket();
 
 function connectToWsServer() {
   nextTick(() => {
     const id = Math.random().toString(36).substring(2, 10);
-    const roomId = id;
+    // const roomId = id;
+    const roomId = "ROOM_1";
     connect();
     on("connect", () => {
       joinRoom(roomId);
@@ -185,10 +216,10 @@ function zoom(direction: string) {
         <div class="inner" ref="loaderProgress"></div>
       </div>
 
-      <div class="qrcode">
+      <div class="qrcode" ref="qrCode">
         <canvas class="inner"></canvas>
       </div>
-      <p class="qr-text">
+      <p class="qr-text" ref="qrCodeText">
         Scan le code QR <br />
         pour te connecter
       </p>
@@ -213,150 +244,12 @@ function zoom(direction: string) {
       <canvas></canvas>
     </div>
   </main>
-  <!--<section v-if="isDebug">
-    <transition>
-      <div class="loader" v-if="!uiStore.isLoaded">
-        <h1>2100 currently loading...</h1>
-      </div>
-    </transition>
-    <transition>
-      <div class="intro" v-if="!webSocketStore.isConnected && uiStore.isLoaded">
-        <button @click="handleWsCo">Co to server</button>
-      </div>
-    </transition>
-    <transition>
-      <div
-        class="form"
-        v-if="webSocketStore.isConnected && !uiStore.isFormValidated"
-      >
-        <div class="buttons">
-          <button @click="revealElements">formstep validate</button>
-          <button @click="handleFormValidations(userData)">
-            VALIDATE FORM
-          </button>
-        </div>
-      </div>
-    </transition>
-    <transition>
-      <div class="experience" v-if="uiStore.isFormValidated">
-        <div class="controls">
-          <div class="step">
-            <button @click="moveToStep('previous')">previous</button>
-            <button @click="moveToStep('next')">next</button>
-          </div>
-          <div class="camera">
-            <div class="direction">
-              <button
-                @mousedown="handleCameraMovements('forward', 5)"
-                @mouseup="handleCameraMovements('forward', 0)"
-              >
-                forward
-              </button>
-              <button
-                @mousedown="handleCameraMovements('back', 5)"
-                @mouseup="handleCameraMovements('back', 0)"
-              >
-                back
-              </button>
-              <button
-                @mousedown="handleCameraMovements('left', 5)"
-                @mouseup="handleCameraMovements('left', 0)"
-              >
-                left
-              </button>
-              <button
-                @mousedown="handleCameraMovements('right', 5)"
-                @mouseup="handleCameraMovements('right', 0)"
-              >
-                right
-              </button>
-            </div>
-            <div class="zoom">
-              <button @mousedown="zoom('down')">down</button>
-              <button @mousedown="zoom('up')">up</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </transition>
-    
-  </section> -->
-  <section v-if="!isDebug">
-    <transition>
-      <div class="loader" v-if="!uiStore.isLoaded">
-        <h1>2100 currently loading...</h1>
-      </div>
-    </transition>
-    <transition>
-      <div class="intro" v-if="!webSocketStore.isRoomFull && uiStore.isLoaded">
-        <h1>SCAN LE QR CODE POUR COMMENCER L'EXPERIENCE</h1>
-        <canvas class="qrcode" style="width: 500px; height: 500px"></canvas>
-      </div>
-    </transition>
-    <transition>
-      <div
-        class="form"
-        v-if="webSocketStore.isRoomFull && !uiStore.isFormValidated"
-      >
-        <h2>REMPLISSER LE FORM SUR VORE PHONE</h2>
-        <div class="buttons">
-          <button @click="revealElements">formstep validate</button>
-          <button @click="handleFormValidations(userData)">
-            VALIDATE FORM
-          </button>
-        </div>
-      </div>
-    </transition>
-    <transition>
-      <div class="experience" v-if="uiStore.isFormValidated">
-        <div class="controls">
-          <div class="step">
-            <button @click="moveToStep('previous')">previous</button>
-            <button @click="moveToStep('next')">next</button>
-          </div>
-          <div class="camera">
-            <div class="direction">
-              <button
-                @mousedown="handleCameraMovements('forward', 5)"
-                @mouseup="handleCameraMovements('forward', 0)"
-              >
-                forward
-              </button>
-              <button
-                @mousedown="handleCameraMovements('back', 5)"
-                @mouseup="handleCameraMovements('back', 0)"
-              >
-                back
-              </button>
-              <button
-                @mousedown="handleCameraMovements('left', 5)"
-                @mouseup="handleCameraMovements('left', 0)"
-              >
-                left
-              </button>
-              <button
-                @mousedown="handleCameraMovements('right', 5)"
-                @mouseup="handleCameraMovements('right', 0)"
-              >
-                right
-              </button>
-            </div>
-            <div class="zoom">
-              <button @mousedown="zoom('down')">down</button>
-              <button @mousedown="zoom('up')">up</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </transition>
-  </section>
 </template>
 
 <style lang="scss">
 main {
   height: 100vh;
   width: 100vw;
-
   position: fixed;
   > .intro {
     z-index: 2;
@@ -419,7 +312,7 @@ main {
       left: 50%;
       transform: translate(-50%, -50%);
       opacity: 0;
-      width: 19vw;
+      width: 15vw;
       height: auto;
       aspect-ratio: 1/1;
       box-shadow: 0 1.8px 7.2px 0 rgba(0, 0, 0, 0.25);
@@ -432,7 +325,7 @@ main {
       }
     }
     > .qr-text {
-      font-size: 48px;
+      font-size: 2.5vw;
       letter-spacing: 0.96px;
       left: 50%;
       position: absolute;
@@ -451,6 +344,15 @@ main {
   z-index: 0;
   pointer-events: none;
   opacity: 0;
+  padding: 30px 30px 10vh;
+  box-sizing: border-box;
+
+  > canvas {
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 44px;
+    object-fit: cover;
+  }
 }
 .clouds-transition {
   height: 100vh;
