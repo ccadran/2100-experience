@@ -3,14 +3,25 @@ import gsap from "gsap";
 
 const modalPhone = ref<HTMLElement>();
 const mascot = ref<HTMLElement>();
+const revealTl = ref<gsap.core.Timeline>();
 
-function revealModal() {
+async function revealModal() {
   gsap.set(modalPhone.value!, { display: "flex" });
   gsap.set(mascot.value!, { display: "flex" });
-  gsap
+
+  await revealTl.value?.play().then();
+}
+
+async function hideModal() {
+  await revealTl.value?.reverse(0).then();
+}
+
+onMounted(() => {
+  revealTl.value = gsap
     .timeline({
       defaults: { ease: "cubic-bezier(0.25, 0.95, 0, 1)" },
       duration: 1,
+      paused: true,
     })
     .fromTo(
       modalPhone.value!,
@@ -19,9 +30,9 @@ function revealModal() {
       0
     )
     .fromTo(mascot.value!, { y: "100%" }, { y: "20%" }, 0);
-}
+});
 
-defineExpose({ revealModal });
+defineExpose({ revealModal, hideModal });
 </script>
 
 <template>

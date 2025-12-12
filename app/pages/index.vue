@@ -120,7 +120,9 @@ watch(
       await delay(1000);
       revealMap();
       await delay(1400);
-      modalPhone.value.revealModal();
+      await modalPhone.value.revealModal();
+      await delay(600);
+      await modalPhone.value.hideModal();
     }
   }
 );
