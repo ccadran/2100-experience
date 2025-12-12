@@ -1,7 +1,12 @@
 <script lang="ts" setup>
+import gsap from "gsap";
+
 const configStore = useConfig();
 const worldYears = ref<any[]>();
 const currentYear = ref<number>();
+const yearsStepsRefs = ref<HTMLElement[]>([]);
+
+let lastTarget: number | null = null;
 
 watch(
   () => configStore.currentStep,
@@ -9,7 +14,7 @@ watch(
     console.log(newValue);
 
     currentYear.value = worldYears.value![newValue];
-    console.log(currentYear.value);
+    slideTimeline(newValue);
   }
 );
 
@@ -22,32 +27,63 @@ watch(
     }
   }
 );
+
+function slideTimeline(target: number) {
+  const slideTl = gsap.timeline({});
+
+  if (lastTarget) {
+    const lastStep = yearsStepsRefs.value![lastTarget] as HTMLElement;
+    const lastStepDate = lastStep.querySelector(".inner");
+    const lastStepIndicator = lastStep.querySelector(".indicator");
+
+    slideTl.add(
+      gsap
+        .timeline()
+        .to(lastStepDate, { scale: 0.84 })
+        .to(lastStepIndicator, { backgroundColor: "var(--grey)" }),
+      0
+    );
+  }
+  const step = yearsStepsRefs.value![target] as HTMLElement;
+  const stepDate = step.querySelector(".inner");
+  const stepIndicator = step.querySelector(".indicator");
+  slideTl
+    .to(stepDate, { scale: 1 }, 0)
+    .to(stepIndicator, { backgroundColor: "black" }, 0);
+
+  lastTarget = target;
+}
 </script>
 
 <template>
   <div class="timeline-container">
     <div class="timeline">
-      <div class="step" v-for="year in worldYears">
-        <div
-          class="date-container"
-          :class="{ '-active': year === currentYear }"
-        >
+      <div
+        class="step"
+        v-for="(year, index) in worldYears"
+        :ref="
+          (el) => {
+            if (el) yearsStepsRefs[index] = el as HTMLElement;
+          }
+        "
+      >
+        <div class="date-container">
           <div class="inner">
             <p>{{ year }}</p>
           </div>
-          <div class="separator"></div>
+          <div class="indicator"></div>
         </div>
-        <div class="separator"></div>
+        <div class="indicator"></div>
       </div>
     </div>
   </div>
 </template>
 
 <style lang="scss">
-.separator {
+.indicator {
   height: 14px;
   width: 4px;
-  background-color: black;
+  background-color: var(--grey);
   border-radius: 50%;
 }
 .timeline-container {
@@ -70,7 +106,9 @@ watch(
         justify-content: space-between;
         align-items: center;
         gap: 16px;
+
         > .inner {
+          scale: 0.84;
           padding: 32px 48px;
           border-radius: 32px;
           display: flex;
@@ -96,7 +134,7 @@ watch(
           }
         }
       }
-      > .separator {
+      > .indicator {
         margin: 0 30px;
       }
     }

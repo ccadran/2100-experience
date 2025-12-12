@@ -214,7 +214,10 @@ const userData = {
   >
     FORM validation
   </button>
-  <button @click="moveToStep(2)" style="position: fixed; top: 0; z-index: 2">
+  <button
+    @click="moveToStep('next')"
+    style="position: fixed; top: 0; z-index: 2"
+  >
     next step
   </button>
   <main>
