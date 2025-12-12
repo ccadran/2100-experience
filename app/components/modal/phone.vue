@@ -54,7 +54,7 @@ defineExpose({ revealModal, hideModal });
   transform: translate(-50%, -50%);
   padding: 60px;
   border-radius: 32px;
-  min-width: 28vw;
+  width: 28vw;
   background: var(
     --white-gradient,
     linear-gradient(
@@ -89,7 +89,8 @@ defineExpose({ revealModal, hideModal });
   }
 }
 .mascot {
-  display: none;
+  // display: none;
+
   z-index: 2;
   position: absolute;
   bottom: 0;

@@ -128,6 +128,7 @@ watch(
 );
 
 onMounted(async () => {
+  return;
   connectToWsServer();
 
   const tl = loaderAnim();
@@ -220,7 +221,8 @@ function zoom(direction: string) {
         pour te connecter
       </p>
     </div>
-    <ModalPhone ref="modalPhone" />
+    <!-- <ModalPhone ref="modalPhone" /> -->
+    <ModalConfig />
 
     <!-- <section class="loader"></section> -->
     <div class="webgl" ref="webglContainer">
