@@ -124,7 +124,6 @@ watch(
 
 onMounted(async () => {
   connectToWsServer();
-  uiStore.cloudsTransition = new CloudsTransition();
 
   const tl = loaderAnim();
 
@@ -132,6 +131,7 @@ onMounted(async () => {
 
   await Promise.all([initScene(), tl.then()]);
 
+  uiStore.cloudsTransition = new CloudsTransition();
   console.log("before______");
   await completeLoader();
   console.log("after______");
@@ -180,17 +180,6 @@ const userData = {
   clothes: 90,
 };
 
-// const roomId = "ROOM_1";
-
-function handleWsCo() {
-  connect();
-  on("connect", () => {
-    joinRoom(roomId);
-    console.log("test");
-  });
-  console.log(webSocketStore.isConnected);
-}
-
 const zoomState = ref<number>(0);
 
 function zoom(direction: string) {
@@ -224,24 +213,25 @@ function zoom(direction: string) {
         pour te connecter
       </p>
     </div>
+    <ModalsPhone key="modalPhone" />
 
-    <div class="clouds-transition">
-      <div class="cloud">
-        <img src="/images/cloud.webp" alt="" />
-      </div>
-      <div class="cloud">
-        <img src="/images/cloud.webp" alt="" />
-      </div>
-      <div class="cloud">
-        <img src="/images/cloud.webp" alt="" />
-      </div>
-      <div class="cloud">
-        <img src="/images/cloud.webp" alt="" />
-      </div>
-    </div>
     <!-- <section class="loader"></section> -->
     <div class="webgl" ref="webglContainer">
       <canvas></canvas>
+    </div>
+    <div class="clouds-transition" key="clouds">
+      <div class="cloud">
+        <img src="/images/cloud.webp" alt="" />
+      </div>
+      <div class="cloud">
+        <img src="/images/cloud.webp" alt="" />
+      </div>
+      <div class="cloud">
+        <img src="/images/cloud.webp" alt="" />
+      </div>
+      <div class="cloud">
+        <img src="/images/cloud.webp" alt="" />
+      </div>
     </div>
   </main>
 </template>
@@ -279,7 +269,6 @@ main {
       height: 52px;
       padding: 10px;
       border-radius: 24px;
-      border: 2px solid transparent;
       box-shadow: 0 -2px 4px 0 rgba(0, 0, 0, 0.25) inset,
         -26px 82px 24px 0 rgba(0, 0, 0, 0), -17px 52px 22px 0 rgba(0, 0, 0, 0),
         -9px 29px 19px 0 rgba(0, 0, 0, 0.01),

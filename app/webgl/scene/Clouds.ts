@@ -26,7 +26,6 @@ export default class CloudsTransition {
 
     this.clouds = [cloud1, cloud2, cloud3, cloud4];
     this.cloudsContainer = cloudsContainer;
-    this.cloudsContainer.style.display = "block";
 
     // Timeline pour show
     this.showTimeline = gsap.timeline({ paused: true });
