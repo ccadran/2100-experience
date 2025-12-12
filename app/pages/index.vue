@@ -29,6 +29,7 @@ const appLogo = ref<HTMLElement>();
 const qrCode = ref<HTMLElement>();
 const qrCodeText = ref<HTMLElement>();
 const modalPhone = ref();
+const modalConfig = ref();
 
 const webglContainer = ref<HTMLElement>();
 
@@ -123,12 +124,13 @@ watch(
       await modalPhone.value.revealModal();
       await delay(600);
       await modalPhone.value.hideModal();
+      await delay(1000);
+      await modalConfig.value.animModals();
     }
   }
 );
 
 onMounted(async () => {
-  return;
   connectToWsServer();
 
   const tl = loaderAnim();
@@ -221,8 +223,8 @@ function zoom(direction: string) {
         pour te connecter
       </p>
     </div>
-    <!-- <ModalPhone ref="modalPhone" /> -->
-    <ModalConfig />
+    <ModalPhone ref="modalPhone" />
+    <ModalConfig ref="modalConfig" />
 
     <!-- <section class="loader"></section> -->
     <div class="webgl" ref="webglContainer">

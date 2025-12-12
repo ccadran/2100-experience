@@ -1,28 +1,63 @@
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+import gsap from "gsap";
+
+const modals = ref<HTMLElement>();
+const modal1 = ref<HTMLElement>();
+const modal2 = ref<HTMLElement>();
+const modal3 = ref<HTMLElement>();
+const mascot = ref<HTMLElement>();
+
+function animModals() {
+  gsap.set(modals.value!, { display: "flex" });
+  gsap
+    .timeline({ defaults: { ease: "cubic-bezier(0.25, 0.95, 0, 1)" } })
+    .fromTo(modals.value!, { x: "100%" }, { x: "0%" }, 0)
+    .fromTo(
+      mascot.value!,
+      { rotation: 30, opacity: 0 },
+      { rotation: 0, opacity: 1 },
+      0
+    )
+    .fromTo(
+      modal2.value!,
+      { x: "150%", rotation: 0 },
+      { x: "0%", rotation: -4 },
+      1
+    )
+    .fromTo(
+      modal3.value!,
+      { x: "150%", rotation: 0 },
+      { x: "0%", rotation: 4 },
+      2
+    );
+}
+
+defineExpose({ animModals });
+</script>
 
 <template>
-  <div class="modalConfig">
+  <div class="modalConfig" ref="modals">
     <div class="modals-container">
-      <div class="modal modal-1">
+      <div class="modal modal-1" ref="modal1">
         <p>
           %name attend que tu configures son monde. Fait le sur ton tel, il est
           impatient !
         </p>
       </div>
-      <div class="modal modal-2">
+      <div class="modal modal-2" ref="modal2">
         <p>
           %name observe chacun de tes choix… continue sur ton téléphone, il a
           hâte de découvrir le résultat !
         </p>
       </div>
-      <div class="modal modal-3">
+      <div class="modal modal-3" ref="modal3">
         <p>
           Pendant que tu configures son univers sur mobile, %name retient son
           souffle… surprends-le !"
         </p>
       </div>
     </div>
-    <div class="mascot">
+    <div class="mascot" ref="mascot">
       <img src="/images/mascot.webp" alt="" />
     </div>
   </div>
@@ -30,6 +65,7 @@
 
 <style lang="scss">
 .modalConfig {
+  display: none;
   position: absolute;
   bottom: 5vh;
   right: 60px;
