@@ -5,6 +5,10 @@ const configStore = useConfig();
 const worldYears = ref<any[]>();
 const currentYear = ref<number>();
 const yearsStepsRefs = ref<HTMLElement[]>([]);
+const timeline = ref<HTMLElement>();
+
+const stepWidth = ref<number>();
+const yearWidth = ref<number>();
 
 let lastTarget: number | null = null;
 
@@ -20,10 +24,24 @@ watch(
 
 watch(
   () => configStore.isFormValidated,
-  (newValue) => {
+  async (newValue) => {
     if (newValue) {
       worldYears.value = configStore.worldStateSteps.map((step) => step.year);
-      console.log(worldYears.value);
+      await nextTick(() => {
+        stepWidth.value =
+          yearsStepsRefs.value[configStore.currentStep]?.clientWidth;
+        yearWidth.value =
+          yearsStepsRefs.value[configStore.currentStep]?.querySelector(
+            ".inner"
+          )?.clientWidth;
+        const offset = yearWidth.value! / 2;
+        console.log(timeline.value);
+
+        timeline.value!.style.transform = `translate(-${offset}px)`;
+        console.log(timeline.value?.style.transform);
+      });
+
+      console.log(stepWidth.value);
     }
   }
 );
@@ -57,7 +75,7 @@ function slideTimeline(target: number) {
 
 <template>
   <div class="timeline-container">
-    <div class="timeline">
+    <div class="timeline" ref="timeline">
       <div
         class="step"
         v-for="(year, index) in worldYears"
@@ -88,6 +106,7 @@ function slideTimeline(target: number) {
 }
 .timeline-container {
   z-index: 2;
+  width: 100vw;
   position: absolute;
   bottom: 0;
   .timeline {
