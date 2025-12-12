@@ -14,6 +14,7 @@ import { useSocketHandler } from "~/composables/useSocketHandler";
 import QRCode from "qrcode";
 import CloudsTransition from "~/webgl/scene/Clouds";
 import gsap from "gsap";
+import { delay } from "~/webgl/utils";
 
 const { connect, joinRoom, sendAction, on } = useSocket();
 const { listenForUpdates } = useSocketHandler();
@@ -114,11 +115,12 @@ async function revealMap() {
 
 watch(
   () => webSocketStore.isRoomFull,
-  (newValue) => {
+  async (newValue) => {
     if (newValue) {
-      setTimeout(() => {
-        revealMap();
-      }, 1000);
+      await delay(1000);
+      revealMap();
+      await delay(1400);
+      modalPhone.value.revealModal();
     }
   }
 );
@@ -139,7 +141,7 @@ onMounted(async () => {
 
   await revealQr();
 
-  modalPhone.value.revealModal();
+  await delay(1000);
 
   // setTimeout(() => {
   //   uiStore.cloudsTransition?.showClouds();

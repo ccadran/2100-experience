@@ -8,13 +8,17 @@ function revealModal() {
   gsap.set(modalPhone.value!, { display: "flex" });
   gsap.set(mascot.value!, { display: "flex" });
   gsap
-    .timeline()
+    .timeline({
+      defaults: { ease: "cubic-bezier(0.25, 0.95, 0, 1)" },
+      duration: 1,
+    })
     .fromTo(
       modalPhone.value!,
       { opacity: 0, rotate: -30 },
-      { opacity: 1, rotate: 0 }
+      { opacity: 1, rotate: 0 },
+      0
     )
-    .fromTo(mascot.value!, { y: "100%" }, { y: "0%" });
+    .fromTo(mascot.value!, { y: "100%" }, { y: "20%" }, 0);
 }
 
 defineExpose({ revealModal });
