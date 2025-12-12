@@ -9,6 +9,7 @@ const timeline = ref<HTMLElement>();
 
 const stepWidth = ref<number>();
 const yearWidth = ref<number>();
+const currentTimelineTransform = ref<number>(0);
 
 let lastTarget: number | null = null;
 
@@ -34,40 +35,54 @@ watch(
           yearsStepsRefs.value[configStore.currentStep]?.querySelector(
             ".inner"
           )?.clientWidth;
-        const offset = yearWidth.value! / 2;
+        const offset = -yearWidth.value! / 2;
         console.log(timeline.value);
 
-        timeline.value!.style.transform = `translate(-${offset}px)`;
-        console.log(timeline.value?.style.transform);
+        timeline.value!.style.transform = `translate(${offset}px)`;
+        currentTimelineTransform.value += offset;
+        console.log(currentTimelineTransform.value);
       });
-
-      console.log(stepWidth.value);
     }
   }
 );
 
 function slideTimeline(target: number) {
-  const slideTl = gsap.timeline({});
+  const slideTl = gsap.timeline();
 
   if (lastTarget) {
     const lastStep = yearsStepsRefs.value![lastTarget] as HTMLElement;
     const lastStepDate = lastStep.querySelector(".inner");
+    const lastStepDateText = lastStepDate!.querySelector("p");
     const lastStepIndicator = lastStep.querySelector(".indicator");
 
     slideTl.add(
       gsap
         .timeline()
         .to(lastStepDate, { scale: 0.84 })
+        .to(lastStepDateText, { fontSize: "1.66vw", color: "var(--grey)" }, 0)
         .to(lastStepIndicator, { backgroundColor: "var(--grey)" }),
       0
     );
   }
+  if (lastTarget) {
+    if (target > lastTarget) {
+      currentTimelineTransform.value -= stepWidth.value!;
+    } else {
+      currentTimelineTransform.value += stepWidth.value!;
+    }
+  } else {
+    currentTimelineTransform.value -= stepWidth.value!;
+  }
+
   const step = yearsStepsRefs.value![target] as HTMLElement;
   const stepDate = step.querySelector(".inner");
+  const stepDateText = stepDate!.querySelector("p");
   const stepIndicator = step.querySelector(".indicator");
   slideTl
     .to(stepDate, { scale: 1 }, 0)
-    .to(stepIndicator, { backgroundColor: "black" }, 0);
+    .to(stepDateText, { fontSize: "1.75vw", color: "black" }, 0)
+    .to(stepIndicator, { backgroundColor: "black" }, 0)
+    .to(timeline.value!, { x: currentTimelineTransform.value }, 0);
 
   lastTarget = target;
 }
@@ -150,6 +165,7 @@ function slideTimeline(target: number) {
             -1px 3px 8px 0 rgba(0, 0, 0, 0.02);
           > p {
             font-size: 1.75vw;
+            color: var(--grey);
           }
         }
       }

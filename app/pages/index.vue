@@ -220,6 +220,12 @@ const userData = {
   >
     next step
   </button>
+  <button
+    @click="moveToStep('previous')"
+    style="position: fixed; top: 80px; z-index: 2"
+  >
+    previous step
+  </button>
   <main>
     <div class="intro">
       <div class="logo" ref="appLogo">
