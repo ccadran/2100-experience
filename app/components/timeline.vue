@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import gsap from "gsap";
+import { delay } from "~/webgl/utils";
 
 const configStore = useConfig();
 const worldYears = ref<any[]>();
@@ -40,7 +41,8 @@ watch(
 
         timeline.value!.style.transform = `translate(${offset}px)`;
         currentTimelineTransform.value += offset;
-        console.log(currentTimelineTransform.value);
+
+        entryTimeline();
       });
     }
   }
@@ -57,7 +59,7 @@ function slideTimeline(target: number) {
 
     slideTl.add(
       gsap
-        .timeline()
+        .timeline({ defaults: { ease: "cubic-bezier(0.25, 0.95, 0, 1)" } })
         .to(lastStepDate, { scale: 0.84 })
         .to(lastStepDateText, { fontSize: "1.66vw", color: "var(--grey)" }, 0)
         .to(lastStepIndicator, { backgroundColor: "var(--grey)" }),
@@ -70,7 +72,7 @@ function slideTimeline(target: number) {
     } else {
       currentTimelineTransform.value += stepWidth.value!;
     }
-  } else {
+  } else if (target !== 0) {
     currentTimelineTransform.value -= stepWidth.value!;
   }
 
@@ -85,6 +87,24 @@ function slideTimeline(target: number) {
     .to(timeline.value!, { x: currentTimelineTransform.value }, 0);
 
   lastTarget = target;
+}
+
+function entryTimeline() {
+  const dateStep = timeline.value!.querySelectorAll(".step");
+
+  gsap.fromTo(
+    dateStep,
+    { x: "100%", opacity: 0 },
+    {
+      x: "0%",
+      opacity: 1,
+      ease: "cubic-bezier(0.25, 0.95, 0, 1)",
+      stagger: 0.175,
+      onStart() {
+        gsap.delayedCall(0.6, () => slideTimeline(0));
+      },
+    }
+  );
 }
 </script>
 
