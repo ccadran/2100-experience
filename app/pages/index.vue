@@ -5,10 +5,9 @@ import {
   revealElements,
 } from "~/webgl/scene/config";
 import {
-  handleCameraMovements,
-  handleCameraZoom,
   moveToStep,
   sceneTransition,
+  goToCameraSpot,
 } from "~/webgl/scene/experience";
 import { useSocket } from "~/composables/useSocket";
 import { useSocketHandler } from "~/composables/useSocketHandler";
@@ -23,7 +22,8 @@ const uiStore = useUi();
 const isDebug = ref<boolean>(true);
 
 const id = Math.random().toString(36).substring(2, 10);
-const roomId = id;
+{/* const roomId = id; */}
+const roomId = "ROOM_1";
 
 onMounted(async () => {
   await initScene();
@@ -100,20 +100,20 @@ function handleWsCo() {
   console.log(webSocketStore.isConnected);
 }
 
-const zoomState = ref<number>(0);
+// const zoomState = ref<number>(0);
 
-function zoom(direction: string) {
-  if (direction === "up") {
-    zoomState.value += 1;
-  } else {
-    zoomState.value -= 1;
-  }
-  zoomState.value = Math.max(zoomState.value, -10);
-  zoomState.value = Math.min(zoomState.value, 10);
+// function zoom(direction: string) {
+//   if (direction === "up") {
+//     zoomState.value += 1;
+//   } else {
+//     zoomState.value -= 1;
+//   }
+//   zoomState.value = Math.max(zoomState.value, -10);
+//   zoomState.value = Math.min(zoomState.value, 10);
 
-  handleCameraZoom(zoomState.value);
-}
-</script>
+//   handleCameraZoom(zoomState.value);
+// }
+// </script>
 
 <template>
   <div class="webgl">
@@ -152,34 +152,9 @@ function zoom(direction: string) {
           </div>
           <div class="camera">
             <div class="direction">
-              <button
-                @mousedown="handleCameraMovements('forward', 5)"
-                @mouseup="handleCameraMovements('forward', 0)"
-              >
-                forward
-              </button>
-              <button
-                @mousedown="handleCameraMovements('back', 5)"
-                @mouseup="handleCameraMovements('back', 0)"
-              >
-                back
-              </button>
-              <button
-                @mousedown="handleCameraMovements('left', 5)"
-                @mouseup="handleCameraMovements('left', 0)"
-              >
-                left
-              </button>
-              <button
-                @mousedown="handleCameraMovements('right', 5)"
-                @mouseup="handleCameraMovements('right', 0)"
-              >
-                right
-              </button>
-            </div>
-            <div class="zoom">
-              <button @mousedown="zoom('down')">down</button>
-              <button @mousedown="zoom('up')">up</button>
+              <button @click="goToCameraSpot('0')">spot 1</button>
+              <button @click="goToCameraSpot('1')">spot 2</button>
+              <button @click="goToCameraSpot('2')">spot 3</button>
             </div>
           </div>
         </div>
@@ -227,34 +202,9 @@ function zoom(direction: string) {
           </div>
           <div class="camera">
             <div class="direction">
-              <button
-                @mousedown="handleCameraMovements('forward', 5)"
-                @mouseup="handleCameraMovements('forward', 0)"
-              >
-                forward
-              </button>
-              <button
-                @mousedown="handleCameraMovements('back', 5)"
-                @mouseup="handleCameraMovements('back', 0)"
-              >
-                back
-              </button>
-              <button
-                @mousedown="handleCameraMovements('left', 5)"
-                @mouseup="handleCameraMovements('left', 0)"
-              >
-                left
-              </button>
-              <button
-                @mousedown="handleCameraMovements('right', 5)"
-                @mouseup="handleCameraMovements('right', 0)"
-              >
-                right
-              </button>
-            </div>
-            <div class="zoom">
-              <button @mousedown="zoom('down')">down</button>
-              <button @mousedown="zoom('up')">up</button>
+              <button @click="goToCameraSpot('0')">spot 1</button>
+              <button @click="goToCameraSpot('1')">spot 2</button>
+              <button @click="goToCameraSpot('2')">spot 3</button>
             </div>
           </div>
         </div>
@@ -345,31 +295,33 @@ button {
     }
     > .camera {
       > .direction {
-        width: 140px;
+        display: flex;
+        gap: 12px;
+        width: fit-content;
         height: 140px;
         position: relative;
         > button {
-          position: absolute;
-          &:nth-of-type(1) {
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-          }
-          &:nth-of-type(2) {
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-          }
-          &:nth-of-type(3) {
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-          }
-          &:nth-of-type(4) {
-            right: 0;
-            top: 50%;
-            transform: translateY(-50%);
-          }
+          height: fit-content;
+          // &:nth-of-type(1) {
+          //   top: 0;
+          //   left: 50%;
+          //   transform: translateX(-50%);
+          // }
+          // &:nth-of-type(2) {
+          //   bottom: 0;
+          //   left: 50%;
+          //   transform: translateX(-50%);
+          // }
+          // &:nth-of-type(3) {
+          //   left: 0;
+          //   top: 50%;
+          //   transform: translateY(-50%);
+          // }
+          // &:nth-of-type(4) {
+          //   right: 0;
+          //   top: 50%;
+          //   transform: translateY(-50%);
+          // }
         }
       }
       > .zoom {

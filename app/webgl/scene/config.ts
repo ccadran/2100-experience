@@ -33,14 +33,34 @@ export function initScene(): Promise<void> {
     loader.load(
       // "/3d/states.glb",
       // "/3d/2100-map__V1.glb",
-      "/3d/Map-V3-group.glb",
+      "/3d/Map-V3-spots.glb",
       (gltf: any) => {
-        gltf.scene.scale.set(0.1, 0.1, 0.1);
+        // gltf.scene.scale.set(0.1, 0.1, 0.1);
+        gltf.scene.scale.set(1, 1, 1);
         globalScene.add(gltf.scene);
 
         const target = globalScene.getObjectByName("Scene");
-
         worldStore.scene3d = target as THREE.Group;
+
+        // spots pov
+        const spots = [
+          gltf.scene.getObjectByName("spot-1"),
+          gltf.scene.getObjectByName("spot-2"),
+          gltf.scene.getObjectByName("spot-3")
+        ].filter(Boolean).map(s => markRaw(s));
+        
+        worldStore.camera = new Camera();
+        worldStore.camera.setSpots(
+          spots,
+          [
+            new THREE.Vector3(100, 0, 0),
+            new THREE.Vector3(100, 0, -10),
+            new THREE.Vector3(-5, 0, 5),
+          ]
+        );
+        worldStore.camera.goToSpot(0);
+
+
 
         const sceneChildrens = worldStore.scene3d?.children;
 

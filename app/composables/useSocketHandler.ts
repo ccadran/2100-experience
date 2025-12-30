@@ -1,8 +1,7 @@
 import { handleFormValidations, revealElements } from "~/webgl/scene/config";
 import {
-  handleCameraMovements,
-  handleCameraZoom,
   moveToStep,
+  goToCameraSpot
 } from "~/webgl/scene/experience";
 
 interface IncomingPayload {
@@ -49,33 +48,20 @@ export function useSocketHandler() {
         break;
 
       /*__________CAMERA CONTOLS_______*/
-      //FORWARD
-      case "CAMERA_FORWARD":
-        handleCameraMovements("forward", payload.data.strength);
-        console.log("PAYLOAD SEND A CAMERA FORWARD TASK");
+      case "CAMERA_SPOT": {
+        const index = payload.data.strength - 1;
+        goToCameraSpot(index);
+        console.log("CAMERA_SPOT → go to spot", index);
         break;
-      //BACK
-      case "CAMERA_BACK":
-        handleCameraMovements("back", payload.data.strength);
-        console.log("PAYLOAD SEND A CAMERA BACK TASK");
-        break;
-      //LEFT
-      case "CAMERA_LEFT":
-        handleCameraMovements("left", payload.data.strength);
-        console.log("PAYLOAD SEND A CAMERA LEFT TASK");
-        break;
-      //RIGHT
-      case "CAMERA_RIGHT":
-        handleCameraMovements("right", payload.data.strength);
-        console.log("PAYLOAD SEND A CAMERA RIGHT TASK");
-        break;
+      }
+
       //UP
-      case "CAMERA_ZOOM":
-        handleCameraZoom(payload.data.value);
-        console.log("PAYLOAD SEND A CAMERA UP PRESSED TASK");
-        break;
-      default:
-        break;
+      // case "CAMERA_ZOOM":
+      //   handleCameraZoom(payload.data.value);
+      //   console.log("PAYLOAD SEND A CAMERA UP PRESSED TASK");
+      //   break;
+      // default:
+      //   break;
     }
   }
 

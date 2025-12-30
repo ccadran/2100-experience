@@ -1,6 +1,6 @@
 import gsap from "gsap";
 
-export async function moveToStep(target: number | "next" | "previous") {
+export async function moveToStep(target: number) {
   const worldStore = useWorld();
   const configStore = useConfig();
   const uiStore = useUi();
@@ -9,11 +9,8 @@ export async function moveToStep(target: number | "next" | "previous") {
   let targetStep: number = configStore.currentStep;
   if (typeof target === "number") {
     targetStep = target;
-  } else if (target === "next") {
-    targetStep += 1;
-  } else if (target === "previous") {
-    targetStep -= 1;
   }
+
   if (targetStep <= configStore.worldStateSteps.length - 1 && targetStep >= 0) {
     configStore.currentStep = targetStep;
   } else {
@@ -83,34 +80,12 @@ function getCurrentState(
   );
 }
 
-export function handleCameraMovements(
-  direction: "forward" | "back" | "left" | "right",
-  strength: number
-) {
+// export function handleCameraZoom(value: number) {
+//   const worldStore = useWorld();
+//   worldStore.camera?.zoom(value);
+// }
+
+export function goToCameraSpot(index: number) {
   const worldStore = useWorld();
-
-  if (strength === 0) {
-    worldStore.camera?.stopMoving();
-    return;
-  }
-
-  switch (direction) {
-    case "forward":
-      worldStore.camera?.moveForward(strength);
-      break;
-    case "back":
-      worldStore.camera?.moveBack(strength);
-      break;
-    case "left":
-      worldStore.camera?.moveLeft(strength);
-      break;
-    case "right":
-      worldStore.camera?.moveRight(strength);
-      break;
-  }
-}
-
-export function handleCameraZoom(value: number) {
-  const worldStore = useWorld();
-  worldStore.camera?.zoom(value);
+  worldStore.camera?.goToSpot(index);
 }
