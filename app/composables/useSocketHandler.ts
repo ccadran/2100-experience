@@ -16,6 +16,12 @@ export function useSocketHandler() {
 
   const { on, off } = useSocket();
 
+
+  // 2s d'attente avant de changer d'annee
+  let pendingYear: number | null = null;
+  let yearValidationTimeout: ReturnType<typeof setTimeout> | null = null;
+  const YEAR_VALIDATION_DELAY = 2000;
+
   function handleIncomingPayload(payload: IncomingPayload) {
     console.log(payload);
 
@@ -33,15 +39,46 @@ export function useSocketHandler() {
         console.log("PAYLOAD SEND A COMPLETE FORM");
         break;
 
-      /*__________STEP CONTROL_________*/
-      case "NEXT_STEP":
-        moveToStep("next");
-        console.log("PAYLOAD SEND A NEXT STEP TASK");
+        
+      /*__________YEAR CONTROL_________*/
+      case "YEARS": {
+        const uiStore = useUi();
+        const configStore = useConfig();
+
+        const year = payload.data.strength;
+        pendingYear = year;
+        uiStore.previewYear = year;
+
+        if (yearValidationTimeout) {
+          clearTimeout(yearValidationTimeout);
+        }
+
+        yearValidationTimeout = setTimeout(() => {
+          const stepIndex = configStore.worldStateSteps.findIndex(
+            (step) => step.year === pendingYear
+          );
+
+          if (stepIndex === -1) return;
+
+          if (
+            configStore.worldStateSteps[configStore.currentStep]?.year ===
+            pendingYear
+          ) {
+            uiStore.previewYear = null;
+            pendingYear = null;
+            return;
+          }
+
+          moveToStep(stepIndex);
+
+          uiStore.previewYear = null;
+          pendingYear = null;
+          yearValidationTimeout = null;
+        }, YEAR_VALIDATION_DELAY);
         break;
-      case "PREVIOUS_STEP":
-        moveToStep("previous");
-        console.log("PAYLOAD SEND A PREVIOUS STEP TASK");
-        break;
+      }
+
+
       //to mobile
       case "WORLD_STEPS":
         console.log("PAYLOAD SEND THE WORLD STATES");

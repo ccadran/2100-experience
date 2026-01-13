@@ -341,26 +341,9 @@ export function handleFormValidations(userData: userConfigParams) {
 
 function calculateExperienceSteps() {
   const configStore = useConfig();
-  const currentYear = configStore.configParams.currentYear;
-  const targetYear = configStore.configParams.targetYear;
-  const yearsPerStep = configStore.configParams.yearsStep;
-
-  const stepYears: number[] = [currentYear];
-
-  let nextYear = currentYear + yearsPerStep;
-  while (nextYear < targetYear - yearsPerStep) {
-    stepYears.push(nextYear);
-    nextYear += yearsPerStep;
-  }
-
-  if (stepYears[stepYears.length - 1] !== targetYear) {
-    stepYears.push(targetYear);
-  }
-
+  const stepYears = [2025, 2050, 2075, 2100];
   const totalSteps = stepYears.length - 1;
-
   const worldStateSteps = [];
-
   const targetTemperature = calculateMaxTemperature();
 
   for (let i = 0; i <= totalSteps; i++) {

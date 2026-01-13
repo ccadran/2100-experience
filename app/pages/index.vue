@@ -18,12 +18,22 @@ const { connect, joinRoom, sendAction, on } = useSocket();
 const { listenForUpdates } = useSocketHandler();
 
 const uiStore = useUi();
+const configStore = useConfig();
 
 const isDebug = ref<boolean>(true);
 
 const id = Math.random().toString(36).substring(2, 10);
 {/* const roomId = id; */}
 const roomId = "ROOM_1";
+
+const currentYear = computed(() => {
+  const step = configStore.worldStateSteps[configStore.currentStep];
+  return step?.year ?? null;
+});
+
+const previewYear = computed(() => {
+  return uiStore.previewYear;
+});
 
 onMounted(async () => {
   await initScene();
@@ -145,6 +155,14 @@ function handleWsCo() {
     </transition>
     <transition>
       <div class="experience" v-if="uiStore.isFormValidated">
+        <div class="year-indicator">
+          <span class="current">
+            {{ currentYear }}
+          </span>
+          <span v-if="previewYear && previewYear !== currentYear" class="preview"> 
+            → {{ previewYear }}
+          </span>
+        </div>
         <div class="controls">
           <div class="step">
             <button @click="moveToStep('previous')">previous</button>
@@ -332,6 +350,28 @@ button {
     }
   }
 }
+.year-indicator {
+  position: fixed;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  font-size: 32px;
+  font-weight: bold;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+
+  .current {
+    color: black;
+  }
+
+  .preview {
+    color: #999;
+    font-size: 24px;
+  }
+}
+
 .controls {
   position: fixed;
   left: 50%;
