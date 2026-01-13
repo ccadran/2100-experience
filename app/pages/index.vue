@@ -213,6 +213,9 @@ function showResult() {
 function showExplanations() {
   modalResults.value.showExplanations();
 }
+function changeQuestion() {
+  modalResults.value.changeQuestion();
+}
 </script>
 
 <template>
@@ -242,6 +245,12 @@ function showExplanations() {
     style="position: fixed; top: 160px; z-index: 2"
   >
     Show explanations
+  </button>
+  <button
+    @click="changeQuestion()"
+    style="position: fixed; top: 200px; z-index: 2"
+  >
+    changeQuestions
   </button>
 
   <main>

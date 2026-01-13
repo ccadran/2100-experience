@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import gsap from "gsap";
+import { log } from "three/src/nodes/TSL.js";
 import questionsData from "~/assets/content/questions.json";
 import resultsData from "~/assets/content/results.json";
 
@@ -7,6 +8,7 @@ const modal = ref<HTMLElement>();
 const currentQuestion = ref<number>(0);
 const userGlobalRanking = ref<number>(0);
 const currentQuestionUserRanking = ref<number>(0); //change at each question
+const questionsList = ref<HTMLElement[]>([]);
 
 const isExplanationsShown = ref<boolean>(false);
 
@@ -37,7 +39,27 @@ async function showExplanations() {
     .fromTo(".explanations", { opacity: 0 }, { opacity: 1 });
 }
 
-defineExpose({ revealModal, showExplanations });
+async function changeQuestion() {
+  let questionListBg =
+    questionsList.value[currentQuestion.value]!.querySelector(".background");
+  await gsap
+    .timeline()
+    .to(".explanations-content", { opacity: 0 })
+    .to(questionListBg, { opacity: 0 })
+    .then();
+
+  currentQuestion.value += 1;
+
+  questionListBg =
+    questionsList.value[currentQuestion.value]!.querySelector(".background");
+
+  gsap
+    .timeline()
+    .to(questionListBg, { opacity: 1 })
+    .to(".explanations-content", { opacity: 1 });
+}
+
+defineExpose({ revealModal, showExplanations, changeQuestion });
 </script>
 
 <template>
@@ -96,8 +118,19 @@ defineExpose({ revealModal, showExplanations });
         </div>
       </div>
       <div class="questions-list">
-        <div class="question" v-for="question in questionsData">
-          <div class="icon"><img :src="question.icon" alt="" /></div>
+        <div
+          class="question"
+          v-for="(question, index) in questionsData"
+          :ref="
+          (el) => {
+            if (el) questionsList[index] = el as HTMLElement;
+          }
+        "
+        >
+          <div class="icon">
+            <div class="background"></div>
+            <img :src="question.icon" alt="" />
+          </div>
           <div class="number">{{ question.number }}</div>
         </div>
       </div>
@@ -253,6 +286,43 @@ defineExpose({ revealModal, showExplanations });
         font-weight: 600;
         font-size: 14px;
         letter-spacing: -2%;
+        > .icon {
+          position: relative;
+          width: 96px;
+          height: 96px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          > .background {
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            transform: rotate(3deg);
+            background: var(
+              --white-gradient,
+              linear-gradient(
+                0deg,
+                rgba(255, 255, 255, 0.5) 0%,
+                rgba(255, 255, 255, 0.5) 100%
+              ),
+              linear-gradient(180deg, #fcfcfc 0%, #d1d1d1 100%)
+            );
+            box-shadow: 0 -2px 4px 0 rgba(0, 0, 0, 0.25) inset,
+              -26px 82px 24px 0 rgba(0, 0, 0, 0),
+              -17px 52px 22px 0 rgba(0, 0, 0, 0),
+              -9px 29px 19px 0 rgba(0, 0, 0, 0.01),
+              -4px 13px 14px 0 rgba(0, 0, 0, 0.01),
+              -1px 3px 8px 0 rgba(0, 0, 0, 0.02);
+            border-radius: 16px;
+          }
+          > img {
+            width: 60%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+          }
+        }
       }
     }
   }
