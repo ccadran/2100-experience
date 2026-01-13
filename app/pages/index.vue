@@ -31,6 +31,7 @@ const qrCode = ref<HTMLElement>();
 const qrCodeText = ref<HTMLElement>();
 const modalPhone = ref();
 const modalConfig = ref();
+const modalResults = ref();
 
 const webglContainer = ref<HTMLElement>();
 
@@ -206,7 +207,12 @@ const userData = {
   clothes: 90,
 };
 
-function endExperience() {}
+function showResult() {
+  modalResults.value.revealModal();
+}
+function showExplanations() {
+  modalResults.value.showExplanations();
+}
 </script>
 
 <template>
@@ -228,13 +234,16 @@ function endExperience() {}
   >
     previous step
   </button>
-  <button
-    @click="moveToStep('previous')"
-    style="position: fixed; top: 80px; z-index: 2"
-  >
+  <button @click="showResult()" style="position: fixed; top: 120px; z-index: 2">
     Finish experience
   </button>
-  <ModalResults />
+  <button
+    @click="showExplanations()"
+    style="position: fixed; top: 160px; z-index: 2"
+  >
+    Show explanations
+  </button>
+
   <main>
     <div class="intro">
       <div class="logo" ref="appLogo">
@@ -255,6 +264,7 @@ function endExperience() {}
     <ModalPhone ref="modalPhone" />
     <ModalConfig ref="modalConfig" />
     <Timeline />
+    <ModalResults ref="modalResults" />
 
     <!-- <section class="loader"></section> -->
     <div class="webgl" ref="webglContainer">

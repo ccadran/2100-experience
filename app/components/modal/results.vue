@@ -1,17 +1,53 @@
 <script lang="ts" setup>
+import gsap from "gsap";
 import questionsData from "~/assets/content/questions.json";
 import resultsData from "~/assets/content/results.json";
 
-const modals = ref<HTMLElement>();
+const modal = ref<HTMLElement>();
 const currentQuestion = ref<number>(0);
 const userGlobalRanking = ref<number>(0);
 const currentQuestionUserRanking = ref<number>(0); //change at each question
+
+const isExplanationsShown = ref<boolean>(false);
+
+function revealModal() {
+  gsap
+    .timeline({})
+    .set(modal.value!, { display: "block" })
+    .fromTo(".title", { opacity: 0 }, { opacity: 1 }, 0.35)
+    .fromTo(".result-description p", { opacity: 0 }, { opacity: 1 }, "<+0.2")
+    .fromTo(
+      ".result-description .rank",
+      { opacity: 0, scale: 2 },
+      { opacity: 1, scale: 1 },
+      "<+0.2"
+    )
+    .fromTo(".ranking .mascot", { opacity: 0 }, { opacity: 1 }, "<+0.2");
+}
+
+async function showExplanations() {
+  await gsap.fromTo(".ranking", { opacity: 1 }, { opacity: 0 }).then();
+  isExplanationsShown.value = true;
+  console.log(isExplanationsShown.value);
+  await nextTick();
+
+  gsap
+    .timeline()
+    .set(modal.value!, { display: "flex" })
+    .fromTo(".explanations", { opacity: 0 }, { opacity: 1 });
+}
+
+defineExpose({ revealModal, showExplanations });
 </script>
 
 <template>
-  <div class="modalResults explanation" ref="modal">
+  <div
+    class="modalResults"
+    :class="{ explanation: isExplanationsShown }"
+    ref="modal"
+  >
     <p class="title">Resultats</p>
-    <div class="ranking">
+    <div class="ranking" v-if="!isExplanationsShown">
       <div class="result-description">
         <div class="rank">
           <img :src="resultsData[userGlobalRanking]?.text" alt="" />
@@ -24,7 +60,7 @@ const currentQuestionUserRanking = ref<number>(0); //change at each question
         <img src="/images/mascot.webp" alt="" />
       </div>
     </div>
-    <div class="explanations">
+    <div class="explanations" v-else>
       <div class="explanations-content">
         <div class="question-icon">
           <img :src="questionsData[currentQuestion]?.icon" alt="" />
@@ -71,6 +107,7 @@ const currentQuestionUserRanking = ref<number>(0); //change at each question
 
 <style lang="scss">
 .modalResults {
+  display: none;
   height: 90vh;
   width: 81.25vw;
   position: absolute;
@@ -92,9 +129,6 @@ const currentQuestionUserRanking = ref<number>(0); //change at each question
     -26px 82px 24px 0 rgba(0, 0, 0, 0), -17px 52px 22px 0 rgba(0, 0, 0, 0),
     -9px 29px 19px 0 rgba(0, 0, 0, 0.01), -4px 13px 14px 0 rgba(0, 0, 0, 0.01),
     -1px 3px 8px 0 rgba(0, 0, 0, 0.02);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   &.explanation {
     align-items: end;
   }
@@ -107,7 +141,11 @@ const currentQuestionUserRanking = ref<number>(0); //change at each question
     font-size: 1.56vw;
   }
   .ranking {
-    display: none;
+    // opacity: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
     > .result-description {
       position: relative;
       > .rank {
@@ -137,6 +175,7 @@ const currentQuestionUserRanking = ref<number>(0); //change at each question
     flex-direction: column;
     gap: 80px;
     margin-bottom: 80px;
+    opacity: 0;
     .explanations-content {
       display: flex;
       align-items: center;
