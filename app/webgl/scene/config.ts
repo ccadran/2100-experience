@@ -388,6 +388,8 @@ function calculateMaxTemperature() {
     const weight = value.weight;
     return acc + value.percentage * weight;
   }, 0);
+
+  configStore.globalPercentage = globalPercentage;
   let targetTemp: number;
   if (configStore.configParams.pivotScore >= globalPercentage) {
     console.log("POLLUE PAS");

@@ -108,6 +108,8 @@ export const useConfig = defineStore("useConfig", () => {
 
   const isFormValidated = ref<boolean>(false);
 
+  const globalPercentage = ref<number>(0);
+
   return {
     formParams,
     userConfig,
@@ -118,5 +120,6 @@ export const useConfig = defineStore("useConfig", () => {
     objectsData,
     currentStep,
     isFormValidated,
+    globalPercentage,
   };
 });

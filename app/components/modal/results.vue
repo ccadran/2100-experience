@@ -1,8 +1,10 @@
 <script lang="ts" setup>
 import gsap from "gsap";
-import { log } from "three/src/nodes/TSL.js";
+
 import questionsData from "~/assets/content/questions.json";
 import resultsData from "~/assets/content/results.json";
+
+const configStore = useConfig();
 
 const modal = ref<HTMLElement>();
 const currentQuestion = ref<number>(0);
@@ -12,7 +14,13 @@ const questionsList = ref<HTMLElement[]>([]);
 
 const isExplanationsShown = ref<boolean>(false);
 
+onMounted(() => {});
+
 function revealModal() {
+  userGlobalRanking.value = Math.round(
+    (configStore.globalPercentage / 100) * (resultsData.length - 1)
+  );
+
   gsap
     .timeline({})
     .set(modal.value!, { display: "block" })
@@ -20,8 +28,8 @@ function revealModal() {
     .fromTo(".result-description p", { opacity: 0 }, { opacity: 1 }, "<+0.2")
     .fromTo(
       ".result-description .rank",
-      { opacity: 0, scale: 2 },
-      { opacity: 1, scale: 1 },
+      { opacity: 0, transform: "translateX(-50%) scale(2)" },
+      { opacity: 1, transform: "translateX(-50%) scale(1)" },
       "<+0.2"
     )
     .fromTo(".ranking .mascot", { opacity: 0 }, { opacity: 1 }, "<+0.2");
@@ -72,7 +80,7 @@ defineExpose({ revealModal, showExplanations, changeQuestion });
     <div class="ranking" v-if="!isExplanationsShown">
       <div class="result-description">
         <div class="rank">
-          <img :src="resultsData[userGlobalRanking]?.text" alt="" />
+          <img :src="resultsData[userGlobalRanking]?.rank" alt="" />
         </div>
         <p>
           {{ resultsData[userGlobalRanking]?.text }}
@@ -316,7 +324,7 @@ defineExpose({ revealModal, showExplanations, changeQuestion });
             border-radius: 16px;
           }
           > img {
-            width: 60%;
+            width: 85%;
             position: absolute;
             top: 50%;
             left: 50%;
