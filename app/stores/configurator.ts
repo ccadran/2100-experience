@@ -1,4 +1,4 @@
-import type { userConfigParams } from "~/types/config";
+import type { UserConfigType, worldImpactsType } from "~/types/config";
 
 export const useConfig = defineStore("useConfig", () => {
   const formParams = {
@@ -19,50 +19,65 @@ export const useConfig = defineStore("useConfig", () => {
   const worldParams = {
     plane: {
       name: "plane",
-      description: "Impact des vols long et court-courriers.",
-      weight: 0.1, // 10%
+      globalWeight: 0.1, // 10%
+      impacts: [{ type: "fog", weight: 0.5 }],
     },
     transport: {
       name: "transport",
-      description:
-        "Impact de la voiture individuelle, bus, train (hors avion).",
-      weight: 0.25, // 25%
+      globalWeight: 0.25, // 25%
+      impacts: [{ type: "fog", weight: 0.2 }],
     },
     meat: {
       name: "meat",
-      description:
-        "Impact lié à la production de viande et produits animaux (méthane, déforestation).",
-      weight: 0.15, // 15%
+      globalWeight: 0.15, // 15%
+      impacts: [{ type: "waterLevel", weight: 0.7 }],
     },
     promptIA: {
       name: "promptIA",
-      description:
-        "Impact lié aux data centers, streaming, et requêtes IA/ChatGPT.",
-      weight: 0.02, // 2%
+      globalWeight: 0.02, // 2%
+      impacts: [{ type: "waterLevel", weight: 0.3 }],
     },
     products: {
       name: "products",
-      description:
-        "Impact lié à l'importation de nourriture et à la fabrication de produits manufacturés (hors textile et tech).",
-      weight: 0.15, // 15%
+      globalWeight: 0.15, // 15%
+      impacts: [{ type: "factory", weight: 0.5 }],
     },
     phone: {
       name: "phone",
-      description:
-        "Impact lié à la fabrication (extraction de métaux) et à l'infrastructure des appareils électroniques (téléphones, PC).",
-      weight: 0.05, // 5%
+      globalWeight: 0.05, // 5%
+      impacts: [
+        { type: "factory", weight: 0.15 },
+        { type: "rocks", weight: 1 },
+      ],
     },
     energy: {
       name: "energy",
-      description:
-        "Impact lié au chauffage (gaz, fioul) et à l'électricité domestique.",
-      weight: 0.2, // 20%
+      globalWeight: 0.2, // 20%
+      impacts: [{ type: "fog", weight: 0.3 }],
     },
     clothes: {
       name: "clothes",
-      description:
-        "Impact lié à la production, la teinture et le transport des textiles (Fast Fashion).",
-      weight: 0.08, // 8%
+      globalWeight: 0.08, // 8%
+      impacts: [{ type: "factory", weight: 0.35 }],
+    },
+  };
+
+  const worldImpacts: worldImpactsType = {
+    fog: {
+      name: "fog",
+      value: 0,
+    },
+    waterLevel: {
+      name: "waterLevel",
+      value: 0,
+    },
+    factory: {
+      name: "factory",
+      value: 0,
+    },
+    rocks: {
+      name: "rocks",
+      value: 0,
     },
   };
 
@@ -83,26 +98,28 @@ export const useConfig = defineStore("useConfig", () => {
       normal: 1.2,
       best: 0.2,
     },
-    water: {
-      worst: 2.5,
-      normal: 1.2,
-      best: 0.5,
-    },
   };
 
-  const userConfig: Partial<userConfigParams> = {};
+  const userConfig: Partial<UserConfigType> = {};
 
   const worldStateSteps: any[] = [];
 
   const currentStep = ref<number>(0);
+
+  const isFormValidated = ref<boolean>(false);
+
+  const globalPercentage = ref<number>(0);
 
   return {
     formParams,
     userConfig,
     configParams,
     worldParams,
+    worldImpacts,
     worldStateSteps,
     objectsData,
     currentStep,
+    isFormValidated,
+    globalPercentage,
   };
 });

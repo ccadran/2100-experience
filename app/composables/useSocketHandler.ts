@@ -1,3 +1,8 @@
+import {
+  changeQuestion,
+  revealResultsModal,
+  showExplanations,
+} from "~/components/modal/results.vue";
 import { handleFormValidations, revealElements } from "~/webgl/scene/config";
 import {
   moveToStep,
@@ -92,13 +97,17 @@ export function useSocketHandler() {
         break;
       }
 
-      //UP
-      // case "CAMERA_ZOOM":
-      //   handleCameraZoom(payload.data.value);
-      //   console.log("PAYLOAD SEND A CAMERA UP PRESSED TASK");
-      //   break;
-      // default:
-      //   break;
+      /*_______EXPERIENCE END_________*/
+      //END
+      case "END_EXPERIENCE":
+        revealResultsModal();
+        console.log("PAYLOAD SEND A END EXPERIENCE");
+      //EXPLANATIONS
+      case "SHOW_EXPLANATIONS":
+        showExplanations();
+        console.log("PAYLOAD SEND A SHOW EXPLANATIONS");
+      case "CHANGE_QUESTION_EXPLANATION":
+        changeQuestion(payload.data.question);
     }
   }
 
