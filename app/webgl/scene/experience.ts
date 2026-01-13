@@ -1,26 +1,25 @@
 import gsap from "gsap";
 
-export async function moveToStep(target: number | "next" | "previous") {
+
+export async function moveToStep(targetStep: number) {
   const worldStore = useWorld();
   const configStore = useConfig();
   const uiStore = useUi();
+
   await uiStore.cloudsTransition?.showClouds();
 
-  let targetStep: number = configStore.currentStep;
-  if (typeof target === "number") {
-    targetStep = target;
-  } else if (target === "next") {
-    targetStep += 1;
-  } else if (target === "previous") {
-    targetStep -= 1;
-  }
-  if (targetStep <= configStore.worldStateSteps.length - 1 && targetStep >= 0) {
+  if (
+    targetStep >= 0 &&
+    targetStep < configStore.worldStateSteps.length
+  ) {
     configStore.currentStep = targetStep;
   } else {
-    alert("THIS STEP DOES NOT EXIST");
+    console.warn("STEP OUT OF RANGE", targetStep);
+    await uiStore.cloudsTransition?.hideClouds();
+    return;
   }
-  const currentStep = configStore.worldStateSteps[configStore.currentStep];
 
+  const currentStep = configStore.worldStateSteps[configStore.currentStep];
   const currentTemperature = currentStep.temperature;
 
   worldStore.paramsParts.forEach((part) => {
@@ -102,34 +101,12 @@ function getCurrentState(
   );
 }
 
-export function handleCameraMovements(
-  direction: "forward" | "back" | "left" | "right",
-  strength: number
-) {
+// export function handleCameraZoom(value: number) {
+//   const worldStore = useWorld();
+//   worldStore.camera?.zoom(value);
+// }
+
+export function goToCameraSpot(index: number) {
   const worldStore = useWorld();
-
-  if (strength === 0) {
-    worldStore.camera?.stopMoving();
-    return;
-  }
-
-  switch (direction) {
-    case "forward":
-      worldStore.camera?.moveForward(strength);
-      break;
-    case "back":
-      worldStore.camera?.moveBack(strength);
-      break;
-    case "left":
-      worldStore.camera?.moveLeft(strength);
-      break;
-    case "right":
-      worldStore.camera?.moveRight(strength);
-      break;
-  }
-}
-
-export function handleCameraZoom(value: number) {
-  const worldStore = useWorld();
-  worldStore.camera?.zoom(value);
+  worldStore.camera?.goToSpot(index);
 }

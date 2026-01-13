@@ -12,7 +12,21 @@ export function initScene(): Promise<void> {
     if (!container) return;
 
     const globalScene = new THREE.Scene();
-    globalScene.background = new THREE.Color(0xaaaaaa);
+
+    const canvasGradient = document.createElement('canvas');
+    canvasGradient.width = 1;
+    canvasGradient.height = 256;
+    const ctx = canvasGradient.getContext('2d');
+    if (ctx) {
+      const gradient = ctx.createLinearGradient(0, 0, 0, 256);
+      gradient.addColorStop(0, 'rgba(108, 157, 241, 1)');
+      gradient.addColorStop(0.80, 'rgba(177, 206, 255, 1)');
+      gradient.addColorStop(1, 'rgba(204, 221, 255, 1)');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, 1, 256);
+    }
+    const texture = new THREE.CanvasTexture(canvasGradient);
+    globalScene.background = texture;
     worldStore.globalScene = globalScene;
 
     worldStore.camera = new Camera();
@@ -33,14 +47,34 @@ export function initScene(): Promise<void> {
     loader.load(
       // "/3d/states.glb",
       // "/3d/2100-map__V1.glb",
-      "/3d/Map-V3-group.glb",
+      "/3d/new-map.glb",
       (gltf: any) => {
-        gltf.scene.scale.set(0.1, 0.1, 0.1);
+        // gltf.scene.scale.set(0.1, 0.1, 0.1);
+        gltf.scene.scale.set(1, 1, 1);
         globalScene.add(gltf.scene);
 
         const target = globalScene.getObjectByName("Scene");
-
         worldStore.scene3d = target as THREE.Group;
+
+        // spots pov
+        const spots = [
+          gltf.scene.getObjectByName("spot-1"),
+          gltf.scene.getObjectByName("spot-2"),
+          gltf.scene.getObjectByName("spot-3")
+        ].filter(Boolean).map(s => markRaw(s));
+        
+        worldStore.camera = new Camera();
+        worldStore.camera.setSpots(
+          spots,
+          [
+            new THREE.Vector3(100, 0, 0),
+            new THREE.Vector3(100, 0, -10),
+            new THREE.Vector3(-5, 0, 5),
+          ]
+        );
+        worldStore.camera.goToSpot(0);
+
+
 
         const sceneChildrens = worldStore.scene3d?.children;
 
@@ -315,26 +349,9 @@ export function handleFormValidations(userData: UserConfigType) {
 
 function calculateExperienceSteps() {
   const configStore = useConfig();
-  const currentYear = configStore.configParams.currentYear;
-  const targetYear = configStore.configParams.targetYear;
-  const yearsPerStep = configStore.configParams.yearsStep;
-
-  const stepYears: number[] = [currentYear];
-
-  let nextYear = currentYear + yearsPerStep;
-  while (nextYear < targetYear - yearsPerStep) {
-    stepYears.push(nextYear);
-    nextYear += yearsPerStep;
-  }
-
-  if (stepYears[stepYears.length - 1] !== targetYear) {
-    stepYears.push(targetYear);
-  }
-
+  const stepYears = [2025, 2050, 2075, 2100];
   const totalSteps = stepYears.length - 1;
-
   const worldStateSteps = [];
-
   const targetTemperature = calculateMaxTemperature();
 
   for (let i = 0; i <= totalSteps; i++) {

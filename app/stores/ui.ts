@@ -5,5 +5,7 @@ export const useUi = defineStore("useUi", () => {
 
   const cloudsTransition = ref<CloudsTransition>();
 
-  return { isLoaded, cloudsTransition };
+  const previewYear = ref<number | null>(null);
+
+  return { isLoaded, isFormValidated, cloudsTransition, previewYear };
 });

@@ -1,36 +1,41 @@
 import * as THREE from "three";
-import { gsap } from "gsap";
-import { lerp } from "../utils";
+import gsap from "gsap";
 
 interface CameraParams {
   startPosition?: THREE.Vector3;
   endPosition?: THREE.Vector3;
   fov?: number;
-  zoomRangeMultiplier?: number;
+  // zoomRangeMultiplier?: number;
+  lerpFactor?: number;
 }
 
 export default class Camera {
   instance: THREE.PerspectiveCamera;
+
   startPosition: THREE.Vector3;
   endPosition: THREE.Vector3;
-  zoomRangeMultiplier: number;
-  targetPosition: THREE.Vector3 = new THREE.Vector3(0, 0, 0);
-  isMoving: boolean;
-  lerpFactor: number = 0.1;
-  strengthMultiplier: number = 0.1;
-  movementState: any = { forward: 0, back: 0, left: 0, right: 0 };
-  lookAtZ: number = 60;
+
+  targetPosition = new THREE.Vector3();
+  targetLookAt = new THREE.Vector3();
+
+  // zoomRangeMultiplier: number;
+  lerpFactor: number;
+
+  private spots: THREE.Object3D[] = [];
+  private lookAtTargets: THREE.Vector3[] = [];
+  private currentSpotIndex = 0;
+
   constructor({
     startPosition = new THREE.Vector3(0, 38, 60),
-    // endPosition = new THREE.Vector3(0, 28, 40),
     endPosition = new THREE.Vector3(0, 1, 10),
     fov = 75,
-    zoomRangeMultiplier = 0.035,
+    // zoomRangeMultiplier = 0.035,
+    lerpFactor = 0.1,
   }: CameraParams = {}) {
     this.startPosition = startPosition;
     this.endPosition = endPosition;
-    this.zoomRangeMultiplier = zoomRangeMultiplier;
-    this.isMoving = false;
+    // this.zoomRangeMultiplier = zoomRangeMultiplier;
+    this.lerpFactor = lerpFactor;
 
     const container = document.querySelector(".webgl")!;
 
@@ -42,94 +47,72 @@ export default class Camera {
     );
 
     this.instance.position.copy(endPosition);
-    this.instance.lookAt(0, 0, 0);
+    this.targetPosition.copy(endPosition);
+    this.instance.lookAt(this.targetLookAt);
 
-    this.targetPosition.copy(this.instance.position);
     this.startLoop();
   }
 
-  entryAnim() {
-    // gsap.fromTo(
-    //   this.instance.position,
-    //   {
-    //     x: this.startPosition.x,
-    //     y: this.startPosition.y,
-    //     z: this.startPosition.z,
-    //   },
-    //   { x: this.endPosition.x, y: this.endPosition.y, z: this.endPosition.z }
-    // );
-  }
-
-  startLoop() {
+  private startLoop() {
     const loop = () => {
-      if (this.movementState.forward > 0) {
-        const delta = this.strengthMultiplier * this.movementState.forward;
-        this.targetPosition.z -= delta;
-      }
-      if (this.movementState.back > 0) {
-        const delta = this.strengthMultiplier * this.movementState.back;
-        this.targetPosition.z += delta;
-      }
-      if (this.movementState.left > 0) {
-        const delta = this.strengthMultiplier * this.movementState.left;
-        this.targetPosition.x -= delta;
-      }
-      if (this.movementState.right > 0) {
-        const delta = this.strengthMultiplier * this.movementState.right;
-        this.targetPosition.x += delta;
-      }
-
-      this.instance.position.x = lerp(
-        this.instance.position.x,
-        this.targetPosition.x,
-        this.lerpFactor
-      );
-      this.instance.position.z = lerp(
-        this.instance.position.z,
-        this.targetPosition.z,
-        this.lerpFactor
-      );
-
-      this.instance.position.y = lerp(
-        this.instance.position.y,
-        this.targetPosition.y,
-        this.lerpFactor
-      );
-
-      this.instance.lookAt(
-        this.instance.position.x,
-        0,
-        this.instance.position.z - this.lookAtZ
-      );
-
+      this.instance.position.lerp(this.targetPosition, this.lerpFactor);
+      this.instance.lookAt(this.targetLookAt);
       requestAnimationFrame(loop);
     };
     loop();
   }
 
-  moveForward(strength: number) {
-    this.movementState.forward = strength;
-  }
-  moveBack(strength: number) {
-    this.movementState.back = strength;
-  }
-  moveLeft(strength: number) {
-    this.movementState.left = strength;
-  }
-  moveRight(strength: number) {
-    this.movementState.right = strength;
+  setSpots(spots: THREE.Object3D[], lookAtTargets: THREE.Vector3[]) {
+    this.spots = spots;
+    this.lookAtTargets = lookAtTargets;
+    this.currentSpotIndex = 0;
   }
 
-  zoom(value: number) {
-    const zoomFactor = 1 + value * this.zoomRangeMultiplier;
+  goToSpot(index: number) {
+    const spot = this.spots[index];
+    const lookAt = this.lookAtTargets[index];
 
-    this.targetPosition.y = this.endPosition.y * zoomFactor;
+    if (!spot || !lookAt) return;
+
+    this.currentSpotIndex = index;
+
+    gsap.to(this.targetPosition, {
+      x: spot.position.x,
+      y: spot.position.y,
+      z: spot.position.z,
+      duration: 1.2,
+      ease: "power2.inOut",
+    });
+
+    gsap.to(this.targetLookAt, {
+      x: lookAt.x,
+      y: lookAt.y,
+      z: lookAt.z,
+      duration: 1.2,
+      ease: "power2.inOut",
+    });
   }
 
-  stopMoving() {
-    this.movementState.forward = 0;
-    this.movementState.back = 0;
-    this.movementState.left = 0;
-    this.movementState.right = 0;
+  // zoom(value: number) {
+  //   const factor = 1 + value * this.zoomRangeMultiplier;
+  //   this.targetPosition.y = this.endPosition.y * factor;
+  // }
+
+  entryAnim() {
+    gsap.fromTo(
+      this.targetPosition,
+      {
+        x: this.startPosition.x,
+        y: this.startPosition.y,
+        z: this.startPosition.z,
+      },
+      {
+        x: this.endPosition.x,
+        y: this.endPosition.y,
+        z: this.endPosition.z,
+        duration: 1.5,
+        ease: "power3.out",
+      }
+    );
   }
 }

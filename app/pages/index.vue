@@ -5,9 +5,9 @@ import {
   revealElements,
 } from "~/webgl/scene/config";
 import {
-  handleCameraMovements,
-  handleCameraZoom,
   moveToStep,
+  sceneTransition,
+  goToCameraSpot,
 } from "~/webgl/scene/experience";
 import { useSocket } from "~/composables/useSocket";
 import { useSocketHandler } from "~/composables/useSocketHandler";
@@ -23,6 +23,15 @@ const uiStore = useUi();
 const configStore = useConfig();
 
 const isDebug = ref<boolean>(true);
+
+const currentYear = computed(() => {
+  const step = configStore.worldStateSteps[configStore.currentStep];
+  return step?.year ?? null;
+});
+
+const previewYear = computed(() => {
+  return uiStore.previewYear;
+});
 
 const loaderProgress = ref<HTMLElement>();
 const loaderContainer = ref<HTMLElement>();
@@ -254,6 +263,33 @@ function changeQuestion() {
   </button>
 
   <main>
+    
+    <div class="experience" v-if="uiStore.isFormValidated">
+        <div class="year-indicator">
+          <span class="current">
+            {{ currentYear }}
+          </span>
+          <span v-if="previewYear && previewYear !== currentYear" class="preview"> 
+            → {{ previewYear }}
+          </span>
+        </div>
+      
+        <div class="controls">
+          <div class="step">
+            <button @click="moveToStep('previous')">previous</button>
+            <button @click="moveToStep('next')">next</button>
+          </div>
+          <div class="camera">
+            <div class="direction">
+              <button @click="goToCameraSpot('0')">spot 1</button>
+              <button @click="goToCameraSpot('1')">spot 2</button>
+              <button @click="goToCameraSpot('2')">spot 3</button>
+            </div>
+          </div>
+        </div>
+    </div>
+    
+    
     <div class="intro">
       <div class="logo" ref="appLogo">
         <img src="/images/logo.webp" alt="" />
@@ -437,6 +473,28 @@ main {
       height: 100%;
       object-fit: contain;
     }
+  }
+}
+
+.year-indicator {
+  position: fixed;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  font-size: 32px;
+  font-weight: bold;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+
+  .current {
+    color: black;
+  }
+
+  .preview {
+    color: #999;
+    font-size: 24px;
   }
 }
 
