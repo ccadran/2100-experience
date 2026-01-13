@@ -1,8 +1,11 @@
 <script lang="ts" setup>
 import questionsData from "~/assets/content/questions.json";
+import resultsData from "~/assets/content/results.json";
 
 const modals = ref<HTMLElement>();
 const currentQuestion = ref<number>(0);
+const userGlobalRanking = ref<number>(0);
+const currentQuestionUserRanking = ref<number>(0); //change at each question
 </script>
 
 <template>
@@ -11,9 +14,11 @@ const currentQuestion = ref<number>(0);
     <div class="ranking">
       <div class="result-description">
         <div class="rank">
-          <img src="/images/rank.png" alt="" />
+          <img :src="resultsData[userGlobalRanking]?.text" alt="" />
         </div>
-        <p>%Name n’est pas trop protecteur de la planete ...</p>
+        <p>
+          {{ resultsData[userGlobalRanking]?.text }}
+        </p>
       </div>
       <div class="mascot">
         <img src="/images/mascot.webp" alt="" />
@@ -21,10 +26,17 @@ const currentQuestion = ref<number>(0);
     </div>
     <div class="explanations">
       <div class="explanations-content">
+        <div class="question-icon">
+          <img :src="questionsData[currentQuestion]?.icon" alt="" />
+        </div>
         <div class="explanation-text">
           <p class="number">{{ questionsData[currentQuestion]?.number }}</p>
           <p class="explanation">
-            {{ questionsData[currentQuestion]?.explanations[0] }}
+            {{
+              questionsData[currentQuestion]?.explanations[
+                currentQuestionUserRanking
+              ]?.text
+            }}
           </p>
           <div class="official-data">
             <p>{{ questionsData[currentQuestion]?.officialData.text }}</p>
@@ -35,10 +47,16 @@ const currentQuestion = ref<number>(0);
               }}</a>
             </p>
           </div>
-          <!-- <p class="explanation">{{ questionsData[currentQuestion]?.explanations[targetExplanation] }}</p> -->
         </div>
         <div class="explanation-illu">
-          <img :src="questionsData[currentQuestion]?.illustration" alt="" />
+          <img
+            :src="
+              questionsData[currentQuestion]?.explanations[
+                currentQuestionUserRanking
+              ]?.illustration
+            "
+            alt=""
+          />
         </div>
       </div>
       <div class="questions-list">
@@ -123,6 +141,14 @@ const currentQuestion = ref<number>(0);
       display: flex;
       align-items: center;
       justify-content: space-between;
+      position: relative;
+      > .question-icon {
+        position: absolute;
+        width: 200px;
+        top: -15%;
+        left: 50%;
+        transform: translateX(-50%);
+      }
       .explanation-text {
         display: flex;
         flex-direction: column;
@@ -141,6 +167,9 @@ const currentQuestion = ref<number>(0);
         }
         .official-data {
           margin-top: 60px;
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
           > p {
             font-family: OpenRunde;
             font-weight: 500;
@@ -153,6 +182,7 @@ const currentQuestion = ref<number>(0);
             font-size: 14px;
             letter-spacing: -2%;
             color: var(--grey);
+
             > a {
               text-decoration: underline;
             }
