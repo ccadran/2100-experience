@@ -24,7 +24,8 @@
         "text": "444444Do reprehenderit veniam incididunt in reprehenderit adipisicing excepteur nisi duis anim mollit pariatur ea labore. Nulla magna ad ",
         "illustration": "/images/ilu2.png"
       }
-    ]
+    ],
+    "params": "plane"
   },
   {
     "number": "Question 2",
@@ -51,7 +52,8 @@
         "text": "44444En répondant que %name prend l’avion de maniere réguliere, il participe involontairement a la deforestation",
         "illustration": "/images/ilu2.png"
       }
-    ]
+    ],
+    "params": "transport"
   },
   {
     "number": "Question 3",
@@ -78,7 +80,8 @@
         "text": "44444En répondant que %name prend l’avion de maniere réguliere, il participe involontairement a la deforestation",
         "illustration": "/images/ilu2.png"
       }
-    ]
+    ],
+    "params": "promptIA"
   },
   {
     "number": "Question 4",
@@ -105,11 +108,12 @@
         "text": "44444En répondant que %name prend l’avion de maniere réguliere, il participe involontairement a la deforestation",
         "illustration": "/images/ilu2.png"
       }
-    ]
+    ],
+    "params": "meat"
   },
   {
     "number": "Question 5",
-    "icon": "/icons/consumption.png",
+    "icon": "/icons/products.png",
     "officialData": {
       "text": "Do reprehenderit veniam incididunt in reprehenderit adipisicing excepteur nisi duis anim mollit pariatur ea labore. Nulla magna ad incididunt excepteur incididunt id laborum irure dolor do. Deserunt magna pariatur velit ad eiusmod non ut elit enim velit.",
       "linkText": "Lien",
@@ -132,11 +136,12 @@
         "text": "44444En répondant que %name prend l’avion de maniere réguliere, il participe involontairement a la deforestation",
         "illustration": "/images/ilu2.png"
       }
-    ]
+    ],
+    "params": "products"
   },
   {
     "number": "Question 6",
-    "icon": "/icons/technology.png",
+    "icon": "/icons/phone.png",
     "officialData": {
       "text": "Do reprehenderit veniam incididunt in reprehenderit adipisicing excepteur nisi duis anim mollit pariatur ea labore. Nulla magna ad incididunt excepteur incididunt id laborum irure dolor do. Deserunt magna pariatur velit ad eiusmod non ut elit enim velit.",
       "linkText": "Lien",
@@ -159,7 +164,8 @@
         "text": "44444En répondant que %name prend l’avion de maniere réguliere, il participe involontairement a la deforestation",
         "illustration": "/images/ilu2.png"
       }
-    ]
+    ],
+    "params": "phone"
   },
   {
     "number": "Question 7",
@@ -186,7 +192,8 @@
         "text": "44444En répondant que %name prend l’avion de maniere réguliere, il participe involontairement a la deforestation",
         "illustration": "/images/ilu2.png"
       }
-    ]
+    ],
+    "params": "energy"
   },
   {
     "number": "Question 8",
@@ -213,6 +220,7 @@
         "text": "44444En répondant que %name prend l’avion de maniere réguliere, il participe involontairement a la deforestation",
         "illustration": "/images/ilu2.png"
       }
-    ]
+    ],
+    "params": "clothes"
   }
 ]

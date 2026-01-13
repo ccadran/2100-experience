@@ -10,13 +10,26 @@ const modal = ref<HTMLElement>();
 const currentQuestion = ref<number>(0);
 const userGlobalRanking = ref<number>(0);
 const currentQuestionUserRanking = ref<number>(0); //change at each question
+const currentQuestionUserExplanation = ref<number>(0); //change at each question
 const questionsList = ref<HTMLElement[]>([]);
 
 const isExplanationsShown = ref<boolean>(false);
 
-onMounted(() => {});
+const userPercentages = ref<any>();
+
+const rankingIcons = [
+  "/icons/rank-a.png",
+  "/icons/rank-b.png",
+  "/icons/rank-c.png",
+  "/icons/rank-d.png",
+  "/icons/rank-e.png",
+  "/icons/rank-f.png",
+];
 
 function revealModal() {
+  userPercentages.value =
+    configStore.worldStateSteps[configStore.worldStateSteps.length - 1].params;
+
   userGlobalRanking.value = Math.round(
     (configStore.globalPercentage / 100) * (resultsData.length - 1)
   );
@@ -57,6 +70,18 @@ async function changeQuestion() {
     .then();
 
   currentQuestion.value += 1;
+
+  const currentParam = questionsData[currentQuestion.value]!.params;
+
+  const percentageValue = userPercentages.value[currentParam];
+
+  currentQuestionUserRanking.value = Math.round(
+    (percentageValue / 100) * (rankingIcons.length - 1)
+  );
+  currentQuestionUserExplanation.value = Math.round(
+    (percentageValue / 100) *
+      (questionsData[currentQuestion.value]!.explanations.length - 1)
+  );
 
   questionListBg =
     questionsList.value[currentQuestion.value]!.querySelector(".background");
@@ -100,7 +125,7 @@ defineExpose({ revealModal, showExplanations, changeQuestion });
           <p class="explanation">
             {{
               questionsData[currentQuestion]?.explanations[
-                currentQuestionUserRanking
+                currentQuestionUserExplanation
               ]?.text
             }}
           </p>
@@ -116,12 +141,18 @@ defineExpose({ revealModal, showExplanations, changeQuestion });
         </div>
         <div class="explanation-illu">
           <img
+            class="illu"
             :src="
               questionsData[currentQuestion]?.explanations[
-                currentQuestionUserRanking
+                currentQuestionUserExplanation
               ]?.illustration
             "
             alt=""
+          />
+          <img
+            :src="rankingIcons[currentQuestionUserRanking]"
+            alt=""
+            class="rank"
           />
         </div>
       </div>
@@ -273,10 +304,17 @@ defineExpose({ revealModal, showExplanations, changeQuestion });
         border-radius: 48px;
         width: 48%;
         overflow: hidden;
-        > img {
+        position: relative;
+        > .illu {
           width: 100%;
           height: 100%;
           object-fit: cover;
+        }
+        > .rank {
+          bottom: 20%;
+          width: 15%;
+          position: absolute;
+          right: 0;
         }
       }
     }
