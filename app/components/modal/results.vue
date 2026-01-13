@@ -26,7 +26,7 @@ const rankingIcons = [
   "/icons/rank-f.png",
 ];
 
-function revealModal() {
+export function revealResultsModal() {
   userPercentages.value =
     configStore.worldStateSteps[configStore.worldStateSteps.length - 1].params;
 
@@ -48,7 +48,7 @@ function revealModal() {
     .fromTo(".ranking .mascot", { opacity: 0 }, { opacity: 1 }, "<+0.2");
 }
 
-async function showExplanations() {
+export async function showExplanations() {
   await gsap.fromTo(".ranking", { opacity: 1 }, { opacity: 0 }).then();
   isExplanationsShown.value = true;
   console.log(isExplanationsShown.value);
@@ -60,7 +60,7 @@ async function showExplanations() {
     .fromTo(".explanations", { opacity: 0 }, { opacity: 1 });
 }
 
-async function changeQuestion() {
+export async function changeQuestion(target: number) {
   let questionListBg =
     questionsList.value[currentQuestion.value]!.querySelector(".background");
   await gsap
@@ -69,7 +69,7 @@ async function changeQuestion() {
     .to(questionListBg, { opacity: 0 })
     .then();
 
-  currentQuestion.value += 1;
+  currentQuestion.value = target;
 
   const currentParam = questionsData[currentQuestion.value]!.params;
 
