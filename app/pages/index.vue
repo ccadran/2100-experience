@@ -205,6 +205,8 @@ const userData = {
   energy: 100,
   clothes: 90,
 };
+
+function endExperience() {}
 </script>
 
 <template>
@@ -226,6 +228,13 @@ const userData = {
   >
     previous step
   </button>
+  <button
+    @click="moveToStep('previous')"
+    style="position: fixed; top: 80px; z-index: 2"
+  >
+    Finish experience
+  </button>
+  <ModalResults />
   <main>
     <div class="intro">
       <div class="logo" ref="appLogo">

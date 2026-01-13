@@ -4,7 +4,7 @@ export async function moveToStep(target: number | "next" | "previous") {
   const worldStore = useWorld();
   const configStore = useConfig();
   const uiStore = useUi();
-  // await uiStore.cloudsTransition?.showClouds();
+  await uiStore.cloudsTransition?.showClouds();
 
   let targetStep: number = configStore.currentStep;
   if (typeof target === "number") {
@@ -49,7 +49,7 @@ export async function moveToStep(target: number | "next" | "previous") {
     updateImact(impact.name, currentStep.impacts[impact.name]);
   });
 
-  // await uiStore.cloudsTransition?.hideClouds();
+  await uiStore.cloudsTransition?.hideClouds();
 }
 
 function updateImact(

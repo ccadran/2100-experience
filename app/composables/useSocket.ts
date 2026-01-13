@@ -6,7 +6,7 @@ import { io, Socket } from "socket.io-client";
 // Mettez l'adresse où tourne votre serveur Fastify.
 // const SOCKET_URL: string = "http://172.20.10.14:4000"; //G
 // const SOCKET_URL: string = "http://10.137.98.82:4000"; //GOB
-const SOCKET_URL: string = "http://192.168.1.25:4000"; //HOME
+const SOCKET_URL: string = "http://192.168.1.35:4000"; //HOME
 
 // Déclaration de l'instance socket et de l'état de connexion
 // Utilisation du type Socket pour une meilleure vérification TypeScript
