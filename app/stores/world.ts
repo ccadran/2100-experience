@@ -10,16 +10,24 @@ interface FogControls {
 export const useWorld = defineStore("useWorld", () => {
   const globalScene = ref<THREE.Scene>();
   const scene3d = ref<THREE.Group | null>(null);
-  const sceneParts = ref<THREE.Object3D[]>([]);
+  const paramsParts = ref<THREE.Object3D[]>([]);
   const hiddenSceneParts = ref<any[]>([]);
   const camera = ref<Camera>();
   const sceneMeshes = ref<Record<string, THREE.Group>>({});
   const fogControls = ref<FogControls | null>(null);
 
+  const impactsParts = {
+    fog: null as any,
+    waterLevel: null as THREE.Object3D | null,
+    factory: null as THREE.Object3D | null,
+    rocks: null as THREE.Object3D | null,
+  };
+
   return {
     globalScene,
     scene3d,
-    sceneParts,
+    paramsParts,
+    impactsParts,
     hiddenSceneParts,
     camera,
     sceneMeshes,

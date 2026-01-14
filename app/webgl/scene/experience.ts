@@ -1,75 +1,93 @@
 import gsap from "gsap";
 
-export async function moveToStep(target: number | "next" | "previous") {
+
+export async function moveToStep(targetStep: number) {
   const worldStore = useWorld();
   const configStore = useConfig();
   const uiStore = useUi();
+
   await uiStore.cloudsTransition?.showClouds();
 
-  let targetStep: number = configStore.currentStep;
-  if (typeof target === "number") {
-    targetStep = target;
-  } else if (target === "next") {
-    targetStep += 1;
-  } else if (target === "previous") {
-    targetStep -= 1;
-  }
-  if (targetStep <= configStore.worldStateSteps.length - 1 && targetStep >= 0) {
+  if (
+    targetStep >= 0 &&
+    targetStep < configStore.worldStateSteps.length
+  ) {
     configStore.currentStep = targetStep;
   } else {
-    alert("THIS STEP DOES NOT EXIST");
+    console.warn("STEP OUT OF RANGE", targetStep);
+    await uiStore.cloudsTransition?.hideClouds();
+    return;
   }
-  const currentStep = configStore.worldStateSteps[configStore.currentStep];
 
+  const currentStep = configStore.worldStateSteps[configStore.currentStep];
   const currentTemperature = currentStep.temperature;
 
-  worldStore.sceneParts.forEach((part) => {
-    if (part.name.includes("group")) {
-      const firstChild = part.children[0];
-      console.log(firstChild);
+  worldStore.paramsParts.forEach((part) => {
+    const firstChild = part.children[0];
+    console.log(firstChild);
 
-      if (!firstChild) return;
+    if (!firstChild) return;
 
-      const currentState = getCurrentState(
-        firstChild.userData,
-        currentTemperature
-      );
+    const currentState = getCurrentState(
+      firstChild.userData,
+      currentTemperature
+    );
 
-      if (!currentState) return;
+    if (!currentState) return;
 
-      part.children.forEach((child) => {
-        if (child.name.includes(currentState)) {
-          child.visible = true;
-        } else {
-          child.visible = false;
-        }
-      });
-    }
+    part.children.forEach((child) => {
+      if (child.name.includes(currentState)) {
+        child.visible = true;
+      } else {
+        child.visible = false;
+      }
+    });
+  });
 
-    //TODO regarder la hiérarchie du part.children.forEach
-    else if (part.name.includes("impact")) {
-      Object.entries(configStore.worldParams).forEach(([key, value]) => {
-        if (!part.name.includes(key)) return;
-
-        const paramValue = currentStep.params[key];
-
-        const levels = {
-          low: paramValue >= 25,
-          mid: paramValue >= 50,
-          high: paramValue >= 75,
-        };
-
-        part.children.forEach((child) => {
-          const level = Object.keys(levels).find((l) =>
-            child.name.includes(l)
-          ) as keyof typeof levels;
-          child.visible = level ? levels[level] : false;
-        });
-      });
-    }
+  Object.values(configStore.worldImpacts).forEach((impact) => {
+    updateIpmact(impact.name, currentStep.impacts[impact.name]);
   });
 
   await uiStore.cloudsTransition?.hideClouds();
+}
+
+function updateIpmact(
+  type: "fog" | "waterLevel" | "factory" | "rocks",
+  evolution: number
+) {
+  const worldStore = useWorld();
+  switch (type) {
+    case "fog":
+      // worldStore.impactsParts.fog.update(evolution) //function de la classe fog
+      break;
+    case "waterLevel":
+      const levelWater = getLevel(evolution);
+      worldStore.impactsParts.waterLevel?.children.forEach((child) => {
+        child.visible = child.name === levelWater;
+      });
+      break;
+    case "factory":
+      const levelFactory = getLevel(evolution);
+      worldStore.impactsParts.waterLevel?.children.forEach((child) => {
+        child.visible = child.name === levelFactory;
+      });
+      break;
+    case "rocks":
+      const levelRocks = getLevel(evolution);
+      worldStore.impactsParts.waterLevel?.children.forEach((child) => {
+        child.visible = child.name === levelRocks;
+      });
+      break;
+    default:
+      break;
+  }
+}
+
+function getLevel(evolution: number) {
+  if (evolution >= 75) return "high";
+  if (evolution >= 50) return "mid";
+  if (evolution >= 25) return "low";
+  return "normal";
 }
 
 function getCurrentState(
@@ -83,34 +101,12 @@ function getCurrentState(
   );
 }
 
-export function handleCameraMovements(
-  direction: "forward" | "back" | "left" | "right",
-  strength: number
-) {
+// export function handleCameraZoom(value: number) {
+//   const worldStore = useWorld();
+//   worldStore.camera?.zoom(value);
+// }
+
+export function goToCameraSpot(index: number) {
   const worldStore = useWorld();
-
-  if (strength === 0) {
-    worldStore.camera?.stopMoving();
-    return;
-  }
-
-  switch (direction) {
-    case "forward":
-      worldStore.camera?.moveForward(strength);
-      break;
-    case "back":
-      worldStore.camera?.moveBack(strength);
-      break;
-    case "left":
-      worldStore.camera?.moveLeft(strength);
-      break;
-    case "right":
-      worldStore.camera?.moveRight(strength);
-      break;
-  }
-}
-
-export function handleCameraZoom(value: number) {
-  const worldStore = useWorld();
-  worldStore.camera?.zoom(value);
+  worldStore.camera?.goToSpot(index);
 }

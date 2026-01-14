@@ -3,10 +3,22 @@ interface UserConfigItem {
   percentage: number;
 }
 
-export interface userConfigParams {
+export interface UserConfigType {
   plane: UserConfigItem;
   dailyTransport: UserConfigItem;
   food: UserConfigItem;
   energy: UserConfigItem;
   consumption: UserConfigItem;
+}
+
+interface impactType {
+  name: "fog" | "waterLevel" | "factory" | "rocks";
+  value: number;
+}
+
+export interface worldImpactsType {
+  fog: impactType;
+  waterLevel: impactType;
+  factory: impactType;
+  rocks: impactType;
 }

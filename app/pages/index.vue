@@ -5,399 +5,598 @@ import {
   revealElements,
 } from "~/webgl/scene/config";
 import {
-  handleCameraMovements,
-  handleCameraZoom,
   moveToStep,
-  sceneTransition,
+  goToCameraSpot,
 } from "~/webgl/scene/experience";
 import { useSocket } from "~/composables/useSocket";
 import { useSocketHandler } from "~/composables/useSocketHandler";
 import QRCode from "qrcode";
 import CloudsTransition from "~/webgl/scene/Clouds";
+import gsap from "gsap";
+import { delay } from "~/webgl/utils";
 
+
+const modalResults = ref();
 const { connect, joinRoom, sendAction, on } = useSocket();
-const { listenForUpdates } = useSocketHandler();
+const { listenForUpdates } = useSocketHandler(modalResults);
 
 const uiStore = useUi();
+const configStore = useConfig();
 
-const isDebug = ref<boolean>(true);
+const loaderProgress = ref<HTMLElement>();
+const loaderContainer = ref<HTMLElement>();
+const appLogo = ref<HTMLElement>();
+const qrCode = ref<HTMLElement>();
+const qrCodeText = ref<HTMLElement>();
+const modalPhone = ref();
+const modalConfig = ref();
 
-const id = Math.random().toString(36).substring(2, 10);
-const roomId = id;
+
+const webglContainer = ref<HTMLElement>();
+
+const isSceneLoaded = ref<boolean>(false);
+
+const webSocketStore = useWebSocket();
+async function loaderAnim() {
+  return gsap
+    .timeline({
+      defaults: { ease: "power1.inOut" },
+    })
+    .to(loaderProgress.value!, { width: "19%" })
+    .to(
+      loaderProgress.value!,
+      { width: "42%", backgroundColor: "var(--pink)" },
+      ">0.3"
+    )
+    .to(
+      loaderProgress.value!,
+      {
+        width: "84%",
+        backgroundColor: "var(--yellow)",
+      },
+      ">0.3"
+    );
+}
+
+async function completeLoader() {
+  return gsap.timeline().to(loaderProgress.value!, {
+    width: "100%",
+    backgroundColor: "var(--green)",
+    onComplete: () => {
+      uiStore.isLoaded = true;
+    },
+  });
+}
+
+async function revealQr() {
+  return gsap
+    .timeline({ defaults: { duration: 0.5 } })
+    .fromTo(
+      webglContainer.value!,
+      { opacity: 0 },
+      { opacity: 1, duration: 1 },
+      0
+    )
+    .to(
+      appLogo.value!,
+      { top: "100px", width: "24vw", ease: "power1.inOut" },
+      0
+    )
+    .to(loaderContainer.value!, { opacity: 0 }, 0)
+    .fromTo(
+      qrCode.value!,
+      {
+        scale: 0.3,
+        opacity: 0,
+        rotation: -90,
+        transform: "translate(-50%, -50%)  scale(0.3)",
+      },
+      {
+        opacity: 1,
+        rotation: 0,
+        transform: "translate(-50%, -50%)  scale(1.0)",
+      },
+      0.15
+    )
+    .to(qrCodeText.value!, { opacity: 1 }, 0);
+}
+
+async function revealMap() {
+  return gsap
+    .timeline({
+      defaults: { ease: "cubic-bezier(0.25, 0.95, 0, 1)", duration: 0.75 },
+      onStart() {
+        uiStore.cloudsTransition?.hideClouds();
+      },
+    })
+    .to(qrCode.value!, {
+      scale: 0.6,
+      opacity: 0,
+      rotation: -90,
+    })
+    .to(qrCodeText.value!, { opacity: 0 }, 0)
+    .to(appLogo.value!, { top: 0, width: "18vw" }, 0);
+}
+
+watch(
+  () => webSocketStore.isRoomFull,
+  async (newValue) => {
+    console.log("isRoomFull", newValue);
+    if (newValue) {
+      await delay(1000);
+      revealMap();
+      await delay(1400);
+      animConfigModals();
+    }
+  }
+);
+
+async function animConfigModals() {
+  await modalPhone.value.revealModal();
+  await delay(600);
+  await modalPhone.value.hideModal();
+  await delay(1000);
+  await modalConfig.value.revealContainer();
+  await delay(500);
+  if (configStore?.isFormValidated) return;
+  await modalConfig.value.revealModal2();
+  await delay(500);
+  if (configStore?.isFormValidated) return;
+  await modalConfig.value.revealModal3();
+}
+
+watch(
+  () => configStore?.isFormValidated,
+  async (newValue) => {
+    if (newValue) {
+      modalConfig?.value?.hideModals();
+    }
+  }
+);
 
 onMounted(async () => {
-  await initScene();
+  // return;
+  console.log("______");
+
+  connectToWsServer();
+
+  const tl = loaderAnim();
+
+  isSceneLoaded.value = true;
+
+  await Promise.all([initScene(), tl.then()]);
+
   uiStore.cloudsTransition = new CloudsTransition();
 
-  // setTimeout(() => {
-  //   uiStore.cloudsTransition?.showClouds();
-  //   //   sceneTransition();
-  // }, 500);
+  await completeLoader();
 
-  uiStore.isLoaded = true;
-  listenForUpdates();
-  if (!isDebug) {
+  await revealQr();
+  
+});
+
+function connectToWsServer() {
+  nextTick(() => {
+    const id = Math.random().toString(36).substring(2, 10);
+    const roomId = id;
+    // const roomId = "ROOM_1";
     connect();
     on("connect", () => {
-      joinRoom(roomId);
+      console.log("Client Socket.io connectéeeeeee");
 
-      nextTick(() => {
-        const canvasQr = document.querySelector(".qrcode") as HTMLCanvasElement;
-        if (canvasQr) {
-          QRCode.toCanvas(canvasQr, roomId, function (error: any) {
-            if (error) console.error(error);
-          });
-        } else {
-          console.error("Canvas .qrcode introuvable");
-        }
-      });
+      listenForUpdates();
+
+
+      joinRoom(roomId);
+      const canvasQr = document.querySelector(
+        ".qrcode .inner"
+      ) as HTMLCanvasElement;
+      if (canvasQr) {
+        QRCode.toCanvas(canvasQr, roomId, function (error: any) {
+          if (error) console.error(error);
+        });
+      } else {
+        console.error("Canvas .qrcode introuvable");
+      }
     });
-  }
-});
-const worldStore = useWorld();
-const webSocketStore = useWebSocket();
+  });
+}
 
 const userData = {
-  plane: 42,
-  transport: 85,
+  plane: 100,
+  transport: 100,
   meat: 70,
   promptIA: 55,
   products: 30,
   phone: 10,
-  energy: 68,
+  energy: 100,
   clothes: 90,
 };
 
-// const userData = {
-//   plane: 0,
-//   transport: 0,
-//   meat: 100,
-//   promptIA: 0,
-//   products: 0,
-//   phone: 0,
-//   energy: 0,
-//   clothes: 0,
-// };
-// const userData = {
-//   plane: 100,
-//   transport: 100,
-//   meat: 100,
-//   promptIA: 100,
-//   products: 100,
-//   phone: 100,
-//   energy: 100,
-//   clothes: 100,
-// };
-
-// const roomId = "ROOM_1";
-
-function handleWsCo() {
-  connect();
-  on("connect", () => {
-    joinRoom(roomId);
-    console.log("test");
-  });
-  console.log(webSocketStore.isConnected);
+function showResult() {
+  modalResults.value.revealResultsModal();
+}
+function showExplanations() {
+  modalResults.value.showExplanations();
+}
+function changeQuestion() {
+  modalResults.value.changeQuestion();
 }
 
-const zoomState = ref<number>(0);
 
-function zoom(direction: string) {
-  if (direction === "up") {
-    zoomState.value += 1;
+function debugGoToYear(year: number) {
+  const index = configStore.worldStateSteps.findIndex((s) => s.year === year);
+  
+  if (index !== -1) {
+    moveToStep(index);
   } else {
-    zoomState.value -= 1;
+    console.log("prblm de year");
   }
-  zoomState.value = Math.max(zoomState.value, -10);
-  zoomState.value = Math.min(zoomState.value, 10);
-
-  handleCameraZoom(zoomState.value);
 }
+
+
 </script>
 
 <template>
-  <div class="webgl">
-    <canvas></canvas>
+  <button
+    @click="handleFormValidations(userData)"
+    style="position: fixed; top: 0; z-index: 2"
+  >
+    FORM validation
+  </button>
+
+  <div style="position: fixed; top: 70px; display: flex; gap: 5px; z-index: 2;">
+    <button @click="debugGoToYear(2025)">2025</button>
+    <button @click="debugGoToYear(2050)">2050</button>
+    <button @click="debugGoToYear(2075)">2075</button>
+    <button @click="debugGoToYear(2100)">2100</button>
   </div>
-  <section v-if="isDebug">
-    <transition>
-      <div class="loader" v-if="!uiStore.isLoaded">
-        <h1>2100 currently loading...</h1>
+
+  <button @click="showResult()" style="position: fixed; top: 120px; z-index: 2">
+    Finish experience
+  </button>
+  <button
+    @click="showExplanations()"
+    style="position: fixed; top: 160px; z-index: 2"
+  >
+    Show explanations
+  </button>
+  <button
+    @click="changeQuestion()"
+    style="position: fixed; top: 200px; z-index: 2"
+  >
+    changeQuestions
+  </button>
+
+  <div class="controls">
+    <div class="camera">
+      <div class="direction">
+        <button @click="goToCameraSpot(0)">spot 1</button>
+        <button @click="goToCameraSpot(1)">spot 2</button>
+        <button @click="goToCameraSpot(2)">spot 3</button>
       </div>
-    </transition>
-    <transition>
-      <div class="intro" v-if="!webSocketStore.isConnected && uiStore.isLoaded">
-        <button @click="handleWsCo">Co to server</button>
-      </div>
-    </transition>
-    <transition>
-      <div
-        class="form"
-        v-if="webSocketStore.isConnected && !uiStore.isFormValidated"
-      >
-        <div class="buttons">
-          <button @click="revealElements">formstep validate</button>
-          <button @click="handleFormValidations(userData)">
-            VALIDATE FORM
-          </button>
-        </div>
-      </div>
-    </transition>
-    <transition>
-      <div class="experience" v-if="uiStore.isFormValidated">
-        <div class="controls">
-          <div class="step">
-            <button @click="moveToStep('previous')">previous</button>
-            <button @click="moveToStep('next')">next</button>
-          </div>
-          <div class="camera">
-            <div class="direction">
-              <button
-                @mousedown="handleCameraMovements('forward', 5)"
-                @mouseup="handleCameraMovements('forward', 0)"
-              >
-                forward
-              </button>
-              <button
-                @mousedown="handleCameraMovements('back', 5)"
-                @mouseup="handleCameraMovements('back', 0)"
-              >
-                back
-              </button>
-              <button
-                @mousedown="handleCameraMovements('left', 5)"
-                @mouseup="handleCameraMovements('left', 0)"
-              >
-                left
-              </button>
-              <button
-                @mousedown="handleCameraMovements('right', 5)"
-                @mouseup="handleCameraMovements('right', 0)"
-              >
-                right
-              </button>
-            </div>
-            <div class="zoom">
-              <button @mousedown="zoom('down')">down</button>
-              <button @mousedown="zoom('up')">up</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </transition>
-    <div class="clouds-transition">
-      <img class="cloud" src="/assets/cloud.webp" alt="" />
-      <img class="cloud" src="/assets/cloud.webp" alt="" />
-      <img class="cloud" src="/assets/cloud.webp" alt="" />
-      <img class="cloud" src="/assets/cloud.webp" alt="" />
     </div>
-  </section>
-  <section v-else>
-    <transition>
-      <div class="loader" v-if="!uiStore.isLoaded">
-        <h1>2100 currently loading...</h1>
+  </div>
+
+  <main>
+    
+    
+    <div class="intro">
+      <div class="logo" ref="appLogo">
+        <img src="/images/logo.webp" alt="" />
       </div>
-    </transition>
-    <transition>
-      <div class="intro" v-if="!webSocketStore.isRoomFull && uiStore.isLoaded">
-        <h1>SCAN LE QR CODE POUR COMMENCER L'EXPERIENCE</h1>
-        <canvas class="qrcode" style="width: 500px; height: 500px"></canvas>
+      <div class="loader-progress" ref="loaderContainer">
+        <div class="inner" ref="loaderProgress"></div>
       </div>
-    </transition>
-    <transition>
-      <div
-        class="form"
-        v-if="webSocketStore.isRoomFull && !uiStore.isFormValidated"
-      >
-        <h2>REMPLISSER LE FORM SUR VORE PHONE</h2>
-        <div class="buttons">
-          <button @click="revealElements">formstep validate</button>
-          <button @click="handleFormValidations(userData)">
-            VALIDATE FORM
-          </button>
-        </div>
+
+      <div class="qrcode" ref="qrCode">
+        <canvas class="inner"></canvas>
       </div>
-    </transition>
-    <transition>
-      <div class="experience" v-if="uiStore.isFormValidated">
-        <div class="controls">
-          <div class="step">
-            <button @click="moveToStep('previous')">previous</button>
-            <button @click="moveToStep('next')">next</button>
-          </div>
-          <div class="camera">
-            <div class="direction">
-              <button
-                @mousedown="handleCameraMovements('forward', 5)"
-                @mouseup="handleCameraMovements('forward', 0)"
-              >
-                forward
-              </button>
-              <button
-                @mousedown="handleCameraMovements('back', 5)"
-                @mouseup="handleCameraMovements('back', 0)"
-              >
-                back
-              </button>
-              <button
-                @mousedown="handleCameraMovements('left', 5)"
-                @mouseup="handleCameraMovements('left', 0)"
-              >
-                left
-              </button>
-              <button
-                @mousedown="handleCameraMovements('right', 5)"
-                @mouseup="handleCameraMovements('right', 0)"
-              >
-                right
-              </button>
-            </div>
-            <div class="zoom">
-              <button @mousedown="zoom('down')">down</button>
-              <button @mousedown="zoom('up')">up</button>
-            </div>
-          </div>
-        </div>
+      <p class="qr-text" ref="qrCodeText">
+        Scan le code QR <br />
+        pour te connecter
+      </p>
+    </div>
+    <ModalPhone ref="modalPhone" />
+    <ModalConfig ref="modalConfig" />
+    <Timeline />
+    <ModalResults ref="modalResults" />
+
+    <!-- <section class="loader"></section> -->
+    <div class="webgl" ref="webglContainer">
+      <canvas></canvas>
+    </div>
+    <div class="clouds-transition" key="clouds">
+      <div class="cloud">
+        <img src="/images/cloud.webp" alt="" />
       </div>
-    </transition>
-  </section>
+      <div class="cloud">
+        <img src="/images/cloud.webp" alt="" />
+      </div>
+      <div class="cloud">
+        <img src="/images/cloud.webp" alt="" />
+      </div>
+      <div class="cloud">
+        <img src="/images/cloud.webp" alt="" />
+      </div>
+    </div>
+  </main>
 </template>
 
 <style lang="scss">
+main {
+  height: 100vh;
+  width: 100vw;
+  position: fixed;
+  > .intro {
+    z-index: 2;
+    position: fixed;
+    height: 100vh;
+    width: 100vw;
+    > .logo {
+      transform: rotate(-5.65deg);
+      width: 28vw;
+      position: absolute;
+      top: 28vh;
+      left: 50%;
+      transform: translateX(-50%);
+      > img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+    }
+    > .loader-progress {
+      position: absolute;
+      bottom: 28vh;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 25vw;
+
+      height: 52px;
+      padding: 10px;
+      border-radius: 24px;
+      box-shadow: 0 -2px 4px 0 rgba(0, 0, 0, 0.25) inset,
+        -26px 82px 24px 0 rgba(0, 0, 0, 0), -17px 52px 22px 0 rgba(0, 0, 0, 0),
+        -9px 29px 19px 0 rgba(0, 0, 0, 0.01),
+        -4px 13px 14px 0 rgba(0, 0, 0, 0.01), -1px 3px 8px 0 rgba(0, 0, 0, 0.02);
+      background: var(
+        --white-gradient,
+        linear-gradient(
+          0deg,
+          rgba(255, 255, 255, 0.5) 0%,
+          rgba(255, 255, 255, 0.5) 100%
+        ),
+        linear-gradient(180deg, #fcfcfc 0%, #d1d1d1 100%)
+      );
+      > .inner {
+        border-radius: 16px;
+        width: 0%;
+        height: 100%;
+        background-color: var(--blue);
+        box-shadow: 0 -2px 4px 0 rgba(0, 0, 0, 0.25) inset,
+          -26px 82px 24px 0 rgba(0, 0, 0, 0), -17px 52px 22px 0 rgba(0, 0, 0, 0),
+          -9px 29px 19px 0 rgba(0, 0, 0, 0.01),
+          -4px 13px 14px 0 rgba(0, 0, 0, 0.01),
+          -1px 3px 8px 0 rgba(0, 0, 0, 0.02);
+      }
+    }
+
+    > .qrcode {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      opacity: 0;
+      width: 15vw;
+      height: auto;
+      aspect-ratio: 1/1;
+      box-shadow: 0 1.8px 7.2px 0 rgba(0, 0, 0, 0.25);
+      border-radius: 32px;
+      background-color: #fff;
+      > canvas {
+        border-radius: 32px;
+        width: 100% !important;
+        height: 100% !important;
+      }
+    }
+    > .qr-text {
+      font-size: 2.5vw;
+      letter-spacing: 0.96px;
+      left: 50%;
+      position: absolute;
+      bottom: 100px;
+      transform: translateX(-50%);
+      text-align: center;
+      opacity: 0;
+    }
+  }
+}
+
+.webgl {
+  height: 100vh;
+  width: 100vw;
+  position: fixed;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  padding: 30px 30px 10vh;
+  box-sizing: border-box;
+
+  > canvas {
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 44px;
+    object-fit: cover;
+  }
+}
 .clouds-transition {
   height: 100vh;
   width: 100vw;
   position: fixed;
-  z-index: 100;
+  z-index: 1;
   top: 0;
-  display: none;
   pointer-events: none;
 
   > .cloud {
     position: absolute;
-    width: 130vw;
+    width: 150vw;
+    height: 100%;
     &:nth-of-type(1) {
-      left: -16%;
+      left: -40%;
+      top: -22%;
     }
     &:nth-of-type(2) {
-      right: -17%;
+      right: -46%;
       top: -37%;
       transform: rotate(180deg);
     }
     &:nth-of-type(3) {
-      left: -50%;
-      bottom: -50%;
+      left: -39%;
+      bottom: -31%;
     }
     &:nth-of-type(4) {
       left: 30%;
       bottom: -20%;
     }
+    > img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
   }
 }
 
-button {
-  width: fit-content;
-  padding: 12px 16px;
-  background-color: white;
-  border: 1px solid black;
-}
-.loader,
-.intro,
-.form,
-.experience {
-  top: 0;
-  height: 100vh;
-  width: 100vw;
+.year-indicator {
   position: fixed;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  font-size: 32px;
+  font-weight: bold;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+
+  .current {
+    color: black;
+  }
+
+  .preview {
+    color: #999;
+    font-size: 24px;
+  }
+}
+
+.direction{
+  position: fixed;
+  top: 30px;
   z-index: 2;
 }
-.loader,
-.intro {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: white;
-}
-.intro {
-  flex-direction: column;
-  gap: 42px;
-}
-.form {
-  display: flex;
-  flex-direction: column;
-  margin-top: 72px;
-  align-items: center;
-  > .buttons {
-    display: flex;
-    gap: 24px;
-  }
-}
-.experience {
-  > .controls {
-    display: flex;
-    flex-direction: column;
-    align-items: end;
-    right: 60px;
-    > .step {
-      display: flex;
-      gap: 24px;
-      margin-bottom: 92px;
-    }
-    > .camera {
-      > .direction {
-        width: 140px;
-        height: 140px;
-        position: relative;
-        > button {
-          position: absolute;
-          &:nth-of-type(1) {
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-          }
-          &:nth-of-type(2) {
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-          }
-          &:nth-of-type(3) {
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-          }
-          &:nth-of-type(4) {
-            right: 0;
-            top: 50%;
-            transform: translateY(-50%);
-          }
-        }
-      }
-      > .zoom {
-        margin-top: 42px;
-        display: flex;
-        gap: 24px;
-      }
-    }
-  }
-}
-.controls {
-  position: fixed;
-  left: 50%;
-  top: 200px;
-  z-index: 1;
-}
-.webgl {
-  width: 100vw;
-  height: 100vh;
-}
 
-.v-enter-active,
-.v-leave-active {
-  transition: opacity 0.5s;
-}
+// button {
+//   width: fit-content;
+//   padding: 12px 16px;
+//   background-color: white;
+//   border: 1px solid black;
+// }
+// .loader,
+// .intro,
+// .form,
+// .experience {
+//   top: 0;
+//   height: 100vh;
+//   width: 100vw;
+//   position: fixed;
+//   z-index: 2;
+// }
+// .loader,
+// .intro {
+//   display: flex;
+//   justify-content: center;
+//   align-items: center;
+//   background-color: white;
+// }
+// .intro {
+//   flex-direction: column;
+//   gap: 42px;
+// }
+// .form {
+//   display: flex;
+//   flex-direction: column;
+//   margin-top: 72px;
+//   align-items: center;
+//   > .buttons {
+//     display: flex;
+//     gap: 24px;
+//   }
+// }
+// .experience {
+//   > .controls {
+//     display: flex;
+//     flex-direction: column;
+//     align-items: end;
+//     right: 60px;
+//     > .step {
+//       display: flex;
+//       gap: 24px;
+//       margin-bottom: 92px;
+//     }
+//     > .camera {
+//       > .direction {
+//         width: 140px;
+//         height: 140px;
+//         position: relative;
+//         > button {
+//           position: absolute;
+//           &:nth-of-type(1) {
+//             top: 0;
+//             left: 50%;
+//             transform: translateX(-50%);
+//           }
+//           &:nth-of-type(2) {
+//             bottom: 0;
+//             left: 50%;
+//             transform: translateX(-50%);
+//           }
+//           &:nth-of-type(3) {
+//             left: 0;
+//             top: 50%;
+//             transform: translateY(-50%);
+//           }
+//           &:nth-of-type(4) {
+//             right: 0;
+//             top: 50%;
+//             transform: translateY(-50%);
+//           }
+//         }
+//       }
+//       > .zoom {
+//         margin-top: 42px;
+//         display: flex;
+//         gap: 24px;
+//       }
+//     }
+//   }
+// }
+// .controls {
+//   position: fixed;
+//   left: 50%;
+//   top: 200px;
+//   z-index: 1;
+// }
+// .webgl {
+//   width: 100vw;
+//   height: 100vh;
+// }
 
-.v-enter-from,
-.v-leave-to {
-  opacity: 0;
-}
+// .v-enter-active,
+// .v-leave-active {
+//   transition: opacity 0.5s;
+// }
+
+// .v-enter-from,
+// .v-leave-to {
+//   opacity: 0;
+// }
 </style>

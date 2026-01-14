@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import type { userConfigParams } from "~/types/config";
+import type { UserConfigType } from "~/types/config";
 import Camera from "./Camera";
 import { moveToStep } from "./experience";
 import gsap from "gsap";
@@ -55,11 +55,39 @@ export function initScene(): Promise<void> {
         const target = globalScene.getObjectByName("Scene");
         worldStore.scene3d = target as THREE.Group;
 
+        // spots pov
+        const spots = [
+          gltf.scene.getObjectByName("spot-1"),
+          gltf.scene.getObjectByName("spot-2"),
+          gltf.scene.getObjectByName("spot-3")
+        ].filter(Boolean).map(s => markRaw(s));
+        
+        worldStore.camera = new Camera();
+        worldStore.camera.setSpots(
+          spots,
+          [
+            new THREE.Vector3(100, 0, 0),
+            new THREE.Vector3(100, 0, -10),
+            new THREE.Vector3(-5, 0, 5),
+          ]
+        );
+        worldStore.camera.goToSpot(0);
+
+
+
         const sceneChildrens = worldStore.scene3d?.children;
 
         sceneChildrens?.forEach((child) => {
-          if (child.name.includes("group") || child.name.includes("impact")) {
-            worldStore.sceneParts.push(child);
+          if (child.name.includes("group")) {
+            worldStore.paramsParts.push(child);
+          } else if (child.name.includes("impacts")) {
+            if (child.name.includes("waterLevel")) {
+              worldStore.impactsParts.waterLevel = child;
+            } else if (child.name.includes("factory")) {
+              worldStore.impactsParts.factory = child;
+            } else if (child.name.includes("rocks")) {
+              worldStore.impactsParts.rocks = child;
+            }
           }
         });
         setupInstances();
@@ -108,7 +136,7 @@ function setupInstances() {
   const targetGroups: Record<string, THREE.Group> = {};
 
   //stock meshes in objects
-  worldStore.sceneParts.forEach((group) => {
+  worldStore.paramsParts.forEach((group) => {
     allMeshes[group.name] = {};
 
     if (!group.name.includes("group")) return;
@@ -130,7 +158,7 @@ function setupInstances() {
       });
     });
   });
-  worldStore.sceneParts = [];
+  worldStore.paramsParts = [];
 
   //create instances
   Object.values(allMeshes).forEach((meshesType) => {
@@ -182,8 +210,8 @@ function setupInstances() {
 
       //stock mesh in store object
       worldStore.sceneMeshes[taregtGroup] = targetGroups[taregtGroup];
-      if (!worldStore.sceneParts.includes(targetGroups[taregtGroup])) {
-        worldStore.sceneParts.push(targetGroups[taregtGroup]);
+      if (!worldStore.paramsParts.includes(targetGroups[taregtGroup])) {
+        worldStore.paramsParts.push(targetGroups[taregtGroup]);
       }
 
       //delete old meshes
@@ -224,7 +252,7 @@ function setupInstances() {
     allMeshes[object.parent!.parent!.name][type].push(object);
   }
 
-  console.log(worldStore.sceneParts);
+  console.log(worldStore.paramsParts);
 }
 
 export function hideElements() {
@@ -259,12 +287,12 @@ export function revealElements() {
   }
 }
 
-export function handleFormValidations(userData: userConfigParams) {
+export function handleFormValidations(userData: UserConfigType) {
   const uiStore = useUi();
   const configStore = useConfig();
   const finalUserData: any = {};
 
-  uiStore.isFormValidated = true;
+  configStore.isFormValidated = true;
   const worldStore = useWorld();
   worldStore.camera?.entryAnim();
 
@@ -272,49 +300,49 @@ export function handleFormValidations(userData: userConfigParams) {
     switch (key) {
       case "plane":
         finalUserData.plane = {
-          weight: configStore.worldParams[key].weight,
+          weight: configStore.worldParams[key].globalWeight,
           percentage: value,
         };
         break;
       case "transport":
         finalUserData.transport = {
-          weight: configStore.worldParams[key].weight,
+          weight: configStore.worldParams[key].globalWeight,
           percentage: value,
         };
         break;
       case "meat":
         finalUserData.meat = {
-          weight: configStore.worldParams[key].weight,
+          weight: configStore.worldParams[key].globalWeight,
           percentage: value,
         };
         break;
       case "promptIA":
         finalUserData.promptIA = {
-          weight: configStore.worldParams[key].weight,
+          weight: configStore.worldParams[key].globalWeight,
           percentage: value,
         };
         break;
       case "products":
         finalUserData.products = {
-          weight: configStore.worldParams[key].weight,
+          weight: configStore.worldParams[key].globalWeight,
           percentage: value,
         };
         break;
       case "phone":
         finalUserData.phone = {
-          weight: configStore.worldParams[key].weight,
+          weight: configStore.worldParams[key].globalWeight,
           percentage: value,
         };
         break;
       case "energy":
         finalUserData.energy = {
-          weight: configStore.worldParams[key].weight,
+          weight: configStore.worldParams[key].globalWeight,
           percentage: value,
         };
         break;
       case "clothes":
         finalUserData.clothes = {
-          weight: configStore.worldParams[key].weight,
+          weight: configStore.worldParams[key].globalWeight,
           percentage: value,
         };
         break;
@@ -333,26 +361,9 @@ export function handleFormValidations(userData: userConfigParams) {
 
 function calculateExperienceSteps() {
   const configStore = useConfig();
-  const currentYear = configStore.configParams.currentYear;
-  const targetYear = configStore.configParams.targetYear;
-  const yearsPerStep = configStore.configParams.yearsStep;
-
-  const stepYears: number[] = [currentYear];
-
-  let nextYear = currentYear + yearsPerStep;
-  while (nextYear < targetYear - yearsPerStep) {
-    stepYears.push(nextYear);
-    nextYear += yearsPerStep;
-  }
-
-  if (stepYears[stepYears.length - 1] !== targetYear) {
-    stepYears.push(targetYear);
-  }
-
+  const stepYears = [2025, 2050, 2075, 2100];
   const totalSteps = stepYears.length - 1;
-
   const worldStateSteps = [];
-
   const targetTemperature = calculateMaxTemperature();
 
   for (let i = 0; i <= totalSteps; i++) {
@@ -360,6 +371,7 @@ function calculateExperienceSteps() {
 
     const worldState: any = {
       params: {},
+      impacts: {},
     };
     worldState.year = stepYears[i];
     Object.entries(configStore.userConfig).forEach(([key, value]) => {
@@ -369,6 +381,27 @@ function calculateExperienceSteps() {
       configStore.configParams.currentTemperature +
       progress *
         (targetTemperature - configStore.configParams.currentTemperature);
+
+    const currentWorldImpacts = {} as any;
+    Object.keys(configStore.worldImpacts).forEach((impactKey) => {
+      currentWorldImpacts[impactKey] = {
+        value: 0,
+      };
+    });
+
+    Object.values(configStore.worldParams).forEach((param: any) => {
+      const paramValue = worldState.params[param.name];
+
+      if (paramValue !== undefined) {
+        param.impacts.forEach((impact: any) => {
+          if (currentWorldImpacts[impact.type]) {
+            currentWorldImpacts[impact.type].value +=
+              paramValue * impact.weight;
+          }
+        });
+      }
+    });
+    worldState.impacts = currentWorldImpacts;
     worldStateSteps.push(worldState);
   }
   configStore.worldStateSteps = worldStateSteps;
@@ -384,6 +417,8 @@ function calculateMaxTemperature() {
     const weight = value.weight;
     return acc + value.percentage * weight;
   }, 0);
+
+  configStore.globalPercentage = globalPercentage;
   let targetTemp: number;
   if (configStore.configParams.pivotScore >= globalPercentage) {
     console.log("POLLUE PAS");
@@ -430,13 +465,13 @@ function setupObjectsData() {
     water: configStore.objectsData.water,
   };
 
-  worldStore.sceneParts.forEach((scenePart) => {
+  worldStore.paramsParts.forEach((paramPart) => {
     const objectType = Object.keys(objectDataMap).find((key) =>
-      scenePart.name.includes(key)
+      paramPart.name.includes(key)
     );
 
     if (objectType) {
-      scenePart.children.forEach((child) => {
+      paramPart.children.forEach((child) => {
         child.userData = objectDataMap[objectType];
       });
     }
