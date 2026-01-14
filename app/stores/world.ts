@@ -1,14 +1,20 @@
 import * as THREE from "three";
 import type Camera from "~/webgl/scene/Camera";
 
+interface FogControls {
+  updateFogColor: (color: THREE.Color) => void;
+  updateFogDistance: (min: number, max: number) => void;
+  updateFogDensity: (density: number) => void;
+}
+
 export const useWorld = defineStore("useWorld", () => {
   const globalScene = ref<THREE.Scene>();
   const scene3d = ref<THREE.Group | null>(null);
   const paramsParts = ref<THREE.Object3D[]>([]);
-  // const impactsParts = ref<THREE.Object3D[]>([]);
   const hiddenSceneParts = ref<any[]>([]);
   const camera = ref<Camera>();
   const sceneMeshes = ref<Record<string, THREE.Group>>({});
+  const fogControls = ref<FogControls | null>(null);
 
   const impactsParts = {
     fog: null as any,
@@ -25,5 +31,6 @@ export const useWorld = defineStore("useWorld", () => {
     hiddenSceneParts,
     camera,
     sceneMeshes,
+    fogControls,
   };
 });

@@ -98,11 +98,6 @@ export const useConfig = defineStore("useConfig", () => {
       normal: 1.2,
       best: 0.2,
     },
-    water: {
-      worst: 2.5,
-      normal: 1.2,
-      best: 0.5,
-    },
   };
 
   const userConfig: Partial<UserConfigType> = {};
@@ -110,6 +105,10 @@ export const useConfig = defineStore("useConfig", () => {
   const worldStateSteps: any[] = [];
 
   const currentStep = ref<number>(0);
+
+  const isFormValidated = ref<boolean>(false);
+
+  const globalPercentage = ref<number>(0);
 
   return {
     formParams,
@@ -120,5 +119,7 @@ export const useConfig = defineStore("useConfig", () => {
     worldStateSteps,
     objectsData,
     currentStep,
+    isFormValidated,
+    globalPercentage,
   };
 });

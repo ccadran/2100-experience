@@ -3,7 +3,9 @@ import gsap from "gsap";
 export default class CloudsTransition {
   clouds: HTMLElement[];
   cloudsContainer: HTMLElement;
-  cloudsTimeline: gsap.core.Timeline;
+  showTimeline: gsap.core.Timeline;
+  hideTimeline: gsap.core.Timeline;
+
   constructor() {
     const cloud1 = document.querySelector(
       ".clouds-transition .cloud:nth-of-type(1)"
@@ -24,42 +26,57 @@ export default class CloudsTransition {
 
     this.clouds = [cloud1, cloud2, cloud3, cloud4];
     this.cloudsContainer = cloudsContainer;
-    this.cloudsContainer.style.display = "block";
 
-    this.cloudsTimeline = gsap.timeline({ paused: true });
-
-    this.cloudsTimeline
-      .fromTo(
-        this.clouds[0]!,
-        { x: "100%" },
-        { x: "0%", duration: 0.75, ease: "power2.out" },
-        0
-      )
-      .fromTo(
+    // Timeline pour show
+    this.showTimeline = gsap.timeline({ paused: true });
+    this.showTimeline
+      .to(this.clouds[0]!, { x: "0%", duration: 0.75, ease: "power2.out" }, 0)
+      .to(
         this.clouds[1]!,
-        { x: "-100%" },
         { x: "0%", duration: 0.75, ease: "power2.out" },
         0.15
       )
-      .fromTo(
+      .to(
         this.clouds[2]!,
-        { x: "120%" },
         { x: "0%", duration: 0.75, ease: "power2.out" },
         0.25
       )
-      .fromTo(
+      .to(
         this.clouds[3]!,
-        { x: "100%" },
         { x: "0%", duration: 0.75, ease: "power2.out" },
         0.3
+      );
+
+    // Timeline pour hide
+    this.hideTimeline = gsap.timeline({ paused: true });
+    this.hideTimeline
+      .to(
+        this.clouds[0]!,
+        { x: "-100%", duration: 0.75, ease: "cubic-bezier(0.25, 0.95, 0, 1)" },
+        0
+      )
+      .to(
+        this.clouds[1]!,
+        { y: "-100%", duration: 0.75, ease: "cubic-bezier(0.25, 0.95, 0, 1)" },
+        0.15
+      )
+      .to(
+        this.clouds[2]!,
+        { x: "-120%", duration: 0.75, ease: "cubic-bezier(0.25, 0.95, 0, 1)" },
+        0.2
+      )
+      .to(
+        this.clouds[3]!,
+        { x: "100%", duration: 0.75, ease: "cubic-bezier(0.25, 0.95, 0, 1)" },
+        0.25
       );
   }
 
   async showClouds() {
-    await this.cloudsTimeline.play(0).then();
+    await this.showTimeline.restart().then();
   }
 
   async hideClouds() {
-    await this.cloudsTimeline.reverse().then();
+    await this.hideTimeline.restart().then();
   }
 }
