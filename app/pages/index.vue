@@ -6,7 +6,6 @@ import {
 } from "~/webgl/scene/config";
 import {
   moveToStep,
-  sceneTransition,
   goToCameraSpot,
 } from "~/webgl/scene/experience";
 import { useSocket } from "~/composables/useSocket";
@@ -16,22 +15,13 @@ import CloudsTransition from "~/webgl/scene/Clouds";
 import gsap from "gsap";
 import { delay } from "~/webgl/utils";
 
+
+const modalResults = ref();
 const { connect, joinRoom, sendAction, on } = useSocket();
-const { listenForUpdates } = useSocketHandler();
+const { listenForUpdates } = useSocketHandler(modalResults);
 
 const uiStore = useUi();
 const configStore = useConfig();
-
-const isDebug = ref<boolean>(true);
-
-const currentYear = computed(() => {
-  const step = configStore.worldStateSteps[configStore.currentStep];
-  return step?.year ?? null;
-});
-
-const previewYear = computed(() => {
-  return uiStore.previewYear;
-});
 
 const loaderProgress = ref<HTMLElement>();
 const loaderContainer = ref<HTMLElement>();
@@ -40,7 +30,7 @@ const qrCode = ref<HTMLElement>();
 const qrCodeText = ref<HTMLElement>();
 const modalPhone = ref();
 const modalConfig = ref();
-const modalResults = ref();
+
 
 const webglContainer = ref<HTMLElement>();
 
@@ -131,6 +121,7 @@ async function revealMap() {
 watch(
   () => webSocketStore.isRoomFull,
   async (newValue) => {
+    console.log("isRoomFull", newValue);
     if (newValue) {
       await delay(1000);
       revealMap();
@@ -147,18 +138,18 @@ async function animConfigModals() {
   await delay(1000);
   await modalConfig.value.revealContainer();
   await delay(500);
-  if (configStore.isFormValidated) return;
+  if (configStore?.isFormValidated) return;
   await modalConfig.value.revealModal2();
   await delay(500);
-  if (configStore.isFormValidated) return;
+  if (configStore?.isFormValidated) return;
   await modalConfig.value.revealModal3();
 }
 
 watch(
-  () => configStore.isFormValidated,
+  () => configStore?.isFormValidated,
   async (newValue) => {
     if (newValue) {
-      modalConfig.value.hideModals();
+      modalConfig?.value?.hideModals();
     }
   }
 );
@@ -180,16 +171,21 @@ onMounted(async () => {
   await completeLoader();
 
   await revealQr();
-  listenForUpdates();
+  
 });
 
 function connectToWsServer() {
   nextTick(() => {
     const id = Math.random().toString(36).substring(2, 10);
-    // const roomId = id;
-    const roomId = "ROOM_1";
+    const roomId = id;
+    // const roomId = "ROOM_1";
     connect();
     on("connect", () => {
+      console.log("Client Socket.io connectéeeeeee");
+
+      listenForUpdates();
+
+
       joinRoom(roomId);
       const canvasQr = document.querySelector(
         ".qrcode .inner"
@@ -217,7 +213,7 @@ const userData = {
 };
 
 function showResult() {
-  modalResults.value.revealModal();
+  modalResults.value.revealResultsModal();
 }
 function showExplanations() {
   modalResults.value.showExplanations();
@@ -225,6 +221,19 @@ function showExplanations() {
 function changeQuestion() {
   modalResults.value.changeQuestion();
 }
+
+
+function debugGoToYear(year: number) {
+  const index = configStore.worldStateSteps.findIndex((s) => s.year === year);
+  
+  if (index !== -1) {
+    moveToStep(index);
+  } else {
+    console.log("prblm de year");
+  }
+}
+
+
 </script>
 
 <template>
@@ -234,18 +243,14 @@ function changeQuestion() {
   >
     FORM validation
   </button>
-  <button
-    @click="moveToStep('next')"
-    style="position: fixed; top: 0; z-index: 2"
-  >
-    next step
-  </button>
-  <button
-    @click="moveToStep('previous')"
-    style="position: fixed; top: 80px; z-index: 2"
-  >
-    previous step
-  </button>
+
+  <div style="position: fixed; top: 70px; display: flex; gap: 5px; z-index: 2;">
+    <button @click="debugGoToYear(2025)">2025</button>
+    <button @click="debugGoToYear(2050)">2050</button>
+    <button @click="debugGoToYear(2075)">2075</button>
+    <button @click="debugGoToYear(2100)">2100</button>
+  </div>
+
   <button @click="showResult()" style="position: fixed; top: 120px; z-index: 2">
     Finish experience
   </button>
@@ -262,32 +267,17 @@ function changeQuestion() {
     changeQuestions
   </button>
 
-  <main>
-    
-    <div class="experience" v-if="uiStore.isFormValidated">
-        <div class="year-indicator">
-          <span class="current">
-            {{ currentYear }}
-          </span>
-          <span v-if="previewYear && previewYear !== currentYear" class="preview"> 
-            → {{ previewYear }}
-          </span>
-        </div>
-      
-        <div class="controls">
-          <div class="step">
-            <button @click="moveToStep('previous')">previous</button>
-            <button @click="moveToStep('next')">next</button>
-          </div>
-          <div class="camera">
-            <div class="direction">
-              <button @click="goToCameraSpot('0')">spot 1</button>
-              <button @click="goToCameraSpot('1')">spot 2</button>
-              <button @click="goToCameraSpot('2')">spot 3</button>
-            </div>
-          </div>
-        </div>
+  <div class="controls">
+    <div class="camera">
+      <div class="direction">
+        <button @click="goToCameraSpot(0)">spot 1</button>
+        <button @click="goToCameraSpot(1)">spot 2</button>
+        <button @click="goToCameraSpot(2)">spot 3</button>
+      </div>
     </div>
+  </div>
+
+  <main>
     
     
     <div class="intro">
@@ -496,6 +486,12 @@ main {
     color: #999;
     font-size: 24px;
   }
+}
+
+.direction{
+  position: fixed;
+  top: 30px;
+  z-index: 2;
 }
 
 // button {

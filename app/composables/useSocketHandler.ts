@@ -1,13 +1,5 @@
-import {
-  changeQuestion,
-  revealResultsModal,
-  showExplanations,
-} from "~/components/modal/results.vue";
 import { handleFormValidations, revealElements } from "~/webgl/scene/config";
-import {
-  moveToStep,
-  goToCameraSpot
-} from "~/webgl/scene/experience";
+import { moveToStep, goToCameraSpot } from "~/webgl/scene/experience";
 
 interface IncomingPayload {
   type: string;
@@ -15,104 +7,111 @@ interface IncomingPayload {
   [key: string]: any;
 }
 
-export function useSocketHandler() {
+export function useSocketHandler(
+  modalResultsRef: Ref<
+    | {
+        revealResultsModal: () => void;
+        showExplanations: () => Promise<void>;
+        changeQuestion: (target: number) => Promise<void>;
+      }
+    | null
+  >
+) {
   const webSocketStore = useWebSocket();
-  console.log(webSocketStore.isConnected);
+  console.log("WebSocket connected:", webSocketStore.isConnected);
 
   const { on, off } = useSocket();
 
-
-  // 2s d'attente avant de changer d'annee
+  // Gestion du changement d'année avec délai
   let pendingYear: number | null = null;
   let yearValidationTimeout: ReturnType<typeof setTimeout> | null = null;
   const YEAR_VALIDATION_DELAY = 2000;
 
   function handleIncomingPayload(payload: IncomingPayload) {
-    console.log(payload);
+    console.log("Incoming payload:", payload);
 
     switch (payload.type) {
-      /*_______FORMS_____*/
+      /*------- FORMS -------*/
       case "REVEAL":
-        console.log("PAYLOAD SEND A REVEAL TASK");
-
+        console.log("Payload → REVEAL");
         revealElements();
         break;
-      case "VALIDATE_FORM":
-        console.log("data", payload.data);
 
+      case "VALIDATE_FORM":
+        console.log("Payload → VALIDATE_FORM", payload.data);
         handleFormValidations(payload.data);
-        console.log("PAYLOAD SEND A COMPLETE FORM");
         break;
 
-        
-      /*__________YEAR CONTROL_________*/
+      /*------- YEAR CONTROL -------*/
       case "YEARS": {
         const uiStore = useUi();
         const configStore = useConfig();
 
         const year = payload.data.strength;
+
+        const stepIndex = configStore.worldStateSteps.findIndex(
+          (step) => step.year === year
+        );
+        if (stepIndex === -1) return;
+
+        // 🔴 PREVIEW LIVE
+        uiStore.previewStep = stepIndex;
         pendingYear = year;
-        uiStore.previewYear = year;
 
-        if (yearValidationTimeout) {
-          clearTimeout(yearValidationTimeout);
-        }
+        if (yearValidationTimeout) clearTimeout(yearValidationTimeout);
 
-        yearValidationTimeout = setTimeout(() => {
-          const stepIndex = configStore.worldStateSteps.findIndex(
-            (step) => step.year === pendingYear
-          );
-
-          if (stepIndex === -1) return;
-
-          if (
-            configStore.worldStateSteps[configStore.currentStep]?.year ===
-            pendingYear
-          ) {
-            uiStore.previewYear = null;
-            pendingYear = null;
-            return;
+        yearValidationTimeout = setTimeout(async () => {
+          if (configStore.currentStep !== stepIndex) {
+            await moveToStep(stepIndex);
           }
 
-          moveToStep(stepIndex);
-
-          uiStore.previewYear = null;
+          uiStore.previewStep = null;
           pendingYear = null;
           yearValidationTimeout = null;
         }, YEAR_VALIDATION_DELAY);
+
         break;
       }
 
 
-      //to mobile
-      case "WORLD_STEPS":
-        console.log("PAYLOAD SEND THE WORLD STATES");
-        break;
-
-      /*__________CAMERA CONTOLS_______*/
+      /*------- CAMERA CONTROLS -------*/
       case "CAMERA_SPOT": {
         const index = payload.data.strength - 1;
         goToCameraSpot(index);
-        console.log("CAMERA_SPOT → go to spot", index);
+        console.log("Camera → go to spot", index);
         break;
       }
 
-      /*_______EXPERIENCE END_________*/
-      //END
+      /*------- EXPERIENCE END -------*/
       case "END_EXPERIENCE":
-        revealResultsModal();
-        console.log("PAYLOAD SEND A END EXPERIENCE");
-      //EXPLANATIONS
+        modalResultsRef.value?.revealResultsModal();
+        console.log("Payload → END_EXPERIENCE");
+        break;
+
+      /*------- SHOW EXPLANATIONS -------*/
       case "SHOW_EXPLANATIONS":
-        showExplanations();
-        console.log("PAYLOAD SEND A SHOW EXPLANATIONS");
+        modalResultsRef.value?.showExplanations();
+        console.log("Payload → SHOW_EXPLANATIONS");
+        break;
+
+      /*------- CHANGE QUESTION -------*/
       case "CHANGE_QUESTION_EXPLANATION":
-        changeQuestion(payload.data.question);
+        modalResultsRef.value?.changeQuestion(payload.data.question);
+        console.log("Payload → CHANGE_QUESTION_EXPLANATION");
+        break;
+
+      /*------- WORLD STEPS (placeholder) -------*/
+      case "WORLD_STEPS":
+        console.log("Payload → WORLD_STEPS", payload.data);
+        break;
+
+      default:
+        console.warn("Unknown payload type:", payload.type);
     }
   }
 
   function handleRoomCo(payload: IncomingPayload) {
-    console.log(payload);
+    console.log("Room count payload:", payload);
 
     if (payload.type === "ROOM_COUNT") {
       if (payload.count > 1) {
@@ -121,15 +120,16 @@ export function useSocketHandler() {
     }
   }
 
+
   const listenForUpdates = () => {
     on("update-client", handleIncomingPayload);
     on("room-count", handleRoomCo);
-    console.log("Écouteur 'update-client' activé.");
+    console.log("Écouteurs WebSocket activés");
   };
 
   const stopListening = () => {
     off("update-client", handleIncomingPayload);
-    console.log("Écouteur 'update-client' désactivé.");
+    console.log("Écouteurs WebSocket désactivés");
   };
 
   return {

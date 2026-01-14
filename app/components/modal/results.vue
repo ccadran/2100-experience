@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import gsap from "gsap";
+import { nextTick, ref } from "vue";
 
 import questionsData from "~/assets/content/questions.json";
 import resultsData from "~/assets/content/results.json";
@@ -9,12 +10,11 @@ const configStore = useConfig();
 const modal = ref<HTMLElement>();
 const currentQuestion = ref<number>(0);
 const userGlobalRanking = ref<number>(0);
-const currentQuestionUserRanking = ref<number>(0); //change at each question
-const currentQuestionUserExplanation = ref<number>(0); //change at each question
+const currentQuestionUserRanking = ref<number>(0);
+const currentQuestionUserExplanation = ref<number>(0);
 const questionsList = ref<HTMLElement[]>([]);
 
 const isExplanationsShown = ref<boolean>(false);
-
 const userPercentages = ref<any>();
 
 const rankingIcons = [
@@ -26,16 +26,18 @@ const rankingIcons = [
   "/icons/rank-f.png",
 ];
 
-export function revealResultsModal() {
-  userPercentages.value =
-    configStore.worldStateSteps[configStore.worldStateSteps.length - 1].params;
+// méthode pour révéler le modal des résultats
+function revealResultsModal() {
+  const lastStep =
+    configStore.worldStateSteps[configStore.worldStateSteps.length - 1];
+  userPercentages.value = lastStep?.params ?? {};
 
   userGlobalRanking.value = Math.round(
     (configStore.globalPercentage / 100) * (resultsData.length - 1)
   );
 
   gsap
-    .timeline({})
+    .timeline()
     .set(modal.value!, { display: "block" })
     .fromTo(".title", { opacity: 0 }, { opacity: 1 }, 0.35)
     .fromTo(".result-description p", { opacity: 0 }, { opacity: 1 }, "<+0.2")
@@ -48,52 +50,55 @@ export function revealResultsModal() {
     .fromTo(".ranking .mascot", { opacity: 0 }, { opacity: 1 }, "<+0.2");
 }
 
-export async function showExplanations() {
-  await gsap.fromTo(".ranking", { opacity: 1 }, { opacity: 0 }).then();
+// méthode pour afficher les explications
+async function showExplanations() {
+  await gsap.to(".ranking", { opacity: 0 });
   isExplanationsShown.value = true;
-  console.log(isExplanationsShown.value);
   await nextTick();
 
-  gsap
-    .timeline()
-    .set(modal.value!, { display: "flex" })
-    .fromTo(".explanations", { opacity: 0 }, { opacity: 1 });
+  gsap.timeline().set(modal.value!, { display: "flex" }).fromTo(
+    ".explanations",
+    { opacity: 0 },
+    { opacity: 1 }
+  );
 }
 
-export async function changeQuestion(target: number) {
-  let questionListBg =
-    questionsList.value[currentQuestion.value]!.querySelector(".background");
-  await gsap
-    .timeline()
-    .to(".explanations-content", { opacity: 0 })
-    .to(questionListBg, { opacity: 0 })
-    .then();
+// méthode pour changer de question
+async function changeQuestion(target: number) {
+  const currentBg =
+    questionsList.value[currentQuestion.value]?.querySelector(".background");
+
+  await gsap.timeline().to(".explanations-content", { opacity: 0 }).to(
+    currentBg,
+    { opacity: 0 }
+  );
 
   currentQuestion.value = target;
 
-  const currentParam = questionsData[currentQuestion.value]!.params;
-
-  const percentageValue = userPercentages.value[currentParam];
+  const currentParam = questionsData[currentQuestion.value]?.params;
+  const percentageValue = userPercentages.value[currentParam] ?? 0;
 
   currentQuestionUserRanking.value = Math.round(
     (percentageValue / 100) * (rankingIcons.length - 1)
   );
+
   currentQuestionUserExplanation.value = Math.round(
     (percentageValue / 100) *
-      (questionsData[currentQuestion.value]!.explanations.length - 1)
+      (questionsData[currentQuestion.value]?.explanations.length - 1 || 0)
   );
 
-  questionListBg =
-    questionsList.value[currentQuestion.value]!.querySelector(".background");
+  const nextBg =
+    questionsList.value[currentQuestion.value]?.querySelector(".background");
 
-  gsap
-    .timeline()
-    .to(questionListBg, { opacity: 1 })
-    .to(".explanations-content", { opacity: 1 });
+  gsap.timeline().to(nextBg, { opacity: 1 }).to(".explanations-content", {
+    opacity: 1,
+  });
 }
 
-defineExpose({ revealModal, showExplanations, changeQuestion });
+// expose les méthodes pour que le parent puisse les appeler via ref
+defineExpose({ revealResultsModal, showExplanations, changeQuestion });
 </script>
+
 
 <template>
   <div

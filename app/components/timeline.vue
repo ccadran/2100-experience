@@ -3,24 +3,23 @@ import gsap from "gsap";
 import { delay } from "~/webgl/utils";
 
 const configStore = useConfig();
+const uiStore = useUi();
+
 const worldYears = ref<any[]>();
-const currentYear = ref<number>();
 const yearsStepsRefs = ref<HTMLElement[]>([]);
 const timeline = ref<HTMLElement>();
 
-const stepWidth = ref<number>();
-const yearWidth = ref<number>();
-const currentTimelineTransform = ref<number>(0);
+const stepWidth = ref<number>(0);
+const yearWidth = ref<number>(0);
+const baseOffset = ref<number>(0);
 
 let lastTarget: number | null = null;
 
 watch(
-  () => configStore.currentStep,
-  (newValue: number) => {
-    console.log(newValue);
-
-    currentYear.value = worldYears.value![newValue];
-    slideTimeline(newValue);
+  () => uiStore.previewStep ?? configStore.currentStep,
+  (step) => {
+    if (step == null || !worldYears.value) return;
+    slideTimeline(step);
   }
 );
 
@@ -29,21 +28,17 @@ watch(
   async (newValue) => {
     if (newValue) {
       worldYears.value = configStore.worldStateSteps.map((step) => step.year);
-      await nextTick(() => {
-        stepWidth.value =
-          yearsStepsRefs.value[configStore.currentStep]?.clientWidth;
-        yearWidth.value =
-          yearsStepsRefs.value[configStore.currentStep]?.querySelector(
-            ".inner"
-          )?.clientWidth;
-        const offset = -yearWidth.value! / 2;
-        console.log(timeline.value);
-
-        timeline.value!.style.transform = `translate(${offset}px)`;
-        currentTimelineTransform.value += offset;
-
+      await nextTick();
+      
+      if (yearsStepsRefs.value[0]) {
+        stepWidth.value = yearsStepsRefs.value[0].clientWidth;
+        yearWidth.value = yearsStepsRefs.value[0].querySelector(".inner")?.clientWidth || 0;
+        
+        baseOffset.value = -yearWidth.value / 2;
+        
+        gsap.set(timeline.value!, { x: baseOffset.value });
         entryTimeline();
-      });
+      }
     }
   }
 );
@@ -51,47 +46,45 @@ watch(
 function slideTimeline(target: number) {
   const slideTl = gsap.timeline();
 
-  if (lastTarget) {
-    const lastStep = yearsStepsRefs.value![lastTarget] as HTMLElement;
-    const lastStepDate = lastStep.querySelector(".inner");
-    const lastStepDateText = lastStepDate!.querySelector("p");
-    const lastStepIndicator = lastStep.querySelector(".indicator");
+  if (lastTarget !== null && yearsStepsRefs.value[lastTarget]) {
+    const lastStep = yearsStepsRefs.value[lastTarget];
+    const lastInner = lastStep.querySelector(".inner");
+    const lastText = lastInner?.querySelector("p");
+    const lastDot = lastStep.querySelector(".indicator");
 
     slideTl.add(
-      gsap
-        .timeline({ defaults: { ease: "cubic-bezier(0.25, 0.95, 0, 1)" } })
-        .to(lastStepDate, { scale: 0.84 })
-        .to(lastStepDateText, { fontSize: "1.66vw", color: "var(--grey)" }, 0)
-        .to(lastStepIndicator, { backgroundColor: "var(--grey)" }),
+      gsap.timeline({ defaults: { ease: "cubic-bezier(0.25, 0.95, 0, 1)" } })
+        .to(lastInner, { scale: 0.84 })
+        .to(lastText, { fontSize: "1.66vw", color: "var(--grey)" }, 0)
+        .to(lastDot, { backgroundColor: "var(--grey)" }, 0),
       0
     );
   }
-  if (lastTarget) {
-    if (target > lastTarget) {
-      currentTimelineTransform.value -= stepWidth.value!;
-    } else {
-      currentTimelineTransform.value += stepWidth.value!;
-    }
-  } else if (target !== 0) {
-    currentTimelineTransform.value -= stepWidth.value!;
-  }
 
-  const step = yearsStepsRefs.value![target] as HTMLElement;
-  const stepDate = step.querySelector(".inner");
-  const stepDateText = stepDate!.querySelector("p");
-  const stepIndicator = step.querySelector(".indicator");
-  slideTl
-    .to(stepDate, { scale: 1 }, 0)
-    .to(stepDateText, { fontSize: "1.75vw", color: "black" }, 0)
-    .to(stepIndicator, { backgroundColor: "black" }, 0)
-    .to(timeline.value!, { x: currentTimelineTransform.value }, 0);
+  const newTransform = baseOffset.value - (target * stepWidth.value);
+
+  if (yearsStepsRefs.value[target]) {
+    const step = yearsStepsRefs.value[target];
+    const stepInner = step.querySelector(".inner");
+    const stepText = stepInner?.querySelector("p");
+    const stepDot = step.querySelector(".indicator");
+
+    slideTl
+      .to(stepInner, { scale: 1 }, 0)
+      .to(stepText, { fontSize: "1.75vw", color: "black" }, 0)
+      .to(stepDot, { backgroundColor: "black" }, 0)
+      .to(timeline.value!, { 
+        x: newTransform, 
+        duration: 0.8,
+        ease: "power2.inOut" 
+      }, 0);
+  }
 
   lastTarget = target;
 }
 
 function entryTimeline() {
   const dateStep = timeline.value!.querySelectorAll(".step");
-
   gsap.fromTo(
     dateStep,
     { x: "100%", opacity: 0 },
@@ -114,11 +107,8 @@ function entryTimeline() {
       <div
         class="step"
         v-for="(year, index) in worldYears"
-        :ref="
-          (el) => {
-            if (el) yearsStepsRefs[index] = el as HTMLElement;
-          }
-        "
+        :key="year"
+        ref="yearsStepsRefs" 
       >
         <div class="date-container">
           <div class="inner">
@@ -126,7 +116,7 @@ function entryTimeline() {
           </div>
           <div class="indicator"></div>
         </div>
-        <div class="indicator"></div>
+        <div class="indicator separator" v-if="index !== worldYears.length -1"></div> 
       </div>
     </div>
   </div>

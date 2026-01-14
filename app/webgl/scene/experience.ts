@@ -45,13 +45,13 @@ export async function moveToStep(targetStep: number) {
   });
 
   Object.values(configStore.worldImpacts).forEach((impact) => {
-    updateImact(impact.name, currentStep.impacts[impact.name]);
+    updateIpmact(impact.name, currentStep.impacts[impact.name]);
   });
 
   await uiStore.cloudsTransition?.hideClouds();
 }
 
-function updateImact(
+function updateIpmact(
   type: "fog" | "waterLevel" | "factory" | "rocks",
   evolution: number
 ) {
