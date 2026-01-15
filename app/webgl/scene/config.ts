@@ -92,8 +92,8 @@ export function initScene(): Promise<void> {
           meshCount++;
         });
 
-        // setupInstances();
-        // hideElements();
+        setupInstances();
+        hideElements();
 
         setTimeout(() => {
           const fogControls = addWorldSpaceFog(globalScene, {
