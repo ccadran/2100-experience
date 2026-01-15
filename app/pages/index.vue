@@ -120,6 +120,7 @@ watch(
     if (newValue) {
       await delay(1000);
       revealMap();
+
       await delay(1400);
       animConfigModals();
     }
@@ -132,10 +133,10 @@ async function animConfigModals() {
   await modalPhone.value.hideModal();
   await delay(1000);
   await modalConfig.value.revealContainer();
-  await delay(500);
+  await delay(5000);
   if (configStore?.isFormValidated) return;
   await modalConfig.value.revealModal2();
-  await delay(500);
+  await delay(5000);
   if (configStore?.isFormValidated) return;
   await modalConfig.value.revealModal3();
 }
@@ -150,9 +151,6 @@ watch(
 );
 
 onMounted(async () => {
-  // return;
-  console.log("______");
-
   connectToWsServer();
 
   const tl = loaderAnim();
@@ -215,68 +213,63 @@ function closeExplanations() {
   modalResults.value.closeExplanations();
 }
 function changeQuestion() {
-  modalResults.value.changeQuestion();
+  modalResults.value.changeQuestion(3);
 }
 
-// function debugGoToYear(year: number) {
-//   const index = configStore.worldStateSteps.findIndex((s) => s.year === year);
-
-//   if (index !== -1) {
-//     moveToStep(index);
-//   } else {
-//     console.log("prblm de year");
-//   }
-// }
+function simulateWsCo() {
+  webSocketStore.isRoomFull = true;
+}
 </script>
 
 <template>
-  <button
-    @click="handleFormValidations(userData)"
-    style="position: fixed; top: 0; z-index: 2"
-  >
-    FORM validation
-  </button>
-
-  <div style="position: fixed; top: 70px; display: flex; gap: 5px; z-index: 2">
-    <button @click="moveToStep(0)">2025</button>
-    <button @click="moveToStep(1)">2050</button>
-    <button @click="moveToStep(2)">2075</button>
-    <button @click="moveToStep(3)">2100</button>
-  </div>
-
-  <button @click="showResult()" style="position: fixed; top: 120px; z-index: 2">
-    Finish experience
-  </button>
-  <button
-    @click="showExplanations()"
-    style="position: fixed; top: 145px; z-index: 2"
-  >
-    Show explanations
-  </button>
-  
-  <button
-    @click="closeExplanations()"
-    style="position: fixed; top: 170px; z-index: 2"
-  >
-    Close results/explanations
-  </button>
-  
-  <button
-    @click="changeQuestion()"
-    style="position: fixed; top: 200px; z-index: 2"
-  >
-    changeQuestions
-  </button>
-
-  <div class="controls">
-    <div class="camera">
-      <div class="direction">
+  <div class="controls-debug" v-if="webSocketStore.isRoomFull">
+    <div class="form-controls" v-if="!configStore.isFormValidated">
+      <h2>FORM</h2>
+      <button @click="revealElements">simulate one form step validate</button>
+      <button @click="handleFormValidations(userData)">
+        Validate the form
+      </button>
+    </div>
+    <div
+      class="world-controls"
+      v-if="
+        configStore.isFormValidated &&
+        configStore.currentStep !== configStore.worldStateSteps.length - 1
+      "
+    >
+      <h2>YEARS</h2>
+      <div
+        class="years-controls"
+        style="display: flex; flex-direction: column; gap: 24px"
+      >
+        <button @click="moveToStep(0)">2025</button>
+        <button @click="moveToStep(1)">2050</button>
+        <button @click="moveToStep(2)">2075</button>
+        <button @click="moveToStep(3)">2100</button>
+      </div>
+      <h2>CAMERA SPOT</h2>
+      <div
+        class="camera-controls"
+        style="display: flex; flex-direction: column; gap: 24px"
+      >
         <button @click="goToCameraSpot(0)">spot 1</button>
         <button @click="goToCameraSpot(1)">spot 2</button>
         <button @click="goToCameraSpot(2)">spot 3</button>
       </div>
     </div>
+
+    <div
+      class="experienceEnds-control"
+      v-if="configStore.currentStep === configStore.worldStateSteps.length - 1"
+    >
+      <h2>RESULTS</h2>
+      <button @click="showResult()">Finish experience</button>
+      <button @click="showExplanations()">Show explanations</button>
+      <button @click="changeQuestion()">changeQuestions</button>
+    </div>
   </div>
+  <!-- <div style="position: fixed; top: 70px; display: flex; gap: 5px; z-index: 2">
+  </div> -->
 
   <main>
     <div class="intro">
@@ -294,6 +287,9 @@ function changeQuestion() {
         Scan le code QR <br />
         pour te connecter
       </p>
+      <button @click="simulateWsCo" v-if="!webSocketStore.isRoomFull">
+        simulate co
+      </button>
     </div>
     <ModalPhone ref="modalPhone" />
     <ModalConfig ref="modalConfig" />
@@ -322,6 +318,30 @@ function changeQuestion() {
 </template>
 
 <style lang="scss">
+.controls-debug {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  background-color: rgba(154, 154, 154, 0.4);
+  border-radius: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  z-index: 2;
+  padding: 24px;
+  > div {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  button {
+    padding: 12px 24px;
+    background-color: white;
+    border: 1px solid black;
+    border-radius: 24px;
+  }
+}
+
 main {
   height: 100vh;
   width: 100vw;

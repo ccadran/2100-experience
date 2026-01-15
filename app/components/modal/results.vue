@@ -38,7 +38,7 @@ function revealResultsModal() {
 
   gsap
     .timeline()
-    .set(modal.value!, { display: "block", visibility: "visible", opacity: 1 }) 
+    .set(modal.value!, { display: "block", visibility: "visible", opacity: 1 })
     .fromTo(".title", { opacity: 0 }, { opacity: 1 }, 0.35)
     .fromTo(".result-description p", { opacity: 0 }, { opacity: 1 }, "<+0.2")
     .fromTo(
@@ -53,10 +53,14 @@ function revealResultsModal() {
 // méthode pour afficher les explications
 async function showExplanations() {
   isExplanationsShown.value = true;
-  
+
   await nextTick();
-  
-  gsap.set(modal.value!, { display: "block", visibility: "visible", opacity: 0 });
+
+  gsap.set(modal.value!, {
+    display: "flex",
+    visibility: "visible",
+    opacity: 0,
+  });
   gsap.set(".explanations", { opacity: 0 });
 
   await gsap.to([modal.value!, ".explanations"], {
@@ -67,31 +71,29 @@ async function showExplanations() {
 
 // close les explications
 async function closeExplanations() {
-
   await gsap.to([".explanations", modal.value!], {
     opacity: 0,
     duration: 0.5,
   });
-  
+
   gsap.set(modal.value!, { display: "none", visibility: "hidden" });
   isExplanationsShown.value = false;
 }
-
-
 
 // méthode pour changer de question
 async function changeQuestion(target: number) {
   const currentBg =
     questionsList.value[currentQuestion.value]?.querySelector(".background");
 
-  await gsap.timeline().to(".explanations-content", { opacity: 0 }).to(
-    currentBg,
-    { opacity: 0 }
-  );
+  await gsap
+    .timeline()
+    .to(".explanations-content", { opacity: 0 })
+    .to(currentBg, { opacity: 0 });
 
   currentQuestion.value = target;
 
   const currentParam = questionsData[currentQuestion.value]?.params;
+
   const percentageValue = userPercentages.value[currentParam] ?? 0;
 
   currentQuestionUserRanking.value = Math.round(
@@ -112,9 +114,13 @@ async function changeQuestion(target: number) {
 }
 
 // expose les méthodes pour que le parent puisse les appeler via ref
-defineExpose({ revealResultsModal, showExplanations, closeExplanations, changeQuestion });
+defineExpose({
+  revealResultsModal,
+  showExplanations,
+  closeExplanations,
+  changeQuestion,
+});
 </script>
-
 
 <template>
   <div

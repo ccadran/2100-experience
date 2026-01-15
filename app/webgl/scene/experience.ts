@@ -1,4 +1,5 @@
 import gsap from "gsap";
+import { delay } from "../utils";
 
 export async function moveToStep(target: number | "next" | "previous") {
   const worldStore = useWorld();
@@ -25,7 +26,6 @@ export async function moveToStep(target: number | "next" | "previous") {
 
   worldStore.paramsParts.forEach((part) => {
     const firstChild = part.children[0];
-    console.log(firstChild);
 
     if (!firstChild) return;
 

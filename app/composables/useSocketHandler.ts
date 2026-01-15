@@ -8,18 +8,14 @@ interface IncomingPayload {
 }
 
 export function useSocketHandler(
-  modalResultsRef: Ref<
-    | {
-        revealResultsModal: () => void;
-        showExplanations: () => Promise<void>;
-        closeExplanations: () => Promise<void>;
-        changeQuestion: (target: number) => Promise<void>;
-      }
-    | null
-  >
+  modalResultsRef: Ref<{
+    revealResultsModal: () => void;
+    showExplanations: () => Promise<void>;
+    closeExplanations: () => Promise<void>;
+    changeQuestion: (target: number) => Promise<void>;
+  } | null>
 ) {
   const webSocketStore = useWebSocket();
-  console.log("WebSocket connected:", webSocketStore.isConnected);
 
   const { on, off } = useSocket();
 
@@ -74,7 +70,6 @@ export function useSocketHandler(
         break;
       }
 
-
       /*------- CAMERA CONTROLS -------*/
       case "CAMERA_SPOT": {
         const index = payload.data.strength - 1;
@@ -95,7 +90,7 @@ export function useSocketHandler(
         console.log("Payload → SHOW_EXPLANATIONS");
         break;
 
-      /*------- CLOSE EXPLANATIONS -------*/  
+      /*------- CLOSE EXPLANATIONS -------*/
       case "CLOSE_EXPLANATIONS":
         modalResultsRef.value?.closeExplanations();
         console.log("Payload → CLOSE_EXPLANATIONS");
@@ -126,7 +121,6 @@ export function useSocketHandler(
       }
     }
   }
-
 
   const listenForUpdates = () => {
     on("update-client", handleIncomingPayload);

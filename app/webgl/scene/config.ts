@@ -48,6 +48,7 @@ export function initScene(): Promise<void> {
       // "/3d/states.glb",
       // "/3d/2100-map__V1.glb",
       "/3d/map.glb",
+      // "/3d/map-v2.glb",
       (gltf: any) => {
         gltf.scene.scale.set(1, 1, 1);
         globalScene.add(gltf.scene);
@@ -251,8 +252,6 @@ function setupInstances() {
     }
     allMeshes[object.parent!.parent!.name][type].push(object);
   }
-
-  console.log(worldStore.paramsParts);
 }
 
 export function hideElements() {
@@ -422,7 +421,6 @@ function calculateExperienceSteps() {
     worldStateSteps.push(worldState);
   }
   configStore.worldStateSteps = worldStateSteps;
-  console.log(worldStateSteps);
 }
 
 function calculateMaxTemperature() {
@@ -438,18 +436,9 @@ function calculateMaxTemperature() {
   configStore.globalPercentage = globalPercentage;
   let targetTemp: number;
   if (configStore.configParams.pivotScore >= globalPercentage) {
-    console.log("POLLUE PAS");
     const improvementRatio =
       (configStore.configParams.pivotScore - globalPercentage) /
       configStore.configParams.pivotScore;
-    console.log(improvementRatio);
-
-    console.log(
-      configStore.configParams.currentTemperature -
-        improvementRatio *
-          (configStore.configParams.currentTemperature -
-            configStore.configParams.minTemperature)
-    );
 
     targetTemp =
       configStore.configParams.currentTemperature -
@@ -476,10 +465,14 @@ function setupObjectsData() {
   const configStore = useConfig();
 
   const objectDataMap: Record<string, any> = {
-    trees: configStore.objectsData.trees,
-    bushes: configStore.objectsData.bushes,
-    flowers: configStore.objectsData.flowers,
+    tree: configStore.objectsData.trees,
+    bush: configStore.objectsData.bushes,
+    fleur: configStore.objectsData.flowers,
     water: configStore.objectsData.water,
+    // trees: configStore.objectsData.trees,
+    // bushes: configStore.objectsData.bushes,
+    // flowers: configStore.objectsData.flowers,
+    // water: configStore.objectsData.water,
   };
 
   worldStore.paramsParts.forEach((paramPart) => {
