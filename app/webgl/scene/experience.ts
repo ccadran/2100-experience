@@ -48,7 +48,7 @@ export async function moveToStep(target: number | "next" | "previous") {
   Object.values(configStore.worldImpacts).forEach((impact) => {
     updateImpact(impact.name, currentStep.impacts[impact.name]);
   });
-
+  await delay(500);
   await uiStore.cloudsTransition?.hideClouds();
 }
 
