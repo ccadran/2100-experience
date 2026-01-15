@@ -38,7 +38,7 @@ function revealResultsModal() {
 
   gsap
     .timeline()
-    .set(modal.value!, { display: "block" })
+    .set(modal.value!, { display: "block", visibility: "visible", opacity: 1 }) 
     .fromTo(".title", { opacity: 0 }, { opacity: 1 }, 0.35)
     .fromTo(".result-description p", { opacity: 0 }, { opacity: 1 }, "<+0.2")
     .fromTo(
@@ -52,16 +52,32 @@ function revealResultsModal() {
 
 // méthode pour afficher les explications
 async function showExplanations() {
-  await gsap.to(".ranking", { opacity: 0 });
   isExplanationsShown.value = true;
+  
   await nextTick();
+  
+  gsap.set(modal.value!, { display: "block", visibility: "visible", opacity: 0 });
+  gsap.set(".explanations", { opacity: 0 });
 
-  gsap.timeline().set(modal.value!, { display: "flex" }).fromTo(
-    ".explanations",
-    { opacity: 0 },
-    { opacity: 1 }
-  );
+  await gsap.to([modal.value!, ".explanations"], {
+    opacity: 1,
+    duration: 0.5,
+  });
 }
+
+// close les explications
+async function closeExplanations() {
+
+  await gsap.to([".explanations", modal.value!], {
+    opacity: 0,
+    duration: 0.5,
+  });
+  
+  gsap.set(modal.value!, { display: "none", visibility: "hidden" });
+  isExplanationsShown.value = false;
+}
+
+
 
 // méthode pour changer de question
 async function changeQuestion(target: number) {
@@ -96,7 +112,7 @@ async function changeQuestion(target: number) {
 }
 
 // expose les méthodes pour que le parent puisse les appeler via ref
-defineExpose({ revealResultsModal, showExplanations, changeQuestion });
+defineExpose({ revealResultsModal, showExplanations, closeExplanations, changeQuestion });
 </script>
 
 

@@ -12,6 +12,7 @@ export function useSocketHandler(
     | {
         revealResultsModal: () => void;
         showExplanations: () => Promise<void>;
+        closeExplanations: () => Promise<void>;
         changeQuestion: (target: number) => Promise<void>;
       }
     | null
@@ -92,6 +93,12 @@ export function useSocketHandler(
       case "SHOW_EXPLANATIONS":
         modalResultsRef.value?.showExplanations();
         console.log("Payload → SHOW_EXPLANATIONS");
+        break;
+
+      /*------- CLOSE EXPLANATIONS -------*/  
+      case "CLOSE_EXPLANATIONS":
+        modalResultsRef.value?.closeExplanations();
+        console.log("Payload → CLOSE_EXPLANATIONS");
         break;
 
       /*------- CHANGE QUESTION -------*/

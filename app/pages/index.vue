@@ -211,6 +211,9 @@ function showResult() {
 function showExplanations() {
   modalResults.value.showExplanations();
 }
+function closeExplanations() {
+  modalResults.value.closeExplanations();
+}
 function changeQuestion() {
   modalResults.value.changeQuestion();
 }
@@ -246,10 +249,18 @@ function changeQuestion() {
   </button>
   <button
     @click="showExplanations()"
-    style="position: fixed; top: 160px; z-index: 2"
+    style="position: fixed; top: 145px; z-index: 2"
   >
     Show explanations
   </button>
+  
+  <button
+    @click="closeExplanations()"
+    style="position: fixed; top: 170px; z-index: 2"
+  >
+    Close results/explanations
+  </button>
+  
   <button
     @click="changeQuestion()"
     style="position: fixed; top: 200px; z-index: 2"
