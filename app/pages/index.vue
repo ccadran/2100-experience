@@ -4,17 +4,13 @@ import {
   initScene,
   revealElements,
 } from "~/webgl/scene/config";
-import {
-  moveToStep,
-  goToCameraSpot,
-} from "~/webgl/scene/experience";
+import { moveToStep, goToCameraSpot } from "~/webgl/scene/experience";
 import { useSocket } from "~/composables/useSocket";
 import { useSocketHandler } from "~/composables/useSocketHandler";
 import QRCode from "qrcode";
 import CloudsTransition from "~/webgl/scene/Clouds";
 import gsap from "gsap";
 import { delay } from "~/webgl/utils";
-
 
 const modalResults = ref();
 const { connect, joinRoom, sendAction, on } = useSocket();
@@ -30,7 +26,6 @@ const qrCode = ref<HTMLElement>();
 const qrCodeText = ref<HTMLElement>();
 const modalPhone = ref();
 const modalConfig = ref();
-
 
 const webglContainer = ref<HTMLElement>();
 
@@ -171,20 +166,18 @@ onMounted(async () => {
   await completeLoader();
 
   await revealQr();
-  
 });
 
 function connectToWsServer() {
   nextTick(() => {
     const id = Math.random().toString(36).substring(2, 10);
-    const roomId = id;
-    // const roomId = "ROOM_1";
+    // const roomId = id;
+    const roomId = "ROOM_1";
     connect();
     on("connect", () => {
       console.log("Client Socket.io connectéeeeeee");
 
       listenForUpdates();
-
 
       joinRoom(roomId);
       const canvasQr = document.querySelector(
@@ -222,18 +215,15 @@ function changeQuestion() {
   modalResults.value.changeQuestion();
 }
 
+// function debugGoToYear(year: number) {
+//   const index = configStore.worldStateSteps.findIndex((s) => s.year === year);
 
-function debugGoToYear(year: number) {
-  const index = configStore.worldStateSteps.findIndex((s) => s.year === year);
-  
-  if (index !== -1) {
-    moveToStep(index);
-  } else {
-    console.log("prblm de year");
-  }
-}
-
-
+//   if (index !== -1) {
+//     moveToStep(index);
+//   } else {
+//     console.log("prblm de year");
+//   }
+// }
 </script>
 
 <template>
@@ -244,11 +234,11 @@ function debugGoToYear(year: number) {
     FORM validation
   </button>
 
-  <div style="position: fixed; top: 70px; display: flex; gap: 5px; z-index: 2;">
-    <button @click="debugGoToYear(2025)">2025</button>
-    <button @click="debugGoToYear(2050)">2050</button>
-    <button @click="debugGoToYear(2075)">2075</button>
-    <button @click="debugGoToYear(2100)">2100</button>
+  <div style="position: fixed; top: 70px; display: flex; gap: 5px; z-index: 2">
+    <button @click="moveToStep(0)">2025</button>
+    <button @click="moveToStep(1)">2050</button>
+    <button @click="moveToStep(2)">2075</button>
+    <button @click="moveToStep(3)">2100</button>
   </div>
 
   <button @click="showResult()" style="position: fixed; top: 120px; z-index: 2">
@@ -278,8 +268,6 @@ function debugGoToYear(year: number) {
   </div>
 
   <main>
-    
-    
     <div class="intro">
       <div class="logo" ref="appLogo">
         <img src="/images/logo.webp" alt="" />
@@ -488,7 +476,7 @@ main {
   }
 }
 
-.direction{
+.direction {
   position: fixed;
   top: 30px;
   z-index: 2;

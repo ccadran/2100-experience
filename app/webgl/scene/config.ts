@@ -13,15 +13,15 @@ export function initScene(): Promise<void> {
     if (!container) return;
 
     const globalScene = new THREE.Scene();
-    const canvasGradient = document.createElement('canvas');
+    const canvasGradient = document.createElement("canvas");
     canvasGradient.width = 1;
     canvasGradient.height = 256;
-    const ctx = canvasGradient.getContext('2d');
+    const ctx = canvasGradient.getContext("2d");
     if (ctx) {
       const gradient = ctx.createLinearGradient(0, 0, 0, 256);
-      gradient.addColorStop(0, '#3377ed');
-      gradient.addColorStop(0.3, '#4f75cd');
-      gradient.addColorStop(1, '#6ea6eb'); 
+      gradient.addColorStop(0, "#3377ed");
+      gradient.addColorStop(0.3, "#4f75cd");
+      gradient.addColorStop(1, "#6ea6eb");
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, 1, 256);
     }
@@ -59,21 +59,18 @@ export function initScene(): Promise<void> {
         const spots = [
           gltf.scene.getObjectByName("spot-1"),
           gltf.scene.getObjectByName("spot-2"),
-          gltf.scene.getObjectByName("spot-3")
-        ].filter(Boolean).map(s => markRaw(s));
-        
+          gltf.scene.getObjectByName("spot-3"),
+        ]
+          .filter(Boolean)
+          .map((s) => markRaw(s));
+
         worldStore.camera = new Camera();
-        worldStore.camera.setSpots(
-          spots,
-          [
-            new THREE.Vector3(100, 0, 0),
-            new THREE.Vector3(100, 0, -10),
-            new THREE.Vector3(-5, 0, 5),
-          ]
-        );
+        worldStore.camera.setSpots(spots, [
+          new THREE.Vector3(100, 0, 0),
+          new THREE.Vector3(100, 0, -10),
+          new THREE.Vector3(-5, 0, 5),
+        ]);
         worldStore.camera.goToSpot(0);
-
-
 
         const sceneChildrens = worldStore.scene3d?.children;
 
@@ -90,21 +87,24 @@ export function initScene(): Promise<void> {
             }
           }
         });
-        setupInstances();
-        hideElements();
+        let meshCount = 0;
+        globalScene.traverse((object) => {
+          meshCount++;
+        });
 
+        // setupInstances();
+        // hideElements();
 
         setTimeout(() => {
           const fogControls = addWorldSpaceFog(globalScene, {
             fogColor: new THREE.Color(0xccddff),
             minFogDistance: 15,
             maxFogDistance: 80,
-            fogDensity: 2.5
+            fogDensity: 2.5,
           });
-          
+
           worldStore.fogControls = fogControls;
         }, 100);
-
 
         resolve();
       },
@@ -361,9 +361,26 @@ export function handleFormValidations(userData: UserConfigType) {
 
 function calculateExperienceSteps() {
   const configStore = useConfig();
-  const stepYears = [2025, 2050, 2075, 2100];
+  const currentYear = configStore.configParams.currentYear;
+  const targetYear = configStore.configParams.targetYear;
+  const yearsPerStep = configStore.configParams.yearsStep;
+
+  const stepYears: number[] = [currentYear];
+
+  let nextYear = currentYear + yearsPerStep;
+  while (nextYear <= targetYear - yearsPerStep) {
+    stepYears.push(nextYear);
+    nextYear += yearsPerStep;
+  }
+
+  if (stepYears[stepYears.length - 1] !== targetYear) {
+    stepYears.push(targetYear);
+  }
+
   const totalSteps = stepYears.length - 1;
+
   const worldStateSteps = [];
+
   const targetTemperature = calculateMaxTemperature();
 
   for (let i = 0; i <= totalSteps; i++) {

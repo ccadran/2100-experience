@@ -1,25 +1,26 @@
 import gsap from "gsap";
 
-
-export async function moveToStep(targetStep: number) {
+export async function moveToStep(target: number | "next" | "previous") {
   const worldStore = useWorld();
   const configStore = useConfig();
   const uiStore = useUi();
-
   await uiStore.cloudsTransition?.showClouds();
 
-  if (
-    targetStep >= 0 &&
-    targetStep < configStore.worldStateSteps.length
-  ) {
+  let targetStep: number = configStore.currentStep;
+  if (typeof target === "number") {
+    targetStep = target;
+  } else if (target === "next") {
+    targetStep += 1;
+  } else if (target === "previous") {
+    targetStep -= 1;
+  }
+  if (targetStep <= configStore.worldStateSteps.length - 1 && targetStep >= 0) {
     configStore.currentStep = targetStep;
   } else {
-    console.warn("STEP OUT OF RANGE", targetStep);
-    await uiStore.cloudsTransition?.hideClouds();
-    return;
+    alert("THIS STEP DOES NOT EXIST");
   }
-
   const currentStep = configStore.worldStateSteps[configStore.currentStep];
+
   const currentTemperature = currentStep.temperature;
 
   worldStore.paramsParts.forEach((part) => {
@@ -45,13 +46,13 @@ export async function moveToStep(targetStep: number) {
   });
 
   Object.values(configStore.worldImpacts).forEach((impact) => {
-    updateIpmact(impact.name, currentStep.impacts[impact.name]);
+    updateImpact(impact.name, currentStep.impacts[impact.name]);
   });
 
   await uiStore.cloudsTransition?.hideClouds();
 }
 
-function updateIpmact(
+function updateImpact(
   type: "fog" | "waterLevel" | "factory" | "rocks",
   evolution: number
 ) {

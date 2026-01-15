@@ -7,7 +7,7 @@ export const useConfig = defineStore("useConfig", () => {
   };
 
   const configParams = {
-    yearsStep: 10, //in years
+    yearsStep: 25, //in years
     currentYear: 2025,
     targetYear: 2100,
     maxTemperature: 5.7,
