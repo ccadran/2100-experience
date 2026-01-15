@@ -259,10 +259,13 @@ export function hideElements() {
   worldStore.hiddenSceneParts = [];
 
   Object.values(worldStore.sceneMeshes).forEach((meshGroup) => {
-    meshGroup.position.y = -10;
-
-    meshGroup.visible = false;
-    worldStore.hiddenSceneParts.push(meshGroup);
+    meshGroup.children.forEach((mesh) => {
+      mesh.visible = false;
+      if (mesh.name.includes("normal")) {
+        mesh.position.y = -10;
+        worldStore.hiddenSceneParts.push(mesh);
+      }
+    });
   });
 }
 
@@ -276,11 +279,13 @@ export function revealElements() {
       Math.random() * worldStore.hiddenSceneParts.length
     );
     worldStore.hiddenSceneParts[randIndex].visible = true;
+
     gsap.to(worldStore.hiddenSceneParts[randIndex].position, {
       y: 0,
       duration: 1,
       ease: "power2.inOut",
     });
+    console.log(worldStore.hiddenSceneParts[randIndex]);
     configStore.formParams.currentStep += 1;
     worldStore.hiddenSceneParts.splice(randIndex, 1);
   }
