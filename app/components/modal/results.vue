@@ -38,7 +38,8 @@ function revealResultsModal() {
 
   gsap
     .timeline()
-    .set(modal.value!, { display: "block", visibility: "visible", opacity: 1 })
+    .set(modal.value!, { display: "block", opacity: 0 })
+    .fromTo(modal.value!, { opacity: 0 }, { opacity: 1 }, 0)
     .fromTo(".title", { opacity: 0 }, { opacity: 1 }, 0.35)
     .fromTo(".result-description p", { opacity: 0 }, { opacity: 1 }, "<+0.2")
     .fromTo(
@@ -58,25 +59,26 @@ async function showExplanations() {
 
   gsap.set(modal.value!, {
     display: "flex",
-    visibility: "visible",
-    opacity: 0,
   });
-  gsap.set(".explanations", { opacity: 0 });
 
-  await gsap.to([modal.value!, ".explanations"], {
-    opacity: 1,
-    duration: 0.5,
-  });
+  gsap.fromTo(
+    ".explanations",
+    { opacity: 0 },
+    {
+      opacity: 1,
+      duration: 0.5,
+    }
+  );
 }
 
 // close les explications
-async function closeExplanations() {
+async function closeResultsModal() {
   await gsap.to([".explanations", modal.value!], {
     opacity: 0,
     duration: 0.5,
   });
 
-  gsap.set(modal.value!, { display: "none", visibility: "hidden" });
+  gsap.set(modal.value!, { display: "none" });
   isExplanationsShown.value = false;
 }
 
@@ -117,7 +119,7 @@ async function changeQuestion(target: number) {
 defineExpose({
   revealResultsModal,
   showExplanations,
-  closeExplanations,
+  closeResultsModal,
   changeQuestion,
 });
 </script>

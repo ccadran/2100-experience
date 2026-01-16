@@ -11,7 +11,7 @@ export function useSocketHandler(
   modalResultsRef: Ref<{
     revealResultsModal: () => void;
     showExplanations: () => Promise<void>;
-    closeExplanations: () => Promise<void>;
+    closeResultsModal: () => Promise<void>;
     changeQuestion: (target: number) => Promise<void>;
   } | null>
 ) {
@@ -94,7 +94,7 @@ export function useSocketHandler(
 
       /*------- CLOSE EXPLANATIONS -------*/
       case "CLOSE_EXPLANATIONS":
-        modalResultsRef.value?.closeExplanations();
+        modalResultsRef.value?.closeResultsModal();
         console.log("Payload → CLOSE_EXPLANATIONS");
         break;
 

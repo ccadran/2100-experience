@@ -132,6 +132,7 @@ async function animConfigModals() {
   await delay(600);
   await modalPhone.value.hideModal();
   await delay(1000);
+  if (configStore?.isFormValidated) return;
   await modalConfig.value.revealContainer();
   await delay(5000);
   if (configStore?.isFormValidated) return;
@@ -209,8 +210,8 @@ function showResult() {
 function showExplanations() {
   modalResults.value.showExplanations();
 }
-function closeExplanations() {
-  modalResults.value.closeExplanations();
+function closeResultsModal() {
+  modalResults.value.closeResultsModal();
 }
 function changeQuestion() {
   modalResults.value.changeQuestion(3);
@@ -266,6 +267,7 @@ function simulateWsCo() {
       <button @click="showResult()">Finish experience</button>
       <button @click="showExplanations()">Show explanations</button>
       <button @click="changeQuestion()">changeQuestions</button>
+      <button @click="closeResultsModal()">closeResults</button>
     </div>
   </div>
   <!-- <div style="position: fixed; top: 70px; display: flex; gap: 5px; z-index: 2">
