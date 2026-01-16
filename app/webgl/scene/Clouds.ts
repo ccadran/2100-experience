@@ -33,7 +33,7 @@ export default class CloudsTransition {
       .to(this.clouds[0]!, { x: "0%", duration: 0.75, ease: "power2.out" }, 0)
       .to(
         this.clouds[1]!,
-        { x: "0%", duration: 0.75, ease: "power2.out" },
+        { y: "0%", duration: 0.75, ease: "power2.out" },
         0.15
       )
       .to(

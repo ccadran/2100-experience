@@ -15,6 +15,8 @@ export function useSocketHandler(
     changeQuestion: (target: number) => Promise<void>;
   } | null>
 ) {
+  console.log(modalResultsRef.value);
+
   const webSocketStore = useWebSocket();
 
   const { on, off } = useSocket();
