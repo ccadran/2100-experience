@@ -37,18 +37,28 @@ function revealResultsModal() {
   );
 
   gsap
-    .timeline()
+    .timeline({ defaults: { ease: "cubic-bezier(0.25, 0.95, 0, 1)" } })
     .set(modal.value!, { display: "block", opacity: 0 })
     .fromTo(modal.value!, { opacity: 0 }, { opacity: 1 }, 0)
-    .fromTo(".title", { opacity: 0 }, { opacity: 1 }, 0.35)
+    .fromTo(
+      ".title p",
+      { opacity: 0, y: "100%" },
+      { opacity: 1, y: "0%" },
+      0.35
+    )
     .fromTo(".result-description p", { opacity: 0 }, { opacity: 1 }, "<+0.2")
     .fromTo(
-      ".result-description .rank",
-      { opacity: 0, transform: "translateX(-50%) scale(2)" },
-      { opacity: 1, transform: "translateX(-50%) scale(1)" },
+      ".ranking .mascot",
+      { opacity: 0, y: "100%", x: "-50%" },
+      { opacity: 1, y: "0%", x: "-50%", duration: 0.25 },
       "<+0.2"
     )
-    .fromTo(".ranking .mascot", { opacity: 0 }, { opacity: 1 }, "<+0.2");
+    .fromTo(
+      ".result-description .rank",
+      { opacity: 0, transform: "translateX(-50%) scale(3)" },
+      { opacity: 1, transform: "translateX(-50%) scale(1)", duration: 0.275 },
+      "<+0.175"
+    );
 }
 
 // méthode pour afficher les explications
@@ -130,7 +140,9 @@ defineExpose({
     :class="{ explanation: isExplanationsShown }"
     ref="modal"
   >
-    <p class="title">Resultats</p>
+    <div class="title">
+      <p>Resultats</p>
+    </div>
     <div class="ranking" v-if="!isExplanationsShown">
       <div class="result-description">
         <div class="rank">
@@ -208,6 +220,7 @@ defineExpose({
 
 <style lang="scss">
 .modalResults {
+  overflow: hidden;
   display: none;
   height: 90vh;
   width: 81.25vw;
@@ -234,6 +247,7 @@ defineExpose({
     align-items: end;
   }
   > .title {
+    overflow: hidden;
     position: absolute;
     top: 80px;
     left: 50%;
@@ -266,7 +280,7 @@ defineExpose({
       position: absolute;
       left: 50%;
       transform: translateX(-50%);
-      bottom: 0;
+      bottom: -6%;
       width: 33%;
     }
   }

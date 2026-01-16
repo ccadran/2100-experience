@@ -30,6 +30,7 @@ function revealModal2() {
     {
       x: "0%",
       rotation: -4,
+      ease: "cubic-bezier(0.25, 0.95, 0, 1)",
       onComplete() {
         isModal2revealed.value = true;
       },
@@ -44,6 +45,7 @@ function revealModal3() {
     {
       x: "0%",
       rotation: 4,
+      ease: "cubic-bezier(0.25, 0.95, 0, 1)",
       onComplete() {
         isModal3revealed.value = true;
       },
