@@ -225,20 +225,20 @@ function setupInstances() {
         }
       });
       //DELETE THE BASE mesh
-      const objectsToRemove = [] as any[];
-
-      worldStore.scene3d?.traverse((o) => {
-        if (o.name.includes(mesheNumbers.toString())) {
-          objectsToRemove.push(o);
+      worldStore.globalScene?.traverse((o) => {
+        if (o instanceof THREE.Mesh) {
+          if (
+            o.name.includes("normal") ||
+            o.name.includes("bad") ||
+            o.name.includes("worst") ||
+            o.name.includes("best")
+          ) {
+            o.visible = false;
+          }
         }
       });
     });
   });
-
-  //TODO remove
-  // worldStore.sceneMeshes.trees_group?.children.forEach((c) => {
-  //   c.visible = c.name === "worst";
-  // });
 
   /*functions*/
 
