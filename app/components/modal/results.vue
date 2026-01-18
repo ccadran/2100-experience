@@ -1,11 +1,13 @@
 <script lang="ts" setup>
 import gsap from "gsap";
 import { nextTick, ref } from "vue";
-
+import { useSocket } from "~/composables/useSocket"
 import questionsData from "~/assets/content/questions.json";
 import resultsData from "~/assets/content/results.json";
 
 const configStore = useConfig();
+const webSocketStore = useWebSocket();
+const { sendAction } = useSocket();
 
 const modal = ref<HTMLElement>();
 const currentQuestion = ref<number>(0);
@@ -35,6 +37,18 @@ function revealResultsModal() {
   userGlobalRanking.value = Math.round(
     (configStore.globalPercentage / 100) * (resultsData.length - 1)
   );
+
+  const resultData = resultsData[userGlobalRanking.value];
+  if (resultData && webSocketStore.isConnected && webSocketStore.roomId) {
+    sendAction(webSocketStore.roomId, {
+      type: "RESULT_CALCULATED",
+      data: {
+        text: resultData.text,
+        rank: resultData.rank
+      }
+    });
+    console.log("resultats envoyés", resultData);
+  }
 
   gsap
     .timeline({ defaults: { ease: "cubic-bezier(0.25, 0.95, 0, 1)" } })

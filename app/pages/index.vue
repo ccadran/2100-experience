@@ -170,8 +170,8 @@ onMounted(async () => {
 function connectToWsServer() {
   nextTick(() => {
     const id = Math.random().toString(36).substring(2, 10);
-    // const roomId = id;
-    const roomId = "ROOM_1";
+    const roomId = id;
+    // const roomId = "ROOM_1";
     connect();
     on("connect", () => {
       console.log("Client Socket.io connectéeeeeee");
@@ -179,6 +179,8 @@ function connectToWsServer() {
       listenForUpdates();
 
       joinRoom(roomId);
+      webSocketStore.setRoomId(roomId);
+      
       const canvasQr = document.querySelector(
         ".qrcode .inner"
       ) as HTMLCanvasElement;
