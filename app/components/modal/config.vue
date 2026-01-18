@@ -1,5 +1,9 @@
 <script lang="ts" setup>
 import gsap from "gsap";
+import { storeToRefs } from "pinia";
+
+const webSocketStore = useWebSocket();
+const { userName } = storeToRefs(webSocketStore);
 
 const modals = ref<HTMLElement>();
 const modal1 = ref<HTMLElement>();
@@ -78,19 +82,19 @@ defineExpose({ revealContainer, revealModal2, revealModal3, hideModals });
     <div class="modals-container">
       <div class="modal modal-1" ref="modal1">
         <p>
-          %name attend que tu configures son monde. Fait le sur ton tel, il est
+          {{ userName ?? "Il" }} attend que tu configures son monde. Fait le sur ton tel, il est
           impatient !
         </p>
       </div>
       <div class="modal modal-2" ref="modal2">
         <p>
-          %name observe chacun de tes choix… continue sur ton téléphone, il a
+          {{ userName ?? "Il" }} observe chacun de tes choix… continue sur ton téléphone, il a
           hâte de découvrir le résultat !
         </p>
       </div>
       <div class="modal modal-3" ref="modal3">
         <p>
-          Pendant que tu configures son univers sur mobile, %name retient son
+          Pendant que tu configures son univers sur mobile, {{ userName ?? "Il" }} retient son
           souffle… surprends-le !"
         </p>
       </div>
