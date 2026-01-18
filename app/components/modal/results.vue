@@ -108,6 +108,7 @@ async function showExplanations() {
 
 function changeBackgroundFocus(target: number) {
   const bg = questionsList.value[target]?.querySelector(".background");
+  console.log(bg);
 
   return gsap.to(bg!, { opacity: 1 });
 }
@@ -128,7 +129,7 @@ async function changeQuestion(target: number) {
   const currentBg =
     questionsList.value[currentQuestion.value]?.querySelector(".background");
 
-  await gsap
+  gsap
     .timeline()
     .to(".explanations-content", { opacity: 0 })
     .to(currentBg, { opacity: 0 });
@@ -148,16 +149,18 @@ async function changeQuestion(target: number) {
       (questionsData[currentQuestion.value]?.explanations.length - 1 || 0)
   );
 
-  const nextBg =
-    questionsList.value[currentQuestion.value]?.querySelector(".background");
-
   gsap
     .timeline()
     .add(changeBackgroundFocus(target))
-    // .to(nextBg, { opacity: 1 })
     .to(".explanations-content", {
       opacity: 1,
-    });
+    })
+    .fromTo(
+      ".explanation-illu .rank",
+      { scale: 2, opacity: 0 },
+      { scale: 1, opacity: 1, ease: "elastic.out(0.65,0.5)", duration: 0.7 },
+      0.65
+    );
 }
 
 // expose les méthodes pour que le parent puisse les appeler via ref
