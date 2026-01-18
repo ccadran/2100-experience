@@ -224,7 +224,7 @@ function simulateWsCo() {
 
 <template>
   <div class="controls-debug" v-if="webSocketStore.isRoomFull">
-    <div class="form-controls" v-if="!configStore.isFormValidated">
+    <!-- <div class="form-controls" v-if="!configStore.isFormValidated">
       <h2>FORM</h2>
       <button @click="revealElements">simulate one form step validate</button>
       <button @click="handleFormValidations(userData)">
@@ -257,12 +257,13 @@ function simulateWsCo() {
         <button @click="goToCameraSpot(1)">spot 2</button>
         <button @click="goToCameraSpot(2)">spot 3</button>
       </div>
-    </div>
+    </div> -->
 
-    <div
+    <div class="experienceEnds-control">
+      <!-- <div
       class="experienceEnds-control"
       v-if="configStore.currentStep === configStore.worldStateSteps.length - 1"
-    >
+    > -->
       <h2>RESULTS</h2>
       <button @click="showResult()">Finish experience</button>
       <button @click="showExplanations()">Show explanations</button>
@@ -293,8 +294,8 @@ function simulateWsCo() {
         simulate co
       </button>
     </div>
-    <ModalPhone ref="modalPhone" />
-    <ModalConfig ref="modalConfig" />
+    <!-- <ModalPhone ref="modalPhone" />
+    <ModalConfig ref="modalConfig" /> -->
     <Timeline />
     <ModalResults ref="modalResults" />
 

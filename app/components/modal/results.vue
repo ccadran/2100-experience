@@ -4,6 +4,7 @@ import { nextTick, ref } from "vue";
 
 import questionsData from "~/assets/content/questions.json";
 import resultsData from "~/assets/content/results.json";
+import { delay } from "~/webgl/utils";
 
 const configStore = useConfig();
 
@@ -56,8 +57,13 @@ function revealResultsModal() {
     .fromTo(
       ".result-description .rank",
       { opacity: 0, transform: "translateX(-50%) scale(3)" },
-      { opacity: 1, transform: "translateX(-50%) scale(1)", duration: 0.275 },
-      "<+0.175"
+      {
+        opacity: 1,
+        transform: "translateX(-50%) scale(1)",
+        duration: 0.725,
+        ease: "elastic.out(0.65,0.4)",
+      },
+      "<+0.135"
     );
 }
 
@@ -71,14 +77,39 @@ async function showExplanations() {
     display: "flex",
   });
 
-  gsap.fromTo(
-    ".explanations",
-    { opacity: 0 },
-    {
-      opacity: 1,
-      duration: 0.5,
-    }
-  );
+  const questions = document.querySelectorAll(".question");
+
+  gsap
+    .timeline({ defaults: { ease: "cubic-bezier(0.25, 0.95, 0, 1)" } })
+    .set(".explanations", { opacity: 1 })
+    .fromTo(".explanation-text", { opacity: 0 }, { opacity: 1 })
+    .fromTo(
+      ".explanation-illu .illu",
+      { filter: "blur(10px)", opacity: 0 },
+      { filter: "blur(0px)", opacity: 1 },
+      0.125
+    )
+    .fromTo(".question-icon", { opacity: 0 }, { opacity: 1 }, 0.35)
+    .fromTo(
+      ".explanation-illu .rank",
+      { scale: 2, opacity: 0 },
+      { scale: 1, opacity: 1, ease: "elastic.out(0.65,0.5)", duration: 0.7 },
+      0.65
+    )
+    .fromTo(
+      questions,
+      { transform: "translateX(-100%)", opacity: 0 },
+      { transform: "translateX(0%)", opacity: 1, stagger: 0.045 },
+      0.15
+    );
+
+  changeBackgroundFocus(0);
+}
+
+function changeBackgroundFocus(target: number) {
+  const bg = questionsList.value[target]?.querySelector(".background");
+
+  return gsap.to(bg!, { opacity: 1 });
 }
 
 // close les explications
@@ -120,9 +151,13 @@ async function changeQuestion(target: number) {
   const nextBg =
     questionsList.value[currentQuestion.value]?.querySelector(".background");
 
-  gsap.timeline().to(nextBg, { opacity: 1 }).to(".explanations-content", {
-    opacity: 1,
-  });
+  gsap
+    .timeline()
+    .add(changeBackgroundFocus(target))
+    // .to(nextBg, { opacity: 1 })
+    .to(".explanations-content", {
+      opacity: 1,
+    });
 }
 
 // expose les méthodes pour que le parent puisse les appeler via ref
@@ -199,7 +234,7 @@ defineExpose({
       </div>
       <div class="questions-list">
         <div
-          class="question"
+          class="question-container"
           v-for="(question, index) in questionsData"
           :ref="
           (el) => {
@@ -207,11 +242,13 @@ defineExpose({
           }
         "
         >
-          <div class="icon">
-            <div class="background"></div>
-            <img :src="question.icon" alt="" />
+          <div class="question">
+            <div class="icon">
+              <div class="background"></div>
+              <img :src="question.icon" alt="" />
+            </div>
+            <div class="number">{{ question.number }}</div>
           </div>
-          <div class="number">{{ question.number }}</div>
         </div>
       </div>
     </div>
@@ -249,7 +286,7 @@ defineExpose({
   > .title {
     overflow: hidden;
     position: absolute;
-    top: 80px;
+    top: 6.6vh;
     left: 50%;
     transform: translateX(-50%);
     font-family: milling;
@@ -298,10 +335,17 @@ defineExpose({
       position: relative;
       > .question-icon {
         position: absolute;
-        width: 200px;
-        top: -15%;
+        width: 13vw;
+        height: 200px;
+        top: -23%;
         left: 50%;
         transform: translateX(-50%);
+        z-index: 2;
+        > img {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+        }
       }
       .explanation-text {
         display: flex;
@@ -365,51 +409,54 @@ defineExpose({
       display: flex;
       justify-content: space-between;
       padding: 0 56px;
-      > .question {
-        display: flex;
-        align-items: center;
-        flex-direction: column;
-        gap: 24px;
-        width: 7%;
-        font-family: OpenRunde;
-        font-weight: 600;
-        font-size: 14px;
-        letter-spacing: -2%;
-        > .icon {
-          position: relative;
-          width: 96px;
-          height: 96px;
+      > .question-container {
+        overflow: hidden;
+        width: fit-content;
+        > .question {
           display: flex;
-          justify-content: center;
           align-items: center;
-          > .background {
-            opacity: 0;
-            width: 100%;
-            height: 100%;
-            transform: rotate(3deg);
-            background: var(
-              --white-gradient,
-              linear-gradient(
-                0deg,
-                rgba(255, 255, 255, 0.5) 0%,
-                rgba(255, 255, 255, 0.5) 100%
-              ),
-              linear-gradient(180deg, #fcfcfc 0%, #d1d1d1 100%)
-            );
-            box-shadow: 0 -2px 4px 0 rgba(0, 0, 0, 0.25) inset,
-              -26px 82px 24px 0 rgba(0, 0, 0, 0),
-              -17px 52px 22px 0 rgba(0, 0, 0, 0),
-              -9px 29px 19px 0 rgba(0, 0, 0, 0.01),
-              -4px 13px 14px 0 rgba(0, 0, 0, 0.01),
-              -1px 3px 8px 0 rgba(0, 0, 0, 0.02);
-            border-radius: 16px;
-          }
-          > img {
-            width: 85%;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+          flex-direction: column;
+          gap: 24px;
+          font-family: OpenRunde;
+          font-weight: 600;
+          font-size: 14px;
+          letter-spacing: -2%;
+          > .icon {
+            position: relative;
+            width: 96px;
+            height: 96px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            > .background {
+              opacity: 0;
+              width: 100%;
+              height: 100%;
+              transform: rotate(3deg);
+              background: var(
+                --white-gradient,
+                linear-gradient(
+                  0deg,
+                  rgba(255, 255, 255, 0.5) 0%,
+                  rgba(255, 255, 255, 0.5) 100%
+                ),
+                linear-gradient(180deg, #fcfcfc 0%, #d1d1d1 100%)
+              );
+              box-shadow: 0 -2px 4px 0 rgba(0, 0, 0, 0.25) inset,
+                -26px 82px 24px 0 rgba(0, 0, 0, 0),
+                -17px 52px 22px 0 rgba(0, 0, 0, 0),
+                -9px 29px 19px 0 rgba(0, 0, 0, 0.01),
+                -4px 13px 14px 0 rgba(0, 0, 0, 0.01),
+                -1px 3px 8px 0 rgba(0, 0, 0, 0.02);
+              border-radius: 16px;
+            }
+            > img {
+              width: 85%;
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+            }
           }
         }
       }
