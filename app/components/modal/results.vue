@@ -1,12 +1,17 @@
 <script lang="ts" setup>
 import gsap from "gsap";
-import { nextTick, ref } from "vue";
-
+import { nextTick, ref, computed } from "vue";
+import { useSocket } from "~/composables/useSocket"
 import questionsData from "~/assets/content/questions.json";
 import resultsData from "~/assets/content/results.json";
 import { delay } from "~/webgl/utils";
 
 const configStore = useConfig();
+const webSocketStore = useWebSocket();
+const { sendAction } = useSocket();
+
+const { userName } = storeToRefs(webSocketStore);
+
 
 const modal = ref<HTMLElement>();
 const currentQuestion = ref<number>(0);
@@ -27,6 +32,25 @@ const rankingIcons = [
   "/icons/rank-f.png",
 ];
 
+
+// changer les %name par le vrai username
+const resultText = computed(() => {
+  const rawText = resultsData[userGlobalRanking.value]?.text ?? "";
+  return rawText.replace(
+    "%Name",
+    userName.value ?? "Tu"
+  );
+});
+
+const explanationText  = computed(() => {
+  const rawText = questionsData[currentQuestion.value]?.explanations[currentQuestionUserExplanation.value]?.text ?? "";
+  return rawText.replace(
+    "%name",
+    userName.value ?? "Tu"
+  );
+});
+
+
 // méthode pour révéler le modal des résultats
 function revealResultsModal() {
   const lastStep =
@@ -36,6 +60,18 @@ function revealResultsModal() {
   userGlobalRanking.value = Math.round(
     (configStore.globalPercentage / 100) * (resultsData.length - 1)
   );
+
+  const resultData = resultsData[userGlobalRanking.value];
+  if (resultData && webSocketStore.isConnected && webSocketStore.roomId) {
+    sendAction(webSocketStore.roomId, {
+      type: "RESULT_CALCULATED",
+      data: {
+        text: resultData.text,
+        rank: resultData.rank
+      }
+    });
+    console.log("resultats envoyés", resultData);
+  }
 
   gsap
     .timeline({ defaults: { ease: "cubic-bezier(0.25, 0.95, 0, 1)" } })
@@ -187,7 +223,7 @@ defineExpose({
           <img :src="resultsData[userGlobalRanking]?.rank" alt="" />
         </div>
         <p>
-          {{ resultsData[userGlobalRanking]?.text }}
+          {{ resultText }}
         </p>
       </div>
       <div class="mascot">
@@ -202,11 +238,7 @@ defineExpose({
         <div class="explanation-text">
           <p class="number">{{ questionsData[currentQuestion]?.number }}</p>
           <p class="explanation">
-            {{
-              questionsData[currentQuestion]?.explanations[
-                currentQuestionUserExplanation
-              ]?.text
-            }}
+            {{ explanationText }}
           </p>
           <div class="official-data">
             <p>{{ questionsData[currentQuestion]?.officialData.text }}</p>

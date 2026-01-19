@@ -124,14 +124,22 @@ export function useSocketHandler(
     }
   }
 
+  function handleUserJoined(payload: { userName: string }) {
+    console.log("Nom du user:", payload.userName);
+    webSocketStore.setUserName(payload.userName);
+  }
+
   const listenForUpdates = () => {
     on("update-client", handleIncomingPayload);
     on("room-count", handleRoomCo);
+    on("user-joined", handleUserJoined);
     console.log("Écouteurs WebSocket activés");
   };
 
   const stopListening = () => {
     off("update-client", handleIncomingPayload);
+    off("room-count", handleRoomCo);
+    off("user-joined", handleUserJoined);
     console.log("Écouteurs WebSocket désactivés");
   };
 
