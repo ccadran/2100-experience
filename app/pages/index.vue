@@ -303,23 +303,22 @@ function simulateWsCo() {
     <ModalResults ref="modalResults" />
 
     <!-- <section class="loader"></section> -->
-    <div class="webgl" ref="webglContainer">
+    <div class="scene" ref="webglContainer">
       <canvas></canvas>
     </div>
-    <div class="clouds-transition" key="clouds">
-      <div class="cloud">
-        <img src="/images/cloud.webp" alt="" />
-      </div>
-      <div class="cloud">
-        <img src="/images/cloud.webp" alt="" />
-      </div>
-      <div class="cloud">
-        <img src="/images/cloud.webp" alt="" />
-      </div>
-      <div class="cloud">
-        <img src="/images/cloud.webp" alt="" />
+    <div class="main-ui">
+      <div class="temperature-indicator" v-if="configStore.isFormValidated">
+        <p>
+          {{
+            (
+              configStore.worldStateSteps[configStore.currentStep].temperature +
+              27
+            ).toFixed(1)
+          }}°C
+        </p>
       </div>
     </div>
+    <Clouds />
   </main>
 </template>
 
@@ -327,7 +326,7 @@ function simulateWsCo() {
 .controls-debug {
   position: fixed;
   top: 24px;
-  right: 24px;
+  left: 24px;
   background-color: rgba(154, 154, 154, 0.4);
   border-radius: 24px;
   display: flex;
@@ -353,7 +352,7 @@ main {
   width: 100vw;
   position: fixed;
   > .intro {
-    z-index: 2;
+    z-index: 3;
     position: fixed;
     height: 100vh;
     width: 100vw;
@@ -440,193 +439,58 @@ main {
       opacity: 0;
     }
   }
-}
-
-.webgl {
-  height: 100vh;
-  width: 100vw;
-  position: fixed;
-  z-index: 0;
-  pointer-events: none;
-  opacity: 0;
-  padding: 30px 30px 10vh;
-  box-sizing: border-box;
-
-  > canvas {
-    width: 100% !important;
-    height: 100% !important;
-    border-radius: 44px;
-    object-fit: cover;
-  }
-}
-.clouds-transition {
-  height: 100vh;
-  width: 100vw;
-  position: fixed;
-  z-index: 1;
-  top: 0;
-  pointer-events: none;
-
-  > .cloud {
-    position: absolute;
-    width: 150vw;
+  > .main-ui {
     height: 100%;
-    &:nth-of-type(1) {
-      left: -40%;
-      top: -22%;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+    > .temperature-indicator {
+      position: absolute;
+      right: 0;
+      top: 0;
+      right: 60px;
+      top: 60px;
+      padding: 1.56vw 2.06vw;
+      box-shadow:
+        0 -2px 4px 0 rgba(0, 0, 0, 0.25) inset,
+        -26px 82px 24px 0 rgba(0, 0, 0, 0),
+        -17px 52px 22px 0 rgba(0, 0, 0, 0),
+        -9px 29px 19px 0 rgba(0, 0, 0, 0.01),
+        -4px 13px 14px 0 rgba(0, 0, 0, 0.01),
+        -1px 3px 8px 0 rgba(0, 0, 0, 0.02);
+      background: var(
+        --white-gradient,
+        linear-gradient(
+          0deg,
+          rgba(255, 255, 255, 0.5) 0%,
+          rgba(255, 255, 255, 0.5) 100%
+        ),
+        linear-gradient(180deg, #fcfcfc 0%, #d1d1d1 100%)
+      );
+      border-radius: 32px;
+      > p {
+        font-size: 1.66vw;
+        line-height: 125%;
+      }
     }
-    &:nth-of-type(2) {
-      right: -46%;
-      top: -37%;
-      transform: rotate(180deg);
-    }
-    &:nth-of-type(3) {
-      left: -39%;
-      bottom: -31%;
-    }
-    &:nth-of-type(4) {
-      left: 30%;
-      bottom: -20%;
-    }
-    > img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
+  }
+
+  > .scene {
+    height: 100vh;
+    width: 100vw;
+    position: fixed;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0;
+    padding: 30px 30px 10vh;
+    box-sizing: border-box;
+
+    > canvas {
+      width: 100% !important;
+      height: 100% !important;
+      border-radius: 44px;
+      object-fit: cover;
     }
   }
 }
-
-.year-indicator {
-  position: fixed;
-  top: 40px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 5;
-  font-size: 32px;
-  font-weight: bold;
-  display: flex;
-  gap: 12px;
-  align-items: center;
-
-  .current {
-    color: black;
-  }
-
-  .preview {
-    color: #999;
-    font-size: 24px;
-  }
-}
-
-.direction {
-  position: fixed;
-  top: 30px;
-  z-index: 2;
-}
-
-// button {
-//   width: fit-content;
-//   padding: 12px 16px;
-//   background-color: white;
-//   border: 1px solid black;
-// }
-// .loader,
-// .intro,
-// .form,
-// .experience {
-//   top: 0;
-//   height: 100vh;
-//   width: 100vw;
-//   position: fixed;
-//   z-index: 2;
-// }
-// .loader,
-// .intro {
-//   display: flex;
-//   justify-content: center;
-//   align-items: center;
-//   background-color: white;
-// }
-// .intro {
-//   flex-direction: column;
-//   gap: 42px;
-// }
-// .form {
-//   display: flex;
-//   flex-direction: column;
-//   margin-top: 72px;
-//   align-items: center;
-//   > .buttons {
-//     display: flex;
-//     gap: 24px;
-//   }
-// }
-// .experience {
-//   > .controls {
-//     display: flex;
-//     flex-direction: column;
-//     align-items: end;
-//     right: 60px;
-//     > .step {
-//       display: flex;
-//       gap: 24px;
-//       margin-bottom: 92px;
-//     }
-//     > .camera {
-//       > .direction {
-//         width: 140px;
-//         height: 140px;
-//         position: relative;
-//         > button {
-//           position: absolute;
-//           &:nth-of-type(1) {
-//             top: 0;
-//             left: 50%;
-//             transform: translateX(-50%);
-//           }
-//           &:nth-of-type(2) {
-//             bottom: 0;
-//             left: 50%;
-//             transform: translateX(-50%);
-//           }
-//           &:nth-of-type(3) {
-//             left: 0;
-//             top: 50%;
-//             transform: translateY(-50%);
-//           }
-//           &:nth-of-type(4) {
-//             right: 0;
-//             top: 50%;
-//             transform: translateY(-50%);
-//           }
-//         }
-//       }
-//       > .zoom {
-//         margin-top: 42px;
-//         display: flex;
-//         gap: 24px;
-//       }
-//     }
-//   }
-// }
-// .controls {
-//   position: fixed;
-//   left: 50%;
-//   top: 200px;
-//   z-index: 1;
-// }
-// .webgl {
-//   width: 100vw;
-//   height: 100vh;
-// }
-
-// .v-enter-active,
-// .v-leave-active {
-//   transition: opacity 0.5s;
-// }
-
-// .v-enter-from,
-// .v-leave-to {
-//   opacity: 0;
-// }
 </style>

@@ -37,13 +37,13 @@ export default class Camera {
     // this.zoomRangeMultiplier = zoomRangeMultiplier;
     this.lerpFactor = lerpFactor;
 
-    const container = document.querySelector(".webgl")!;
+    const container = document.querySelector(".scene")!;
 
     this.instance = new THREE.PerspectiveCamera(
       fov,
       container.clientWidth / container.clientHeight,
       0.1,
-      1000
+      1000,
     );
 
     this.instance.position.copy(endPosition);
@@ -112,7 +112,7 @@ export default class Camera {
         z: this.endPosition.z,
         duration: 1.5,
         ease: "power3.out",
-      }
+      },
     );
   }
 }

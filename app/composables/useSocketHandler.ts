@@ -22,6 +22,7 @@ export function useSocketHandler(
   console.log(modalResultsRef.value);
 
   const webSocketStore = useWebSocket();
+  const configStore = useConfig();
 
   const { on, off } = useSocket();
 
@@ -46,8 +47,7 @@ export function useSocketHandler(
         break;
 
       case "TUTO_END":
-        console.log("tuto end");
-
+        configStore.isTutoEnded = true;
         break;
 
       /*------- YEAR CONTROL -------*/

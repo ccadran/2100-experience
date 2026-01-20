@@ -9,7 +9,7 @@ import { addWorldSpaceFog } from "./Fog";
 export function initScene(): Promise<void> {
   return new Promise((resolve, reject) => {
     const worldStore = useWorld();
-    const container = document.querySelector(".webgl");
+    const container = document.querySelector(".scene");
     if (!container) return;
 
     const globalScene = new THREE.Scene();
