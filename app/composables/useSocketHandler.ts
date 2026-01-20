@@ -11,18 +11,10 @@ interface IncomingPayload {
   [key: string]: any;
 }
 
-export function useSocketHandler(
-  modalResultsRef: Ref<{
-    revealResultsModal: () => void;
-    showExplanations: () => Promise<void>;
-    closeResultsModal: () => Promise<void>;
-    changeQuestion: (target: number) => Promise<void>;
-  } | null>,
-) {
-  console.log(modalResultsRef.value);
-
+export function useSocketHandler() {
   const webSocketStore = useWebSocket();
   const configStore = useConfig();
+  const uiStore = useUi();
 
   const { on, off } = useSocket();
 
@@ -91,25 +83,25 @@ export function useSocketHandler(
 
       /*------- EXPERIENCE END -------*/
       case "END_EXPERIENCE":
-        modalResultsRef.value?.revealResultsModal();
+        uiStore.toggleModalResult();
         console.log("Payload → END_EXPERIENCE");
         break;
 
       /*------- SHOW EXPLANATIONS -------*/
       case "SHOW_EXPLANATIONS":
-        modalResultsRef.value?.showExplanations();
+        uiStore.showExplanations();
         console.log("Payload → SHOW_EXPLANATIONS");
         break;
 
       /*------- CLOSE EXPLANATIONS -------*/
       case "CLOSE_EXPLANATIONS":
-        modalResultsRef.value?.closeResultsModal();
+        uiStore.toggleModalResult();
         console.log("Payload → CLOSE_EXPLANATIONS");
         break;
 
       /*------- CHANGE QUESTION -------*/
       case "CHANGE_QUESTION_EXPLANATION":
-        modalResultsRef.value?.changeQuestion(payload.data.question);
+        uiStore.changeFocusedExplanationQuestion(payload.data.question);
         console.log("Payload → CHANGE_QUESTION_EXPLANATION");
         break;
 

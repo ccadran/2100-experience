@@ -8,6 +8,7 @@ import { delay } from "~/webgl/utils";
 
 const configStore = useConfig();
 const webSocketStore = useWebSocket();
+const uiStore = useUi();
 const { sendAction } = useSocket();
 
 const { userName } = storeToRefs(webSocketStore);
@@ -45,6 +46,17 @@ const explanationText = computed(() => {
     ]?.text ?? "";
   return rawText.replace("%name", userName.value ?? "Tu");
 });
+
+watch(
+  () => uiStore.isModalResultShown,
+  (newValue) => {
+    if (newValue) {
+      revealResultsModal();
+    } else {
+      closeResultsModal();
+    }
+  },
+);
 
 // méthode pour révéler le modal des résultats
 function revealResultsModal() {
@@ -103,6 +115,15 @@ function revealResultsModal() {
     );
 }
 
+watch(
+  () => uiStore.isExplanationsShown,
+  (newValue) => {
+    if (newValue) {
+      showExplanations();
+    }
+  },
+);
+
 // méthode pour afficher les explications
 async function showExplanations() {
   isExplanationsShown.value = true;
@@ -159,6 +180,13 @@ async function closeResultsModal() {
   gsap.set([modal.value!, opacityLayer.value], { display: "none" });
   isExplanationsShown.value = false;
 }
+
+watch(
+  () => uiStore.focusedExplanationQuestion,
+  (newValue) => {
+    changeQuestion(newValue);
+  },
+);
 
 // méthode pour changer de question
 async function changeQuestion(target: number) {
