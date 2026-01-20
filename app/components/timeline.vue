@@ -38,6 +38,7 @@ watch(
         baseOffset.value = -yearWidth.value / 2;
 
         gsap.set(timeline.value!, { x: baseOffset.value });
+        await delay(1700);
         entryTimeline();
       }
     } else {
@@ -106,24 +107,38 @@ function slideTimeline(target: number) {
 
 function entryTimeline() {
   const dateStep = timeline.value!.querySelectorAll(".step");
-  gsap.fromTo(
-    dateStep,
-    { x: "100%", opacity: 0 },
-    {
-      x: "0%",
-      opacity: 1,
-      ease: "cubic-bezier(0.25, 0.95, 0, 1)",
-      stagger: 0.175,
-      onStart() {
-        gsap.delayedCall(0.6, () => slideTimeline(0));
+  gsap
+    .timeline({ defaults: { ease: "cubic-bezier(0.25, 0.95, 0, 1)" } })
+    .fromTo(
+      dateStep,
+      { x: "100%", opacity: 0 },
+      {
+        x: "0%",
+        opacity: 1,
+        stagger: 0.175,
+        onStart() {
+          gsap.delayedCall(0.6, () => slideTimeline(0));
+        },
       },
-    },
-  );
+    )
+    .fromTo(
+      ".timeline-mascot",
+      {
+        transform: "translateX(-100%) rotate(15deg)",
+        opacity: 0,
+      },
+      { transform: "translateX(0%) rotate(15deg)", opacity: 1 },
+
+      0,
+    );
 }
 </script>
 
 <template>
   <div class="timeline-container">
+    <div class="timeline-mascot">
+      <video src="/videos/3-coucou.webm" autoplay loop muted></video>
+    </div>
     <div class="timeline" ref="timeline">
       <div
         class="step"
@@ -158,6 +173,21 @@ function entryTimeline() {
   width: 100vw;
   position: absolute;
   bottom: 0;
+  > .timeline-mascot {
+    position: fixed;
+    bottom: -13%;
+    width: 32vw;
+    height: auto;
+    left: -8%;
+    rotate: 15deg;
+    opacity: 0;
+    z-index: 1;
+    > video {
+      height: 100%;
+      width: 100%;
+      object-fit: contain;
+    }
+  }
   .timeline {
     margin-left: 50%;
 
@@ -168,6 +198,7 @@ function entryTimeline() {
     > .step {
       display: flex;
       align-items: end;
+      opacity: 0;
       > .date-container {
         display: flex;
         flex-direction: column;

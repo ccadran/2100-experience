@@ -299,6 +299,7 @@ function simulateWsCo() {
     </div>
     <ModalPhone ref="modalPhone" />
     <ModalConfig ref="modalConfig" />
+
     <Timeline />
     <ModalResults ref="modalResults" />
 

@@ -228,7 +228,7 @@ defineExpose({
           </p>
         </div>
         <div class="mascot">
-          <img src="/images/mascot.webp" alt="" />
+          <video src="/videos/4 - resultst.webm" autoplay loop muted></video>
         </div>
       </div>
       <div class="explanations" v-else>
@@ -359,15 +359,20 @@ defineExpose({
         position: absolute;
         left: 50%;
         transform: translateX(-50%);
-        bottom: -6%;
+        bottom: -11%;
         width: 33%;
+        > video {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+        }
       }
     }
     .explanations {
       padding: 0 60px;
       display: flex;
       flex-direction: column;
-      gap: 80px;
+      gap: 5vh;
       margin-bottom: 80px;
       opacity: 0;
       .explanations-content {

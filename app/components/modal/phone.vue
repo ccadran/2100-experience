@@ -41,7 +41,7 @@ async function hideModal() {
 
 async function animModal() {
   await revealModal();
-  await delay(600);
+  await delay(1000);
   await hideModal();
 }
 
@@ -57,7 +57,7 @@ defineExpose({ animModal });
       </p>
     </div>
     <div class="mascot" ref="mascot">
-      <img src="/images/mascot.webp" alt="" />
+      <video src="/videos/1 - thumb up.webm" autoplay loop muted></video>
     </div>
   </div>
 </template>
@@ -93,7 +93,6 @@ defineExpose({ animModal });
 
     justify-content: center;
     > p {
-      font-size: 1.6vw;
       text-align: center;
     }
     &:before {
@@ -118,10 +117,10 @@ defineExpose({ animModal });
     bottom: 0;
     left: 50%;
     transform: translateX(-50%);
-    width: auto;
-    height: 32vh;
+    width: 32vw;
+    height: auto;
 
-    > img {
+    > video {
       width: 100%;
       height: 100%;
       object-fit: contain;

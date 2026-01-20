@@ -115,7 +115,7 @@ defineExpose({ animConfigModals, hideModals });
       </div>
     </div>
     <div class="mascot" ref="mascot">
-      <img src="/images/mascot.webp" alt="" />
+      <video src="/videos/2-dance.webm" autoplay loop muted></video>
     </div>
   </div>
 </template>
@@ -159,20 +159,21 @@ defineExpose({ animConfigModals, hideModals });
         -4px 13px 14px 0 rgba(0, 0, 0, 0.01),
         -1px 3px 8px 0 rgba(0, 0, 0, 0.02);
       > p {
+        font-size: 1.56vw;
         text-align: center;
       }
     }
   }
   > .mascot {
     position: absolute;
-    top: -150%;
-    width: auto;
-    height: 28vh;
+    top: -130%;
+    width: 28vw;
+    height: auto;
     aspect-ratio: 459/334;
     left: 50%;
     transform: translateX(-50%);
     z-index: -1;
-    > img {
+    > video {
       width: 100%;
       height: 100%;
       object-fit: contain;
