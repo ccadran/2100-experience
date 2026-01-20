@@ -18,6 +18,8 @@ export const useWorld = defineStore("useWorld", () => {
   const ground = ref<THREE.Mesh | null>(null);
   const skyContext = ref<CanvasRenderingContext2D | null>(null);
   const skyTexture = ref<THREE.CanvasTexture | null>(null);
+  const skyMesh = ref<THREE.Mesh | null>(null);
+  const infiniteFloor = ref<THREE.Mesh | null>(null);
 
   const impactsParts = {
     fog: null as any,
@@ -38,5 +40,7 @@ export const useWorld = defineStore("useWorld", () => {
     ground,
     skyContext,
     skyTexture,
+    skyMesh,
+    infiniteFloor
   };
 });

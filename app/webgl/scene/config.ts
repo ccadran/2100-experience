@@ -11,9 +11,7 @@ export function initScene(): Promise<void> {
     const worldStore = useWorld();
     const container = document.querySelector(".scene");
     if (!container) return;
-
     const globalScene = new THREE.Scene();
-
 
     // ciel
     const canvasGradient = document.createElement("canvas");
@@ -22,8 +20,6 @@ export function initScene(): Promise<void> {
     const ctx = canvasGradient.getContext("2d");
 
     if (ctx) worldStore.skyContext = ctx;
-
-
     if (ctx) {
       const gradient = ctx.createLinearGradient(0, 0, 0, 256);
       gradient.addColorStop(0, "#3377ed");
@@ -34,26 +30,24 @@ export function initScene(): Promise<void> {
     }
     const texture = new THREE.CanvasTexture(canvasGradient);
     worldStore.skyTexture = texture;
-    globalScene.background = texture;
-
-
-
-    // const canvasGradient = document.createElement("canvas");
-    // canvasGradient.width = 1;
-    // canvasGradient.height = 256;
-    // const ctx = canvasGradient.getContext("2d");
-    // if (ctx) {
-    //   const gradient = ctx.createLinearGradient(0, 0, 0, 256);
-    //   gradient.addColorStop(0, "#3377ed");
-    //   gradient.addColorStop(0.3, "#4f75cd");
-    //   gradient.addColorStop(1, "#6ea6eb");
-    //   ctx.fillStyle = gradient;
-    //   ctx.fillRect(0, 0, 1, 256);
-    // }
-    // const texture = new THREE.CanvasTexture(canvasGradient);
     // globalScene.background = texture;
-    worldStore.globalScene = globalScene;
+    globalScene.background = new THREE.Color("#ccddff"); 
 
+    // big sphere autour de la scene
+    const skyGeo = new THREE.SphereGeometry(400, 32, 32);
+    const skyMat = new THREE.MeshBasicMaterial({
+      map: texture,
+      side: THREE.BackSide, 
+      fog: false,
+      depthWrite: false 
+    });
+    const skyMesh = new THREE.Mesh(skyGeo, skyMat);
+    skyMesh.name = "SkyDome";
+    globalScene.add(skyMesh);
+    worldStore.skyMesh = markRaw(skyMesh);
+    
+
+    worldStore.globalScene = globalScene;
     worldStore.camera = new Camera();
 
     const canvas = container.querySelector("canvas");
@@ -73,7 +67,7 @@ export function initScene(): Promise<void> {
       // "/3d/states.glb",
       // "/3d/2100-map__V1.glb",
       // "/3d/map.glb",
-      "/3d/map-v2.glb",
+      "/3d/map-spots.glb",
       (gltf: any) => {
         gltf.scene.scale.set(1, 1, 1);
         globalScene.add(gltf.scene);
@@ -81,15 +75,10 @@ export function initScene(): Promise<void> {
         // ground color
         const groundMesh = gltf.scene.getObjectByName("ground");
         if (groundMesh && groundMesh instanceof THREE.Mesh) {
-          groundMesh.material = groundMesh.material.clone(); 
+          groundMesh.material = groundMesh.material.clone();
           groundMesh.material.color = new THREE.Color(0x007411);
-
           worldStore.ground = markRaw(groundMesh);
-        } else {
-          console.warn("ground introuvable");
         }
-
-
 
         const target = globalScene.getObjectByName("Scene");
         worldStore.scene3d = markRaw(target as THREE.Group);
