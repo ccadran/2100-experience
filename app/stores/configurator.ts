@@ -107,6 +107,7 @@ export const useConfig = defineStore("useConfig", () => {
   const currentStep = ref<number>(0);
 
   const isFormValidated = ref<boolean>(false);
+  const isTutoEnded = ref<boolean>(false);
 
   const globalPercentage = ref<number>(0);
 
@@ -120,6 +121,7 @@ export const useConfig = defineStore("useConfig", () => {
     objectsData,
     currentStep,
     isFormValidated,
+    isTutoEnded,
     globalPercentage,
   };
 });

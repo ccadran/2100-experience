@@ -166,28 +166,20 @@ watch(
     if (newValue) {
       await delay(1000);
       revealMap();
-
       await delay(1400);
-      animConfigModals();
+      await modalPhone.value.animModal();
     }
   },
 );
 
-async function animConfigModals() {
-  await modalPhone.value.revealModal();
-  await delay(600);
-  await modalPhone.value.hideModal();
-  await delay(1000);
-  if (configStore?.isFormValidated) return;
-  await modalConfig.value.revealContainer();
-  await delay(5000);
-  if (configStore?.isFormValidated) return;
-  await modalConfig.value.revealModal2();
-  await delay(5000);
-  if (configStore?.isFormValidated) return;
-  await modalConfig.value.revealModal3();
-}
-
+watch(
+  () => configStore?.isTutoEnded,
+  async (newValue) => {
+    if (newValue) {
+      modalConfig?.value?.animConfigModals();
+    }
+  },
+);
 watch(
   () => configStore?.isFormValidated,
   async (newValue) => {
@@ -209,6 +201,10 @@ const userData = {
   energy: 100,
   clothes: 90,
 };
+
+function endTuto() {
+  configStore.isTutoEnded = true;
+}
 
 function showResult() {
   modalResults.value.revealResultsModal();
@@ -232,6 +228,7 @@ function simulateWsCo() {
   <div class="controls-debug" v-if="webSocketStore.isRoomFull">
     <div class="form-controls" v-if="!configStore.isFormValidated">
       <h2>FORM</h2>
+      <button @click="endTuto">endTuto</button>
       <button @click="revealElements">simulate one form step validate</button>
       <button @click="handleFormValidations(userData)">
         Validate the form

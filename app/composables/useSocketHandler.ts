@@ -45,6 +45,11 @@ export function useSocketHandler(
         handleFormValidations(payload.data);
         break;
 
+      case "TUTO_END":
+        console.log("tuto end");
+
+        break;
+
       /*------- YEAR CONTROL -------*/
       case "YEARS": {
         const uiStore = useUi();

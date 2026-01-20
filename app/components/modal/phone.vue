@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import gsap from "gsap";
+import { delay } from "~/webgl/utils";
 
 const modal = ref<HTMLElement>();
 const mascot = ref<HTMLElement>();
@@ -17,7 +18,7 @@ async function revealModal() {
       modal.value!,
       { opacity: 0, rotate: -30 },
       { opacity: 1, rotate: 0 },
-      0
+      0,
     )
     .fromTo(mascot.value!, { y: "100%" }, { y: "20%" }, 0)
     .then();
@@ -32,13 +33,19 @@ async function hideModal() {
     .to(
       modal.value!,
       { opacity: 0, rotate: -10, ease: "power2.out", duration: 0.35 },
-      0
+      0,
     )
     .to(mascot.value!, { y: "100%" }, 0)
     .then();
 }
 
-defineExpose({ revealModal, hideModal });
+async function animModal() {
+  await revealModal();
+  await delay(600);
+  await hideModal();
+}
+
+defineExpose({ animModal });
 </script>
 
 <template>
@@ -75,9 +82,12 @@ defineExpose({ revealModal, hideModal });
       ),
       linear-gradient(180deg, #fcfcfc 0%, #d1d1d1 100%)
     );
-    box-shadow: 0 -2px 4px 0 rgba(0, 0, 0, 0.25) inset,
-      -26px 82px 24px 0 rgba(0, 0, 0, 0), -17px 52px 22px 0 rgba(0, 0, 0, 0),
-      -9px 29px 19px 0 rgba(0, 0, 0, 0.01), -4px 13px 14px 0 rgba(0, 0, 0, 0.01),
+    box-shadow:
+      0 -2px 4px 0 rgba(0, 0, 0, 0.25) inset,
+      -26px 82px 24px 0 rgba(0, 0, 0, 0),
+      -17px 52px 22px 0 rgba(0, 0, 0, 0),
+      -9px 29px 19px 0 rgba(0, 0, 0, 0.01),
+      -4px 13px 14px 0 rgba(0, 0, 0, 0.01),
       -1px 3px 8px 0 rgba(0, 0, 0, 0.02);
     display: none;
 
