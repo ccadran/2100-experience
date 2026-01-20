@@ -54,7 +54,7 @@ export function initScene(): Promise<void> {
         globalScene.add(gltf.scene);
 
         const target = globalScene.getObjectByName("Scene");
-        worldStore.scene3d = target as THREE.Group;
+        worldStore.scene3d = markRaw(target as THREE.Group);
 
         // spots pov
         const spots = [
@@ -77,14 +77,14 @@ export function initScene(): Promise<void> {
 
         sceneChildrens?.forEach((child) => {
           if (child.name.includes("group")) {
-            worldStore.paramsParts.push(child);
+            worldStore.paramsParts.push(markRaw(child));
           } else if (child.name.includes("impacts")) {
             if (child.name.includes("waterLevel")) {
-              worldStore.impactsParts.waterLevel = child;
+              worldStore.impactsParts.waterLevel = markRaw(child);
             } else if (child.name.includes("factory")) {
-              worldStore.impactsParts.factory = child;
+              worldStore.impactsParts.factory = markRaw(child);
             } else if (child.name.includes("rocks")) {
-              worldStore.impactsParts.rocks = child;
+              worldStore.impactsParts.rocks = markRaw(child);
             }
           }
         });
@@ -110,7 +110,7 @@ export function initScene(): Promise<void> {
         resolve();
       },
       undefined,
-      reject
+      reject,
     );
 
     function animate() {
@@ -181,7 +181,7 @@ function setupInstances() {
       const instancedMesh = new THREE.InstancedMesh(
         meshGroup[0]?.geometry,
         meshGroup[0]?.material,
-        mesheNumbers
+        mesheNumbers,
       );
       instancedMesh.name = targetType;
 
@@ -210,9 +210,9 @@ function setupInstances() {
       targetGroups[taregtGroup].add(instancedMesh);
 
       //stock mesh in store object
-      worldStore.sceneMeshes[taregtGroup] = targetGroups[taregtGroup];
+      worldStore.sceneMeshes[taregtGroup] = markRaw(targetGroups[taregtGroup]);
       if (!worldStore.paramsParts.includes(targetGroups[taregtGroup])) {
-        worldStore.paramsParts.push(targetGroups[taregtGroup]);
+        worldStore.paramsParts.push(markRaw(targetGroups[taregtGroup]));
       }
 
       //delete old meshes
@@ -245,7 +245,7 @@ function setupInstances() {
   //stock mesh & create objects
   function stockMesh(
     type: "best" | "normal" | "bad" | "worst",
-    object: THREE.Mesh
+    object: THREE.Mesh,
   ) {
     if (!allMeshes[object.parent!.parent!.name][type]) {
       allMeshes[object.parent!.parent!.name][type] = [];
@@ -276,7 +276,7 @@ export function revealElements() {
   if (configStore.formParams.currentStep <= configStore.formParams.step) {
     if (worldStore.hiddenSceneParts.length < 1) return;
     const randIndex = Math.floor(
-      Math.random() * worldStore.hiddenSceneParts.length
+      Math.random() * worldStore.hiddenSceneParts.length,
     );
     worldStore.hiddenSceneParts[randIndex].visible = true;
 
@@ -432,7 +432,7 @@ function calculateMaxTemperature() {
   const configStore = useConfig();
 
   const globalPercentage = Object.entries(
-    configStore.userConfig
+    configStore.userConfig,
   ).reduce<number>((acc, [key, value]) => {
     const weight = value.weight;
     return acc + value.percentage * weight;
@@ -482,7 +482,7 @@ function setupObjectsData() {
 
   worldStore.paramsParts.forEach((paramPart) => {
     const objectType = Object.keys(objectDataMap).find((key) =>
-      paramPart.name.includes(key)
+      paramPart.name.includes(key),
     );
 
     if (objectType) {
