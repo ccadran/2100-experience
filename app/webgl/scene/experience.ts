@@ -1,5 +1,6 @@
 import gsap from "gsap";
 import { delay } from "../utils";
+import { hideElements } from "./config";
 
 export async function moveToStep(target: number | "next" | "previous") {
   const worldStore = useWorld();
@@ -31,7 +32,7 @@ export async function moveToStep(target: number | "next" | "previous") {
 
     const currentState = getCurrentState(
       firstChild.userData,
-      currentTemperature
+      currentTemperature,
     );
 
     if (!currentState) return;
@@ -54,7 +55,7 @@ export async function moveToStep(target: number | "next" | "previous") {
 
 function updateImpact(
   type: "fog" | "waterLevel" | "factory" | "rocks",
-  evolution: number
+  evolution: number,
 ) {
   const worldStore = useWorld();
   switch (type) {
@@ -93,7 +94,7 @@ function getLevel(evolution: number) {
 
 function getCurrentState(
   states: Record<string, number>,
-  temperature: number
+  temperature: number,
 ): string | null {
   return (
     (Object.entries(states) as [string, number][])
@@ -110,4 +111,17 @@ function getCurrentState(
 export function goToCameraSpot(index: number) {
   const worldStore = useWorld();
   worldStore.camera?.goToSpot(index);
+}
+
+export function resetExperience() {
+  const configStore = useConfig();
+  const worldStore = useWorld();
+
+  configStore.isFormValidated = false;
+  configStore.userConfig = {};
+  configStore.worldStateSteps = [];
+  configStore.globalPercentage = 0;
+  configStore.currentStep = 0;
+  hideElements();
+  worldStore.camera?.goToSpot(0);
 }

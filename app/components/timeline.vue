@@ -20,7 +20,7 @@ watch(
   (step) => {
     if (step == null || !worldYears.value) return;
     slideTimeline(step);
-  }
+  },
 );
 
 watch(
@@ -29,19 +29,35 @@ watch(
     if (newValue) {
       worldYears.value = configStore.worldStateSteps.map((step) => step.year);
       await nextTick();
-      
+
       if (yearsStepsRefs.value[0]) {
         stepWidth.value = yearsStepsRefs.value[0].clientWidth;
-        yearWidth.value = yearsStepsRefs.value[0].querySelector(".inner")?.clientWidth || 0;
-        
+        yearWidth.value =
+          yearsStepsRefs.value[0].querySelector(".inner")?.clientWidth || 0;
+
         baseOffset.value = -yearWidth.value / 2;
-        
+
         gsap.set(timeline.value!, { x: baseOffset.value });
         entryTimeline();
       }
+    } else {
+      leaveTimeline();
     }
-  }
+  },
 );
+
+function leaveTimeline() {
+  const dateStep = timeline.value!.querySelectorAll(".step");
+  gsap.to(dateStep, {
+    x: "100%",
+    opacity: 0,
+    ease: "cubic-bezier(0.25, 0.95, 0, 1)",
+    stagger: {
+      each: 0.075,
+      from: "end",
+    },
+  });
+}
 
 function slideTimeline(target: number) {
   const slideTl = gsap.timeline();
@@ -53,15 +69,16 @@ function slideTimeline(target: number) {
     const lastDot = lastStep.querySelector(".indicator");
 
     slideTl.add(
-      gsap.timeline({ defaults: { ease: "cubic-bezier(0.25, 0.95, 0, 1)" } })
+      gsap
+        .timeline({ defaults: { ease: "cubic-bezier(0.25, 0.95, 0, 1)" } })
         .to(lastInner, { scale: 0.84 })
         .to(lastText, { fontSize: "1.66vw", color: "var(--grey)" }, 0)
         .to(lastDot, { backgroundColor: "var(--grey)" }, 0),
-      0
+      0,
     );
   }
 
-  const newTransform = baseOffset.value - (target * stepWidth.value);
+  const newTransform = baseOffset.value - target * stepWidth.value;
 
   if (yearsStepsRefs.value[target]) {
     const step = yearsStepsRefs.value[target];
@@ -73,11 +90,15 @@ function slideTimeline(target: number) {
       .to(stepInner, { scale: 1 }, 0)
       .to(stepText, { fontSize: "1.75vw", color: "black" }, 0)
       .to(stepDot, { backgroundColor: "black" }, 0)
-      .to(timeline.value!, { 
-        x: newTransform, 
-        duration: 0.8,
-        ease: "power2.inOut" 
-      }, 0);
+      .to(
+        timeline.value!,
+        {
+          x: newTransform,
+          duration: 0.8,
+          ease: "power2.inOut",
+        },
+        0,
+      );
   }
 
   lastTarget = target;
@@ -96,7 +117,7 @@ function entryTimeline() {
       onStart() {
         gsap.delayedCall(0.6, () => slideTimeline(0));
       },
-    }
+    },
   );
 }
 </script>
@@ -108,7 +129,7 @@ function entryTimeline() {
         class="step"
         v-for="(year, index) in worldYears"
         :key="year"
-        ref="yearsStepsRefs" 
+        ref="yearsStepsRefs"
       >
         <div class="date-container">
           <div class="inner">
@@ -116,7 +137,10 @@ function entryTimeline() {
           </div>
           <div class="indicator"></div>
         </div>
-        <div class="indicator separator" v-if="index !== worldYears.length -1"></div> 
+        <div
+          class="indicator separator"
+          v-if="index !== worldYears.length - 1"
+        ></div>
       </div>
     </div>
   </div>
@@ -167,7 +191,8 @@ function entryTimeline() {
             ),
             linear-gradient(180deg, #fcfcfc 0%, #d1d1d1 100%)
           );
-          box-shadow: 0 -2px 4px 0 rgba(0, 0, 0, 0.25) inset,
+          box-shadow:
+            0 -2px 4px 0 rgba(0, 0, 0, 0.25) inset,
             -26px 82px 24px 0 rgba(0, 0, 0, 0),
             -17px 52px 22px 0 rgba(0, 0, 0, 0),
             -9px 29px 19px 0 rgba(0, 0, 0, 0.01),

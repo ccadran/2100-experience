@@ -1,5 +1,9 @@
 import { handleFormValidations, revealElements } from "~/webgl/scene/config";
-import { moveToStep, goToCameraSpot } from "~/webgl/scene/experience";
+import {
+  moveToStep,
+  goToCameraSpot,
+  resetExperience,
+} from "~/webgl/scene/experience";
 
 interface IncomingPayload {
   type: string;
@@ -13,7 +17,7 @@ export function useSocketHandler(
     showExplanations: () => Promise<void>;
     closeResultsModal: () => Promise<void>;
     changeQuestion: (target: number) => Promise<void>;
-  } | null>
+  } | null>,
 ) {
   console.log(modalResultsRef.value);
 
@@ -49,7 +53,7 @@ export function useSocketHandler(
         const year = payload.data.strength;
 
         const stepIndex = configStore.worldStateSteps.findIndex(
-          (step) => step.year === year
+          (step) => step.year === year,
         );
         if (stepIndex === -1) return;
 
@@ -102,6 +106,10 @@ export function useSocketHandler(
       case "CHANGE_QUESTION_EXPLANATION":
         modalResultsRef.value?.changeQuestion(payload.data.question);
         console.log("Payload → CHANGE_QUESTION_EXPLANATION");
+        break;
+
+      case "RESET_EXPERIENCE":
+        resetExperience();
         break;
 
       /*------- WORLD STEPS (placeholder) -------*/

@@ -4,7 +4,11 @@ import {
   initScene,
   revealElements,
 } from "~/webgl/scene/config";
-import { moveToStep, goToCameraSpot } from "~/webgl/scene/experience";
+import {
+  moveToStep,
+  goToCameraSpot,
+  resetExperience,
+} from "~/webgl/scene/experience";
 import { useSocket } from "~/composables/useSocket";
 import { useSocketHandler } from "~/composables/useSocketHandler";
 import QRCode from "qrcode";
@@ -31,6 +35,48 @@ const webglContainer = ref<HTMLElement>();
 
 const isSceneLoaded = ref<boolean>(false);
 
+onMounted(async () => {
+  connectToWsServer();
+
+  const tl = loaderAnim();
+
+  isSceneLoaded.value = true;
+
+  await Promise.all([initScene(), tl.then()]);
+
+  uiStore.cloudsTransition = new CloudsTransition();
+
+  await completeLoader();
+
+  await revealQr();
+});
+
+function connectToWsServer() {
+  nextTick(() => {
+    const id = Math.random().toString(36).substring(2, 10);
+    const roomId = id;
+    // const roomId = "ROOM_1";
+    connect();
+    on("connect", () => {
+      listenForUpdates();
+
+      joinRoom(roomId);
+      webSocketStore.setRoomId(roomId);
+
+      const canvasQr = document.querySelector(
+        ".qrcode .inner",
+      ) as HTMLCanvasElement;
+      if (canvasQr) {
+        QRCode.toCanvas(canvasQr, roomId, function (error: any) {
+          if (error) console.error(error);
+        });
+      } else {
+        console.error("Canvas .qrcode introuvable");
+      }
+    });
+  });
+}
+
 const webSocketStore = useWebSocket();
 async function loaderAnim() {
   return gsap
@@ -41,7 +87,7 @@ async function loaderAnim() {
     .to(
       loaderProgress.value!,
       { width: "42%", backgroundColor: "var(--pink)" },
-      ">0.3"
+      ">0.3",
     )
     .to(
       loaderProgress.value!,
@@ -49,7 +95,7 @@ async function loaderAnim() {
         width: "84%",
         backgroundColor: "var(--yellow)",
       },
-      ">0.3"
+      ">0.3",
     );
 }
 
@@ -70,12 +116,12 @@ async function revealQr() {
       webglContainer.value!,
       { opacity: 0 },
       { opacity: 1, duration: 1 },
-      0
+      0,
     )
     .to(
       appLogo.value!,
       { top: "100px", width: "24vw", ease: "power1.inOut" },
-      0
+      0,
     )
     .to(loaderContainer.value!, { opacity: 0 }, 0)
     .fromTo(
@@ -91,7 +137,7 @@ async function revealQr() {
         rotation: 0,
         transform: "translate(-50%, -50%)  scale(1.0)",
       },
-      0.15
+      0.15,
     )
     .to(qrCodeText.value!, { opacity: 1 }, 0);
 }
@@ -124,7 +170,7 @@ watch(
       await delay(1400);
       animConfigModals();
     }
-  }
+  },
 );
 
 async function animConfigModals() {
@@ -148,52 +194,10 @@ watch(
     if (newValue) {
       modalConfig?.value?.hideModals();
     }
-  }
+  },
 );
 
-onMounted(async () => {
-  connectToWsServer();
-
-  const tl = loaderAnim();
-
-  isSceneLoaded.value = true;
-
-  await Promise.all([initScene(), tl.then()]);
-
-  uiStore.cloudsTransition = new CloudsTransition();
-
-  await completeLoader();
-
-  await revealQr();
-});
-
-function connectToWsServer() {
-  nextTick(() => {
-    const id = Math.random().toString(36).substring(2, 10);
-    const roomId = id;
-    // const roomId = "ROOM_1";
-    connect();
-    on("connect", () => {
-      console.log("Client Socket.io connectéeeeeee");
-
-      listenForUpdates();
-
-      joinRoom(roomId);
-      webSocketStore.setRoomId(roomId);
-      
-      const canvasQr = document.querySelector(
-        ".qrcode .inner"
-      ) as HTMLCanvasElement;
-      if (canvasQr) {
-        QRCode.toCanvas(canvasQr, roomId, function (error: any) {
-          if (error) console.error(error);
-        });
-      } else {
-        console.error("Canvas .qrcode introuvable");
-      }
-    });
-  });
-}
+//DEBUG
 
 const userData = {
   plane: 100,
@@ -270,6 +274,7 @@ function simulateWsCo() {
       <button @click="showExplanations()">Show explanations</button>
       <button @click="changeQuestion()">changeQuestions</button>
       <button @click="closeResultsModal()">closeResults</button>
+      <button @click="resetExperience">reset experience</button>
     </div>
   </div>
   <!-- <div style="position: fixed; top: 70px; display: flex; gap: 5px; z-index: 2">
@@ -378,10 +383,13 @@ main {
       height: 52px;
       padding: 10px;
       border-radius: 24px;
-      box-shadow: 0 -2px 4px 0 rgba(0, 0, 0, 0.25) inset,
-        -26px 82px 24px 0 rgba(0, 0, 0, 0), -17px 52px 22px 0 rgba(0, 0, 0, 0),
+      box-shadow:
+        0 -2px 4px 0 rgba(0, 0, 0, 0.25) inset,
+        -26px 82px 24px 0 rgba(0, 0, 0, 0),
+        -17px 52px 22px 0 rgba(0, 0, 0, 0),
         -9px 29px 19px 0 rgba(0, 0, 0, 0.01),
-        -4px 13px 14px 0 rgba(0, 0, 0, 0.01), -1px 3px 8px 0 rgba(0, 0, 0, 0.02);
+        -4px 13px 14px 0 rgba(0, 0, 0, 0.01),
+        -1px 3px 8px 0 rgba(0, 0, 0, 0.02);
       background: var(
         --white-gradient,
         linear-gradient(
@@ -396,8 +404,10 @@ main {
         width: 0%;
         height: 100%;
         background-color: var(--blue);
-        box-shadow: 0 -2px 4px 0 rgba(0, 0, 0, 0.25) inset,
-          -26px 82px 24px 0 rgba(0, 0, 0, 0), -17px 52px 22px 0 rgba(0, 0, 0, 0),
+        box-shadow:
+          0 -2px 4px 0 rgba(0, 0, 0, 0.25) inset,
+          -26px 82px 24px 0 rgba(0, 0, 0, 0),
+          -17px 52px 22px 0 rgba(0, 0, 0, 0),
           -9px 29px 19px 0 rgba(0, 0, 0, 0.01),
           -4px 13px 14px 0 rgba(0, 0, 0, 0.01),
           -1px 3px 8px 0 rgba(0, 0, 0, 0.02);
