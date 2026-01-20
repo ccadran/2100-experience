@@ -15,6 +15,9 @@ export const useWorld = defineStore("useWorld", () => {
   const camera = ref<Camera>();
   const sceneMeshes = ref<Record<string, THREE.Group>>({});
   const fogControls = ref<FogControls | null>(null);
+  const ground = ref<THREE.Mesh | null>(null);
+  const skyContext = ref<CanvasRenderingContext2D | null>(null);
+  const skyTexture = ref<THREE.CanvasTexture | null>(null);
 
   const impactsParts = {
     fog: null as any,
@@ -32,5 +35,8 @@ export const useWorld = defineStore("useWorld", () => {
     camera,
     sceneMeshes,
     fogControls,
+    ground,
+    skyContext,
+    skyTexture,
   };
 });
