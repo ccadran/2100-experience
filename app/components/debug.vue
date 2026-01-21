@@ -19,26 +19,26 @@ function simulateWsCo() {
   webSocketStore.isRoomFull = true;
 }
 
-const userData = {
-  plane: 100,
-  transport: 0,
-  meat: 0,
-  promptIA: 0,
-  products: 0,
-  phone: 0,
-  energy: 0,
-  clothes: 0,
-};
 // const userData = {
 //   plane: 100,
-//   transport: 100,
-//   meat: 70,
-//   promptIA: 55,
-//   products: 30,
-//   phone: 10,
-//   energy: 100,
-//   clothes: 90,
+//   transport: 0,
+//   meat: 100,
+//   promptIA: 0,
+//   products: 100,
+//   phone: 0,
+//   energy: 0,
+//   clothes: 0,
 // };
+const userData = {
+  plane: 100,
+  transport: 100,
+  meat: 70,
+  promptIA: 55,
+  products: 30,
+  phone: 10,
+  energy: 100,
+  clothes: 90,
+};
 </script>
 
 <template>

@@ -31,6 +31,8 @@ export const useWorld = defineStore("useWorld", () => {
     factory: null as THREE.Object3D | null,
     rocks: null as THREE.Object3D | null,
     fields: null as THREE.Object3D | null,
+    sheeps: null as THREE.Object3D | null,
+    chickens: null as THREE.Object3D | null,
   };
 
   return {

@@ -6,7 +6,12 @@ import { delay } from "../utils";
 const healthy_color = new THREE.Color("#007411");
 const dry_color = new THREE.Color("#a89a02");
 
-import { calculateParmasAssetsNumber, hideElements } from "./elementsManager";
+import {
+  calculateParmasAssetsNumber,
+  hideElements,
+  hideInstanceChildren,
+} from "./elementsManager";
+import type { impactType } from "~/types/config";
 
 export async function moveToStep(target: number | "next" | "previous") {
   const worldStore = useWorld();
@@ -67,8 +72,6 @@ export async function moveToStep(target: number | "next" | "previous") {
   });
 
   Object.values(configStore.worldImpacts).forEach((impact) => {
-    console.log(impact, "YOOOOO");
-
     updateImpact(impact.name, currentStep.impacts[impact.name].value);
   });
   await delay(500);
@@ -76,10 +79,19 @@ export async function moveToStep(target: number | "next" | "previous") {
 }
 
 function updateImpact(
-  type: "fog" | "waterLevel" | "factory" | "rocks" | "fields" | "animals",
+  type:
+    | "fog"
+    | "waterLevel"
+    | "factory"
+    | "rocks"
+    | "fields"
+    | "sheeps"
+    | "chickens",
   evolution: number,
 ) {
   const worldStore = useWorld();
+  console.log(type);
+
   switch (type) {
     case "fog":
       // worldStore.impactsParts.fog.update(evolution) //function de la classe fog
@@ -91,7 +103,11 @@ function updateImpact(
         child.visible = child.name === fieldsState;
       });
       break;
-    case "animals":
+    case "sheeps":
+      updateImpactNumber({ name: "sheeps", value: evolution });
+      break;
+    case "chickens":
+      updateImpactNumber({ name: "chickens", value: evolution });
       break;
     case "waterLevel":
       const levelWater = getLevel(evolution);
@@ -120,6 +136,20 @@ function getLevel(evolution: number) {
   if (evolution < 20) return "high";
   if (evolution < 50) return "mid";
   if (evolution < 75) return "low";
+}
+
+export function updateImpactNumber(impact: impactType) {
+  const worldStore = useWorld();
+  const targetInstancedMesh = worldStore.impactsParts[impact.name];
+  console.log(targetInstancedMesh);
+
+  const targetInstances = Math.ceil(
+    (targetInstancedMesh.count / 100) * impact.value,
+  );
+
+  for (let i = 0; i < targetInstances; i++) {
+    hideInstanceChildren(targetInstancedMesh, i);
+  }
 }
 
 function getCurrentState(

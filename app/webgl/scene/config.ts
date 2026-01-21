@@ -9,8 +9,8 @@ import gsap from "gsap";
 import { addWorldSpaceFog } from "./Fog";
 import {
   hideElements,
+  setupAllImpacts,
   setupDecorInstances,
-  setupImpactsInstances,
   setupParamsInstances,
 } from "./elementsManager";
 
@@ -48,7 +48,8 @@ export function initScene(): Promise<void> {
       // "/3d/states.glb",
       // "/3d/2100-map__V1.glb",
       // "/3d/map.glb",
-      "/3d/map-v8.glb",
+      // "/3d/map-v10.glb",
+      "/3d/map-v12.glb",
       // "/3d/map-spots.glb",
       (gltf: any) => {
         gltf.scene.scale.set(1, 1, 1);
@@ -92,7 +93,7 @@ export function initScene(): Promise<void> {
 
         if (worldStore.camera) {
           worldStore.camera.setSpots(spots, [
-            new THREE.Vector3(100, 0, 0),
+            new THREE.Vector3(0, 0, 0),
             new THREE.Vector3(100, 0, -10),
             new THREE.Vector3(-5, 0, 5),
           ]);
@@ -106,9 +107,7 @@ export function initScene(): Promise<void> {
             worldStore.paramsParts.push(markRaw(child));
           } else if (child.name.includes("IMPACTS")) {
             child.children.forEach((c) => {
-              console.log("________");
               if (c.name.includes("fields")) {
-                console.log("fields________");
                 worldStore.impactsParts.fields = markRaw(c);
               }
             });
@@ -120,8 +119,10 @@ export function initScene(): Promise<void> {
         });
 
         setupParamsInstances();
-        setupImpactsInstances();
-        setupDecorInstances();
+        // setupImpactsInstances();
+        // setupImpactsPool();
+        setupAllImpacts();
+        // setupDecorInstances()
         hideElements();
 
         environment.initFog();
