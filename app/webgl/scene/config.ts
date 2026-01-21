@@ -2,9 +2,9 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import type { UserConfigType } from "~/types/config";
 import Camera from "./Camera";
+import Environment from "./Environment";
 import { moveToStep } from "./experience";
 import gsap from "gsap";
-import { addWorldSpaceFog } from "./Fog";
 
 export function initScene(): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -12,38 +12,6 @@ export function initScene(): Promise<void> {
     const container = document.querySelector(".scene");
     if (!container) return;
     const globalScene = new THREE.Scene();
-
-    // ciel
-    const canvasGradient = document.createElement("canvas");
-    canvasGradient.width = 1;
-    canvasGradient.height = 256;
-    const ctx = canvasGradient.getContext("2d");
-
-    if (ctx) worldStore.skyContext = ctx;
-    if (ctx) {
-      const gradient = ctx.createLinearGradient(0, 0, 0, 256);
-      gradient.addColorStop(0, "#3377ed");
-      gradient.addColorStop(0.3, "#4f75cd");
-      gradient.addColorStop(1, "#6ea6eb");
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, 1, 256);
-    }
-    const texture = new THREE.CanvasTexture(canvasGradient);
-    worldStore.skyTexture = texture;
-    globalScene.background = new THREE.Color("#ccddff"); 
-
-    // big sphere autour de la scene
-    const skyGeo = new THREE.SphereGeometry(400, 32, 32);
-    const skyMat = new THREE.MeshBasicMaterial({
-      map: texture,
-      side: THREE.BackSide, 
-      fog: false,
-      depthWrite: false 
-    });
-    const skyMesh = new THREE.Mesh(skyGeo, skyMat);
-    skyMesh.name = "SkyDome";
-    globalScene.add(skyMesh);
-    worldStore.skyMesh = markRaw(skyMesh);
 
     worldStore.globalScene = globalScene;
     worldStore.camera = new Camera();
@@ -53,53 +21,20 @@ export function initScene(): Promise<void> {
       worldStore.cameraOverlay = markRaw(worldStore.camera.overlay);
     }
 
-
     const canvas = container.querySelector("canvas");
     if (!canvas) return;
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     renderer.setSize(container.clientWidth, container.clientHeight);
 
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    const environment = new Environment(globalScene, renderer);
 
-    renderer.toneMapping = THREE.ACESFilmicToneMapping; 
+    worldStore.skyContext = environment.getSkyContext();
+    worldStore.skyTexture = environment.getSkyTexture();
+    worldStore.skyMesh = markRaw(environment.getSkyMesh()!);
+    worldStore.hemiLight = markRaw(environment.getHemiLight());
+    worldStore.sunLight = markRaw(environment.getSunLight());
+    worldStore.environment = markRaw(environment);
 
-    renderer.toneMappingExposure = 1.2;
-
-
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-
-
-    //lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
-    globalScene.add(ambientLight);
-    
-    const hemiLight = new THREE.HemisphereLight(0x3377ed, 0x68d155, 0.4);
-    hemiLight.position.set(0, 20, 0);
-    globalScene.add(hemiLight);
-    worldStore.hemiLight = markRaw(hemiLight);
-
-    const sunLight = new THREE.DirectionalLight(0xffffff, 2.5);
-    sunLight.position.set(15, 30, 15);
-    sunLight.castShadow = true;
-
-
-    //  ombres
-    sunLight.shadow.bias = -0.0005;
-    sunLight.shadow.normalBias = 0.05;  
-    sunLight.shadow.mapSize.width = 2048; 
-    sunLight.shadow.mapSize.height = 2048;
-
-    const d = 60; 
-    sunLight.shadow.camera.near = 0.5;
-    sunLight.shadow.camera.far = 200;
-    sunLight.shadow.camera.left = -d;
-    sunLight.shadow.camera.right = d;
-    sunLight.shadow.camera.top = d;
-    sunLight.shadow.camera.bottom = -d;
-    
-    globalScene.add(sunLight);
-    worldStore.sunLight = markRaw(sunLight);
 
     const loader = new GLTFLoader();
     loader.load(
@@ -147,14 +82,16 @@ export function initScene(): Promise<void> {
         ]
           .filter(Boolean)
           .map((s) => markRaw(s));
+          
 
-        // worldStore.camera = new Camera();
-        worldStore.camera.setSpots(spots, [
-          new THREE.Vector3(100, 0, 0),
-          new THREE.Vector3(100, 0, -10),
-          new THREE.Vector3(-5, 0, 5),
-        ]);
-        worldStore.camera.goToSpot(0);
+        if (worldStore.camera) {
+          worldStore.camera.setSpots(spots, [
+            new THREE.Vector3(100, 0, 0),
+            new THREE.Vector3(100, 0, -10),
+            new THREE.Vector3(-5, 0, 5),
+          ]);
+          worldStore.camera.goToSpot(0);
+        }
 
     
         const sceneChildrens = worldStore.scene3d?.children;
@@ -180,16 +117,8 @@ export function initScene(): Promise<void> {
         setupInstances();
         hideElements();
 
-        setTimeout(() => {
-          const fogControls = addWorldSpaceFog(globalScene, {
-            fogColor: new THREE.Color(0xccddff),
-            minFogDistance: 15,
-            maxFogDistance: 80,
-            fogDensity: 2.5,
-          });
-
-          worldStore.fogControls = fogControls;
-        }, 100);
+        environment.initFog();
+        worldStore.fogControls = environment.getFogControls();
 
         resolve();
       },

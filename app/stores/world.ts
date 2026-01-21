@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import type Camera from "~/webgl/scene/Camera";
+import type Environment from "~/webgl/scene/Environment"
 
 interface FogControls {
   updateFogColor: (color: THREE.Color) => void;
@@ -22,6 +23,7 @@ export const useWorld = defineStore("useWorld", () => {
   const sunLight = ref<THREE.DirectionalLight | null>(null);
   const hemiLight = ref<THREE.HemisphereLight | null>(null);
   const cameraOverlay = ref<THREE.Mesh | null>(null);
+  const environment = ref<Environment | null>(null)
 
   const impactsParts = {
     fog: null as any,
@@ -46,5 +48,6 @@ export const useWorld = defineStore("useWorld", () => {
     sunLight,
     hemiLight,
     cameraOverlay,
+    environment
   };
 });
