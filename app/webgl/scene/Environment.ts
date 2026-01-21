@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import gsap from "gsap";
 import { addWorldSpaceFog } from "./Fog";
+import { createPollutionCloud } from "./Smoke";
 
 const SKY_CLEAN = {
   top: new THREE.Color("#3377ed"),
@@ -25,6 +26,9 @@ const SKY_POLLUTED = {
 const MAX_FOG_SCORE = 16;
 
 
+const SMOKE_COLOR_POLLUTED = new THREE.Color("#938776");
+const SMOKE_COLOR_CLEAN = new THREE.Color("#ffffff");
+
 export default class Environment {
     private scene: THREE.Scene;
     private renderer: THREE.WebGLRenderer;
@@ -35,6 +39,7 @@ export default class Environment {
     private hemiLight!: THREE.HemisphereLight;
     private sunLight!: THREE.DirectionalLight;
     private fogControls: any = null;
+    private pollutionCloud: THREE.Points | null = null;
     
 
     private currentSkyState = {
@@ -54,6 +59,7 @@ export default class Environment {
         this.setupRenderer();
         this.setupSky();
         this.setupLights();
+        this.setupPollution();
     }
 
 
@@ -136,6 +142,27 @@ export default class Environment {
     }
 
 
+    // nuage de pollution
+    private setupPollution() {
+        this.pollutionCloud = createPollutionCloud({
+            count: 200,
+            radius: 40,
+            height: 15,
+            color: "#ffffff",
+            opacity: 0,
+            size: 12
+        });
+        this.scene.add(this.pollutionCloud);
+    }
+
+    //anim nuage
+    public tick() {
+        if (this.pollutionCloud) {
+            this.pollutionCloud.rotation.y += 0.001;
+        }
+    }
+
+
     //fog
     public initFog() {
         setTimeout(() => {
@@ -152,7 +179,17 @@ export default class Environment {
         if (!this.skyContext || !this.skyTexture || !this.fogControls) return;
 
         let ratio = currentFogValue / MAX_FOG_SCORE;
-        ratio = Math.max(0, Math.min(1, ratio));
+        const INTENSITY_FACTOR = 0.5;
+        ratio = Math.max(0, Math.min(1, ratio * INTENSITY_FACTOR));
+
+        if (this.sunLight) {
+            const targetIntensity = THREE.MathUtils.lerp(2.5, 0.5, ratio);
+            this.sunLight.intensity = targetIntensity;
+            
+            const sunColorClean = new THREE.Color("#ffffff");
+            const sunColorPolluted = new THREE.Color("#ffaa00");
+            this.sunLight.color.copy(sunColorClean).lerp(sunColorPolluted, ratio);
+        }
 
         const targetTop = new THREE.Color().copy(SKY_CLEAN.top).lerp(SKY_POLLUTED.top, ratio);
         const targetMid = new THREE.Color().copy(SKY_CLEAN.mid).lerp(SKY_POLLUTED.mid, ratio);
@@ -195,6 +232,15 @@ export default class Environment {
                     const mat = cameraOverlay.material as THREE.MeshBasicMaterial;
                     mat.color.copy(this.currentSkyState.top);
                 }
+
+                if (this.pollutionCloud) {
+                    const mat = this.pollutionCloud.material as THREE.PointsMaterial;
+                    const targetOpacity = ratio * 0.3; 
+                    mat.opacity = targetOpacity;
+                    
+                    const targetColor = new THREE.Color().copy(SMOKE_COLOR_CLEAN).lerp(SMOKE_COLOR_POLLUTED, ratio);
+                    mat.color.copy(targetColor);
+                }
             }
         });
     }
@@ -205,5 +251,6 @@ export default class Environment {
     public getHemiLight() { return this.hemiLight; }
     public getSunLight() { return this.sunLight; }
     public getFogControls() { return this.fogControls; }
+    public getPollutionCloud() { return this.pollutionCloud; }
 
 }

@@ -41,6 +41,9 @@ export function initScene(): Promise<void> {
     worldStore.hemiLight = markRaw(environment.getHemiLight());
     worldStore.sunLight = markRaw(environment.getSunLight());
     worldStore.environment = markRaw(environment);
+    if (environment.getPollutionCloud()) {
+      worldStore.pollutionCloud = markRaw(environment.getPollutionCloud()!);
+    }
 
     const loader = new GLTFLoader();
     loader.load(
@@ -132,6 +135,10 @@ export function initScene(): Promise<void> {
 
     function animate() {
       requestAnimationFrame(animate);
+
+      if (worldStore.environment) {
+          worldStore.environment.tick();
+      }
 
       renderer.render(globalScene, worldStore.camera!.instance);
     }
