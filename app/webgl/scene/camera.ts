@@ -12,6 +12,8 @@ interface CameraParams {
 export default class Camera {
   instance: THREE.PerspectiveCamera;
 
+  overlay: THREE.Mesh;
+
   startPosition: THREE.Vector3;
   endPosition: THREE.Vector3;
 
@@ -50,8 +52,49 @@ export default class Camera {
     this.targetPosition.copy(endPosition);
     this.instance.lookAt(this.targetLookAt);
 
+    this.overlay = this.createOverlay();
+    this.instance.add(this.overlay);
+
     this.startLoop();
   }
+
+  private createOverlay(): THREE.Mesh {
+    
+    const overlayCanvas = document.createElement("canvas");
+    overlayCanvas.width = 1;
+    overlayCanvas.height = 128;
+    const overlayCtx = overlayCanvas.getContext("2d");
+
+    if (overlayCtx) {
+      const grad = overlayCtx.createLinearGradient(0, 0, 0, 128);
+      grad.addColorStop(0, "rgba(255, 255, 255, 1)"); 
+      grad.addColorStop(0.6, "rgba(255, 255, 255, 0)"); 
+      overlayCtx.fillStyle = grad;
+      overlayCtx.fillRect(0, 0, 1, 128);
+    }
+    
+    const overlayTexture = new THREE.CanvasTexture(overlayCanvas);
+    overlayTexture.colorSpace = THREE.SRGBColorSpace;
+
+    const overlayGeo = new THREE.PlaneGeometry(4, 2); 
+    
+    const overlayMat = new THREE.MeshBasicMaterial({
+      color: 0x3377ed,
+      map: overlayTexture,
+      transparent: true,
+      opacity: 0.8,
+      depthTest: false, 
+      depthWrite: false,
+      fog: false
+    });
+
+    const mesh = new THREE.Mesh(overlayGeo, overlayMat);
+    mesh.position.set(0, 0, -1.1); 
+    mesh.renderOrder = 9999;
+    
+    return mesh;
+  }
+
 
   private startLoop() {
     const loop = () => {

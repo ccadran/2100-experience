@@ -1,6 +1,16 @@
 import gsap from "gsap";
 import { delay } from "../utils";
+
+
+import * as THREE from "three";
+
 import { hideElements } from "./elementsManager";
+// couleurs du sol
+const healthy_color = new THREE.Color("#007411");
+const dry_color = new THREE.Color("#a89a02");
+
+
+
 
 export async function moveToStep(target: number | "next" | "previous") {
   const worldStore = useWorld();
@@ -24,6 +34,13 @@ export async function moveToStep(target: number | "next" | "previous") {
   const currentStep = configStore.worldStateSteps[configStore.currentStep];
 
   const currentTemperature = currentStep.temperature;
+  updateGroundColor(currentTemperature);
+
+  const currentFogValue = currentStep.impacts.fog?.value || 0;
+
+  if (worldStore.environment) {
+    worldStore.environment.updateSkyAndFog(currentFogValue, worldStore.cameraOverlay || undefined);
+  }
 
   worldStore.paramsParts.forEach((part) => {
     const firstChild = part.children[0];
@@ -124,4 +141,31 @@ export function resetExperience() {
   configStore.currentStep = 0;
   hideElements();
   worldStore.camera?.goToSpot(0);
+}
+
+
+
+// couleur du sol via la temp
+function updateGroundColor(currentTemp: number) {
+  const worldStore = useWorld();
+  const configStore = useConfig();
+
+  if (!worldStore.ground) return;
+
+  const minTemp = configStore.configParams.minTemperature;
+  const maxTemp = configStore.configParams.maxTemperature;
+
+
+  let ratio = (currentTemp - minTemp) / (maxTemp - minTemp);
+  ratio = Math.max(0, Math.min(1, ratio));
+
+  const targetColor = new THREE.Color().copy(healthy_color).lerp(dry_color, ratio);
+
+  gsap.to((worldStore.ground.material as THREE.MeshStandardMaterial).color, {
+    r: targetColor.r,
+    g: targetColor.g,
+    b: targetColor.b,
+    duration: 1.5,
+    ease: "power2.inOut"
+  });
 }
