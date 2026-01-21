@@ -482,3 +482,42 @@ export function setupAllImpacts() {
     });
   }
 }
+
+//TODO change to upodate
+export function updateCity(temperature: number) {
+  const worldStore = useWorld();
+  const configStore = useConfig();
+
+  const cityGroup = worldStore.globalScene?.getObjectByName("City")!;
+
+  const citySpotNumber = 5;
+
+  const focusedSpot = Math.round(
+    (temperature / configStore.configParams.maxTemperature) * citySpotNumber,
+  );
+  console.log(focusedSpot);
+
+  for (let i = 0; i < cityGroup.children.length!; i++) {
+    const citySpot = cityGroup.children[i]!;
+
+    citySpot.children.forEach((child) => {
+      if (child.name.includes("house")) {
+        console.log(i, focusedSpot);
+
+        if (i < focusedSpot) {
+          child.visible = false;
+        } else {
+          child.visible = true;
+        }
+        console.log(child.visible);
+      } else if (child.name.includes("building")) {
+        if (i < focusedSpot) {
+          child.visible = true;
+        } else {
+          child.visible = false;
+        }
+        console.log(child.visible);
+      }
+    });
+  }
+}

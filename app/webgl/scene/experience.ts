@@ -10,6 +10,7 @@ import {
   calculateParmasAssetsNumber,
   hideElements,
   hideInstanceChildren,
+  updateCity,
 } from "./elementsManager";
 import type { impactType } from "~/types/config";
 
@@ -36,6 +37,7 @@ export async function moveToStep(target: number | "next" | "previous") {
 
   const currentTemperature = currentStep.temperature;
   updateGroundColor(currentTemperature);
+  updateCity(currentTemperature);
 
   const currentFogValue = currentStep.impacts.fog?.value || 0;
 

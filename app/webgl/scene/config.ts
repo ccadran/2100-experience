@@ -5,18 +5,17 @@ import Camera from "./Camera";
 import Environment from "./Environment";
 import { moveToStep } from "./experience";
 
-import gsap from "gsap";
-import { addWorldSpaceFog } from "./Fog";
 import {
   hideElements,
   setupAllImpacts,
-  setupDecorInstances,
   setupParamsInstances,
+  updateCity,
 } from "./elementsManager";
 
 export function initScene(): Promise<void> {
   return new Promise((resolve, reject) => {
     const worldStore = useWorld();
+    const configStore = useConfig();
     const container = document.querySelector(".scene");
     if (!container) return;
     const globalScene = new THREE.Scene();
@@ -49,7 +48,7 @@ export function initScene(): Promise<void> {
       // "/3d/2100-map__V1.glb",
       // "/3d/map.glb",
       // "/3d/map-v10.glb",
-      "/3d/map-v12.glb",
+      "/3d/map-v13.glb",
       // "/3d/map-spots.glb",
       (gltf: any) => {
         gltf.scene.scale.set(1, 1, 1);
@@ -123,6 +122,7 @@ export function initScene(): Promise<void> {
         // setupImpactsPool();
         setupAllImpacts();
         // setupDecorInstances()
+        updateCity(configStore.configParams.currentTemperature);
         hideElements();
 
         environment.initFog();
