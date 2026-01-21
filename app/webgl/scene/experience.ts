@@ -6,7 +6,7 @@ import * as THREE from "three";
 
 // couleurs du sol
 const healthy_color = new THREE.Color("#007411");
-const dry_color = new THREE.Color("#dadd7d");
+const dry_color = new THREE.Color("#a89a02");
 
 
 const SKY_CLEAN = {
@@ -234,7 +234,7 @@ function updateSkyAndFog(currentFogValue: number) {
       const ctx = worldStore.skyContext!;
       const gradient = ctx.createLinearGradient(0, 0, 0, 256);
       gradient.addColorStop(0, `#${currentSkyState.top.getHexString()}`);
-      gradient.addColorStop(0.3, `#${currentSkyState.mid.getHexString()}`);
+      gradient.addColorStop(0.70, `#${currentSkyState.mid.getHexString()}`);
       gradient.addColorStop(1, `#${currentSkyState.bot.getHexString()}`);
       
       ctx.fillStyle = gradient;
@@ -247,9 +247,9 @@ function updateSkyAndFog(currentFogValue: number) {
         worldStore.fogControls.updateFogDensity(currentSkyState.fogDensity);
       }
 
-
-      if (worldStore.globalScene) {
-        worldStore.globalScene.background = currentSkyState.fog;
+      if (worldStore.cameraOverlay) {
+          const mat = worldStore.cameraOverlay.material as THREE.MeshBasicMaterial;
+          mat.color.copy(currentSkyState.top);
       }
 
     }
