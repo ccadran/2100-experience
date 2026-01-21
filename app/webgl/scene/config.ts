@@ -13,7 +13,6 @@ import {
   setupInstances,
 } from "./elementsManager";
 
-
 export function initScene(): Promise<void> {
   return new Promise((resolve, reject) => {
     const worldStore = useWorld();
@@ -43,27 +42,25 @@ export function initScene(): Promise<void> {
     worldStore.sunLight = markRaw(environment.getSunLight());
     worldStore.environment = markRaw(environment);
 
-
     const loader = new GLTFLoader();
     loader.load(
       // "/3d/states.glb",
       // "/3d/2100-map__V1.glb",
-      // "/3d/map.glb",
-      "/3d/map-spots.glb",
+      "/3d/map.glb",
+      // "/3d/map-spots.glb",
       (gltf: any) => {
         gltf.scene.scale.set(1, 1, 1);
 
         gltf.scene.traverse((child: any) => {
-
           // booster les mat des objets
           if (child.isMesh) {
             child.castShadow = true;
-            child.receiveShadow = true; 
+            child.receiveShadow = true;
 
             if (child.material.map) {
               child.material.map.colorSpace = THREE.SRGBColorSpace;
             }
-            
+
             if (child.material.metalness > 0.5) child.material.metalness = 0.1;
             child.material.roughness = 0.7;
           }
@@ -90,7 +87,6 @@ export function initScene(): Promise<void> {
         ]
           .filter(Boolean)
           .map((s) => markRaw(s));
-          
 
         if (worldStore.camera) {
           worldStore.camera.setSpots(spots, [
@@ -101,7 +97,6 @@ export function initScene(): Promise<void> {
           worldStore.camera.goToSpot(0);
         }
 
-    
         const sceneChildrens = worldStore.scene3d?.children;
 
         sceneChildrens?.forEach((child) => {

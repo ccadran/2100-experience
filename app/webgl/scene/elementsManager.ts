@@ -225,14 +225,16 @@ export function calculateParmasAssetsNumber(
   instancedMesh: THREE.InstancedMesh,
 ) {
   let visibleInstancePercentage = 0;
+  const randomMultiplier = Math.random() * 0.2 + 0.8;
+
   if (instancedMesh.name.includes("best")) {
-    visibleInstancePercentage = 100;
+    visibleInstancePercentage = 100 * randomMultiplier;
   } else if (instancedMesh.name.includes("normal")) {
-    visibleInstancePercentage = 75;
+    visibleInstancePercentage = 75 * randomMultiplier;
   } else if (instancedMesh.name.includes("bad")) {
-    visibleInstancePercentage = 50;
+    visibleInstancePercentage = 50 * randomMultiplier;
   } else if (instancedMesh.name.includes("worst")) {
-    visibleInstancePercentage = 25;
+    visibleInstancePercentage = 25 * randomMultiplier;
   }
 
   const targetInstances = Math.round(
