@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { handleFormValidations, revealElements } from "~/webgl/scene/config";
+import { handleFormValidations } from "~/webgl/scene/config";
+import { revealElements } from "~/webgl/scene/elementsManager";
 import {
   goToCameraSpot,
   moveToStep,
