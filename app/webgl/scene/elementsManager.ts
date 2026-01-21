@@ -218,3 +218,45 @@ export function revealElements() {
     worldStore.hiddenSceneParts.splice(randIndex, 1);
   }
 }
+
+/*___________INSTANCE CHILDRENS_________*/
+
+export function calculateParmasAssetsNumber(
+  instancedMesh: THREE.InstancedMesh,
+) {
+  let visibleInstancePercentage = 0;
+  if (instancedMesh.name.includes("best")) {
+    visibleInstancePercentage = 100;
+  } else if (instancedMesh.name.includes("normal")) {
+    visibleInstancePercentage = 75;
+  } else if (instancedMesh.name.includes("bad")) {
+    visibleInstancePercentage = 50;
+  } else if (instancedMesh.name.includes("worst")) {
+    visibleInstancePercentage = 25;
+  }
+
+  const targetInstances = Math.round(
+    instancedMesh.count -
+      (instancedMesh.count / 100) * visibleInstancePercentage,
+  );
+
+  for (let i = 0; i < targetInstances; i++) {
+    hideInstanceChildren(instancedMesh, i);
+  }
+}
+
+function hideInstanceChildren(
+  instancedMesh: THREE.InstancedMesh,
+  index: number,
+) {
+  const dummy = new THREE.Object3D();
+
+  instancedMesh.getMatrixAt(index, dummy.matrix);
+  dummy.matrix.decompose(dummy.position, dummy.quaternion, dummy.scale);
+
+  dummy.scale.set(0, 0, 0);
+  dummy.updateMatrix();
+
+  instancedMesh.setMatrixAt(index, dummy.matrix);
+  instancedMesh.instanceMatrix.needsUpdate = true;
+}

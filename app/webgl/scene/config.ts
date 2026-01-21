@@ -157,6 +157,8 @@ export function handleFormValidations(userData: UserConfigType) {
   const configStore = useConfig();
   const finalUserData: any = {};
 
+  console.log(userData);
+
   configStore.isFormValidated = true;
   const worldStore = useWorld();
   worldStore.camera?.entryAnim();
@@ -218,6 +220,7 @@ export function handleFormValidations(userData: UserConfigType) {
   });
 
   configStore.userConfig = finalUserData;
+  console.log(finalUserData);
 
   calculateExperienceSteps();
   setupObjectsData();
@@ -287,6 +290,7 @@ function calculateExperienceSteps() {
     worldStateSteps.push(worldState);
   }
   configStore.worldStateSteps = worldStateSteps;
+  console.log(worldStateSteps);
 }
 
 function calculateMaxTemperature() {
