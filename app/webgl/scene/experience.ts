@@ -1,6 +1,6 @@
 import gsap from "gsap";
 import { delay } from "../utils";
-import { hideElements } from "./config";
+import { hideElements } from "./elementsManager";
 
 export async function moveToStep(target: number | "next" | "previous") {
   const worldStore = useWorld();
