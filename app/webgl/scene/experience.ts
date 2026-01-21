@@ -67,6 +67,8 @@ export async function moveToStep(target: number | "next" | "previous") {
   });
 
   Object.values(configStore.worldImpacts).forEach((impact) => {
+    console.log(impact, "YOOOOO");
+
     updateImpact(impact.name, currentStep.impacts[impact.name]);
   });
   await delay(500);
@@ -74,7 +76,7 @@ export async function moveToStep(target: number | "next" | "previous") {
 }
 
 function updateImpact(
-  type: "fog" | "waterLevel" | "factory" | "rocks",
+  type: "fog" | "waterLevel" | "factory" | "rocks" | "fields",
   evolution: number,
 ) {
   const worldStore = useWorld();
@@ -82,6 +84,21 @@ function updateImpact(
     case "fog":
       // worldStore.impactsParts.fog.update(evolution) //function de la classe fog
       break;
+    case "fields":
+      console.log("TTTTTTTT");
+
+      const fieldsState = getLevel(100 - evolution);
+      console.log(worldStore.impactsParts);
+
+      worldStore.impactsParts.fields?.children.forEach((child) => {
+        console.log(child, "ttttttttt");
+
+        console.log("updateeee", child);
+
+        child.visible = child.name === fieldsState;
+      });
+      break;
+
     case "waterLevel":
       const levelWater = getLevel(evolution);
       worldStore.impactsParts.waterLevel?.children.forEach((child) => {

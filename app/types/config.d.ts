@@ -12,7 +12,7 @@ export interface UserConfigType {
 }
 
 interface impactType {
-  name: "fog" | "waterLevel" | "factory" | "rocks";
+  name: "fog" | "waterLevel" | "factory" | "rocks" | "fields";
   value: number;
 }
 
@@ -21,4 +21,5 @@ export interface worldImpactsType {
   waterLevel: impactType;
   factory: impactType;
   rocks: impactType;
+  fields: impactType;
 }

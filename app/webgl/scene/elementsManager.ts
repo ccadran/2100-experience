@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import gsap from "gsap";
 
-export function setupInstances() {
+export function setupParamsInstances() {
   const worldStore = useWorld();
 
   const allMeshes: Record<string, any> = {};
@@ -37,15 +37,15 @@ export function setupInstances() {
     Object.values(meshesType as THREE.Mesh[][]).forEach((meshGroup) => {
       if (!meshGroup[0]) return;
       const mesheNumbers = meshGroup.length;
-      const taregtGroup = meshGroup[0]?.parent?.parent?.name;
+      const targetGroup = meshGroup[0]?.parent?.parent?.name;
       const targetType = meshGroup[0].name;
 
-      if (!taregtGroup) return;
+      if (!targetGroup) return;
 
-      if (!targetGroups[taregtGroup]) {
+      if (!targetGroups[targetGroup]) {
         const newGroup = new THREE.Group();
-        newGroup.name = taregtGroup;
-        targetGroups[taregtGroup] = newGroup;
+        newGroup.name = targetGroup;
+        targetGroups[targetGroup] = newGroup;
         worldStore.scene3d?.add(newGroup);
       }
 
@@ -78,12 +78,12 @@ export function setupInstances() {
       instancedMesh.instanceMatrix.needsUpdate = true;
       instancedMesh.frustumCulled = false;
 
-      targetGroups[taregtGroup].add(instancedMesh);
+      targetGroups[targetGroup].add(instancedMesh);
 
       //stock mesh in store object
-      worldStore.sceneMeshes[taregtGroup] = markRaw(targetGroups[taregtGroup]);
-      if (!worldStore.paramsParts.includes(targetGroups[taregtGroup])) {
-        worldStore.paramsParts.push(markRaw(targetGroups[taregtGroup]));
+      worldStore.sceneMeshes[targetGroup] = markRaw(targetGroups[targetGroup]);
+      if (!worldStore.paramsParts.includes(targetGroups[targetGroup])) {
+        worldStore.paramsParts.push(markRaw(targetGroups[targetGroup]));
       }
 
       //delete old meshes
@@ -130,9 +130,13 @@ export function setupDecorInstances() {
 
   const instancesGroup: THREE.Object3D[] = [];
 
-  worldStore.globalScene?.traverse((c) => {
-    if (c.name.includes("instance")) {
-      instancesGroup.push(c);
+  worldStore.globalScene?.traverse((child) => {
+    if (child.name.includes("DECORS")) {
+      child.children.forEach((c) => {
+        if (c.name.includes("instance")) {
+          instancesGroup.push(c);
+        }
+      });
     }
   });
 
@@ -266,4 +270,173 @@ function hideInstanceChildren(
 
   instancedMesh.setMatrixAt(index, dummy.matrix);
   instancedMesh.instanceMatrix.needsUpdate = true;
+}
+
+export function setupImpactsInstances() {
+  const worldStore = useWorld();
+
+  const allMeshes: Record<string, any> = {};
+  const targetGroups: Record<string, THREE.Group> = {};
+
+  // 1. Map pour stocker la correspondance : "Nom3DTechnique" -> "NomAmical" (ex: "Fog_Collection" -> "fog")
+  const impactNamesMap: Record<string, string> = {};
+
+  console.log("Initial impacts:", worldStore.impactsParts);
+
+  // --- BOUCLE 1 : Inventaire et Mapping ---
+  Object.entries(worldStore.impactsParts).forEach(([key, value]) => {
+    if (!value) return;
+
+    const impactName = key; // C'est le nom que tu veux garder (ex: "fog")
+
+    // On associe le nom de l'objet 3D au nom de l'impact
+    impactNamesMap[value.name] = impactName;
+
+    allMeshes[value.name] = {};
+
+    if (!value.name.includes("instance")) return;
+
+    value.children.forEach((child: any) => {
+      child.children.forEach((c: any) => {
+        if (c instanceof THREE.Mesh) {
+          c.visible = false;
+          if (c.name.includes("high")) {
+            stockMesh("high", c);
+          } else if (c.name.includes("mid")) {
+            stockMesh("mid", c);
+          } else if (c.name.includes("low")) {
+            stockMesh("low", c);
+          }
+        }
+      });
+    });
+  });
+
+  // On vide le store pour le remplir proprement après
+  worldStore.impactsParts = {};
+
+  // --- BOUCLE 2 : Création des instances ---
+  Object.entries(allMeshes).forEach(([groupName, meshesType]) => {
+    // On récupère le "NomAmical" grâce au nom du groupe 3D actuel
+    const currentImpactName = impactNamesMap[groupName];
+
+    Object.values(meshesType as THREE.Mesh[][]).forEach((meshGroup) => {
+      if (!meshGroup[0]) return;
+      const mesheNumbers = meshGroup.length;
+
+      // Récupération du nom du groupe parent dans la hiérarchie 3D
+      const targetGroupName = meshGroup[0]?.parent?.parent?.name;
+      const targetType = meshGroup[0].name;
+
+      if (!targetGroupName) return;
+
+      // Création du Groupe Conteneur s'il n'existe pas
+      if (!targetGroups[targetGroupName]) {
+        const newGroup = new THREE.Group();
+        // On nomme le groupe avec le nom amical si possible
+        newGroup.name = currentImpactName || targetGroupName;
+        targetGroups[targetGroupName] = newGroup;
+        worldStore.scene3d?.add(newGroup);
+      }
+
+      // Création de l'InstancedMesh
+      const instancedMesh = new THREE.InstancedMesh(
+        meshGroup[0]?.geometry,
+        meshGroup[0]?.material,
+        mesheNumbers,
+      );
+      instancedMesh.name = targetType;
+
+      // Gestion des matrices
+      if (worldStore.scene3d) worldStore.scene3d.updateMatrixWorld(true);
+
+      const parentMatrix = worldStore.scene3d!.matrixWorld;
+      const parentInverse = new THREE.Matrix4().copy(parentMatrix).invert();
+      const tempMatrix = new THREE.Matrix4();
+
+      for (let i = 0; i < mesheNumbers; i++) {
+        const ogObject = meshGroup[i];
+        if (!ogObject) continue;
+
+        ogObject.updateMatrixWorld();
+
+        tempMatrix.copy(ogObject.matrixWorld);
+        tempMatrix.premultiply(parentInverse);
+
+        instancedMesh.setMatrixAt(i, tempMatrix);
+      }
+
+      instancedMesh.instanceMatrix.needsUpdate = true;
+      instancedMesh.frustumCulled = false;
+
+      // Ajout de l'instance au groupe
+      targetGroups[targetGroupName].add(instancedMesh);
+
+      // --- STOCKAGE FINAL DANS LE STORE ---
+
+      // 1. Stockage technique (Optionnel, selon tes besoins de debug)
+      worldStore.sceneMeshes[targetGroupName] = markRaw(
+        targetGroups[targetGroupName],
+      );
+
+      // 2. Stockage Fonctionnel avec la BONNE CLÉ (Celle que tu voulais)
+      const targetPiece = targetGroups[targetGroupName];
+
+      // On retrouve la clé (ex: "fog") associée à ce groupe 3D (ex: "Instance_Fog")
+      const storeKey = impactNamesMap[targetGroupName];
+
+      if (storeKey) {
+        // Si on a trouvé la clé, on l'utilise
+        if (!worldStore.impactsParts[storeKey]) {
+          worldStore.impactsParts[storeKey] = markRaw(targetPiece);
+        }
+      } else {
+        // Sécurité : si pas de clé trouvée, on utilise le nom technique
+        if (!worldStore.impactsParts[targetGroupName]) {
+          worldStore.impactsParts[targetGroupName] = markRaw(targetPiece);
+        }
+      }
+
+      // --- NETTOYAGE ---
+
+      // Suppression des anciens meshes originaux de la hiérarchie
+      meshGroup.forEach((mesh) => {
+        const parent = mesh.parent;
+        mesh.removeFromParent();
+
+        if (parent && parent.children.length === 0) {
+          parent.removeFromParent();
+        }
+      });
+
+      // Nettoyage global des objets inutiles restants dans la scène
+      worldStore.globalScene?.traverse((o) => {
+        if (o instanceof THREE.Mesh) {
+          if (
+            o.name.includes("normal") ||
+            o.name.includes("bad") ||
+            o.name.includes("worst") ||
+            o.name.includes("best") ||
+            o.name.includes("high") ||
+            o.name.includes("mid") ||
+            o.name.includes("low")
+          ) {
+            o.visible = false;
+          }
+        }
+      });
+    });
+  });
+
+  /* --- FONCTIONS UTILITAIRES --- */
+  function stockMesh(
+    type: "best" | "normal" | "bad" | "worst" | "high" | "mid" | "low",
+    object: THREE.Mesh,
+  ) {
+    const parentName = object.parent!.parent!.name;
+    if (!allMeshes[parentName][type]) {
+      allMeshes[parentName][type] = [];
+    }
+    allMeshes[parentName][type].push(object);
+  }
 }

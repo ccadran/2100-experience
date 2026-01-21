@@ -80,6 +80,10 @@ export const useConfig = defineStore("useConfig", () => {
       name: "rocks",
       value: 0,
     },
+    fields: {
+      name: "fields",
+      value: 0,
+    },
   };
 
   const objectsData = {
