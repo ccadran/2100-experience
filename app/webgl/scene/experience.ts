@@ -69,14 +69,14 @@ export async function moveToStep(target: number | "next" | "previous") {
   Object.values(configStore.worldImpacts).forEach((impact) => {
     console.log(impact, "YOOOOO");
 
-    updateImpact(impact.name, currentStep.impacts[impact.name]);
+    updateImpact(impact.name, currentStep.impacts[impact.name].value);
   });
   await delay(500);
   await uiStore.cloudsTransition?.hideClouds();
 }
 
 function updateImpact(
-  type: "fog" | "waterLevel" | "factory" | "rocks" | "fields",
+  type: "fog" | "waterLevel" | "factory" | "rocks" | "fields" | "animals",
   evolution: number,
 ) {
   const worldStore = useWorld();
@@ -85,20 +85,14 @@ function updateImpact(
       // worldStore.impactsParts.fog.update(evolution) //function de la classe fog
       break;
     case "fields":
-      console.log("TTTTTTTT");
-
-      const fieldsState = getLevel(100 - evolution);
-      console.log(worldStore.impactsParts);
+      const fieldsState = getLevel(evolution);
 
       worldStore.impactsParts.fields?.children.forEach((child) => {
-        console.log(child, "ttttttttt");
-
-        console.log("updateeee", child);
-
         child.visible = child.name === fieldsState;
       });
       break;
-
+    case "animals":
+      break;
     case "waterLevel":
       const levelWater = getLevel(evolution);
       worldStore.impactsParts.waterLevel?.children.forEach((child) => {
@@ -123,10 +117,9 @@ function updateImpact(
 }
 
 function getLevel(evolution: number) {
-  if (evolution >= 75) return "high";
-  if (evolution >= 50) return "mid";
-  if (evolution >= 25) return "low";
-  return "normal";
+  if (evolution < 20) return "high";
+  if (evolution < 50) return "mid";
+  if (evolution < 75) return "low";
 }
 
 function getCurrentState(

@@ -413,10 +413,6 @@ export function setupImpactsInstances() {
       worldStore.globalScene?.traverse((o) => {
         if (o instanceof THREE.Mesh) {
           if (
-            o.name.includes("normal") ||
-            o.name.includes("bad") ||
-            o.name.includes("worst") ||
-            o.name.includes("best") ||
             o.name.includes("high") ||
             o.name.includes("mid") ||
             o.name.includes("low")
