@@ -113,7 +113,7 @@ defineExpose({
 </template>
 
 <style lang="scss">
-> .intro {
+.intro {
   z-index: 3;
   position: fixed;
   height: 100vh;

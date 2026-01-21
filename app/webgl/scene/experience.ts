@@ -1,12 +1,15 @@
 import gsap from "gsap";
 import { delay } from "../utils";
-import { hideElements } from "./config";
+
+
 import * as THREE from "three";
 
-
+import { hideElements } from "./elementsManager";
 // couleurs du sol
 const healthy_color = new THREE.Color("#007411");
 const dry_color = new THREE.Color("#a89a02");
+
+
 
 
 export async function moveToStep(target: number | "next" | "previous") {
