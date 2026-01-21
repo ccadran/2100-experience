@@ -347,7 +347,17 @@ function setupObjectsData() {
 
     if (objectType) {
       paramPart.children.forEach((child) => {
-        child.userData = objectDataMap[objectType];
+        if (child instanceof THREE.InstancedMesh) {
+          child.userData = objectDataMap[objectType];
+
+          let instancedMeshCountArray = [];
+          for (let i = 0; i < child.count; i++) {
+            instancedMeshCountArray.push(i);
+          }
+          instancedMeshCountArray.sort(() => Math.random() - 0.5);
+
+          child.userData.childrenArray = instancedMeshCountArray;
+        }
       });
     }
   });

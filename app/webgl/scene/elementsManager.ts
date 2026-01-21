@@ -242,8 +242,13 @@ export function calculateParmasAssetsNumber(
       (instancedMesh.count / 100) * visibleInstancePercentage,
   );
 
+  console.log(instancedMesh.userData);
+
   for (let i = 0; i < targetInstances; i++) {
-    hideInstanceChildren(instancedMesh, i);
+    hideInstanceChildren(
+      instancedMesh,
+      instancedMesh.userData.childrenArray[i]!,
+    );
   }
 }
 
