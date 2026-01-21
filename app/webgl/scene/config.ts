@@ -152,8 +152,6 @@ export function handleFormValidations(userData: UserConfigType) {
   const configStore = useConfig();
   const finalUserData: any = {};
 
-  console.log(userData);
-
   configStore.isFormValidated = true;
   const worldStore = useWorld();
   worldStore.camera?.entryAnim();
@@ -265,18 +263,38 @@ function calculateExperienceSteps() {
     const currentWorldImpacts = {} as any;
     Object.keys(configStore.worldImpacts).forEach((impactKey) => {
       currentWorldImpacts[impactKey] = {
-        value: 0,
+        value: configStore.configParams.currentImpactValue,
       };
     });
 
     Object.values(configStore.worldParams).forEach((param: any) => {
-      const paramValue = worldState.params[param.name];
+      const userParam = (configStore.userConfig as any)[param.name];
+      const userGoalPercentage = userParam.percentage;
+      const pivot = configStore.configParams.pivotScore;
 
-      if (paramValue !== undefined) {
+      if (userGoalPercentage !== undefined) {
         param.impacts.forEach((impact: any) => {
           if (currentWorldImpacts[impact.type]) {
+            let finalContribution = 0;
+
+            if (userGoalPercentage > pivot) {
+              finalContribution = (userGoalPercentage - pivot) * impact.weight;
+            } else {
+              const improvementRatio = (pivot - userGoalPercentage) / pivot;
+
+              finalContribution =
+                -1 *
+                (improvementRatio *
+                  configStore.configParams.currentImpactValue *
+                  impact.weight);
+            }
+
             currentWorldImpacts[impact.type].value +=
-              paramValue * impact.weight;
+              finalContribution * progress;
+
+            currentWorldImpacts[impact.type].value = parseFloat(
+              currentWorldImpacts[impact.type].value.toFixed(4),
+            );
           }
         });
       }
