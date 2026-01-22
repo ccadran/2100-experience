@@ -1,13 +1,20 @@
 <script lang="ts" setup>
 import gsap from "gsap";
 import { delay } from "~/webgl/utils";
+import { useAudio } from "~/composables/useAudio";
 
 const modal = ref<HTMLElement>();
 const mascot = ref<HTMLElement>();
 
+// musique
+const { playOnboarding, initAudioContext } = useAudio();
 async function revealModal() {
   gsap.set(modal.value!, { display: "flex" });
   gsap.set(mascot.value!, { display: "flex" });
+
+
+  initAudioContext();
+  playOnboarding();
 
   await gsap
     .timeline({

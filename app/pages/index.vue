@@ -6,6 +6,12 @@ import CloudsTransition from "~/webgl/scene/Clouds";
 import { initScene } from "~/webgl/scene/config";
 import { delay } from "~/webgl/utils";
 
+import { useAudio } from '~/composables/useAudio'
+import { useAmbient } from '~/composables/useAmbient'
+
+const { initAudioContext } = useAudio();
+const { startAmbient } = useAmbient();
+
 const modalResults = ref();
 const introRef = ref();
 const { connect, joinRoom, sendAction, on } = useSocket();
@@ -18,8 +24,15 @@ const configStore = useConfig();
 const modalPhone = ref();
 const modalConfig = ref();
 
+
+
 onMounted(async () => {
   connectToWsServer();
+  
+  window.addEventListener( 'click', () => { 
+    initAudioContext();
+    startAmbient();
+  },{ once: true });
 
   const tl = introRef.value.loaderAnim();
 

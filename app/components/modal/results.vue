@@ -5,6 +5,9 @@ import { useSocket } from "~/composables/useSocket";
 import questionsData from "~/assets/content/questions.json";
 import resultsData from "~/assets/content/results.json";
 import { delay } from "~/webgl/utils";
+import { useAudio } from "~/composables/useAudio";
+
+const { playSuccess, playMid, playDefeat } = useAudio();
 
 const configStore = useConfig();
 const webSocketStore = useWebSocket();
@@ -58,6 +61,17 @@ watch(
   },
 );
 
+
+//sounds resultats
+type ResultSound = "success" | "mid" | "defeat";
+
+function getResultSound(rankIndex: number): ResultSound {
+  if (rankIndex <= 1) return "success";
+  if (rankIndex <= 3) return "mid"; 
+  return "defeat";
+}
+
+
 // méthode pour révéler le modal des résultats
 function revealResultsModal() {
   const lastStep =
@@ -67,6 +81,14 @@ function revealResultsModal() {
   userGlobalRanking.value = Math.round(
     (configStore.globalPercentage / 100) * (resultsData.length - 1),
   );
+
+  const resultSound = getResultSound(userGlobalRanking.value);
+
+  if (resultSound === "success") playSuccess();
+  if (resultSound === "mid") playMid();
+  if (resultSound === "defeat") playDefeat();
+
+
 
   const resultData = resultsData[userGlobalRanking.value];
   if (resultData && webSocketStore.isConnected && webSocketStore.roomId) {

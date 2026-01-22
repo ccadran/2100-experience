@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import type Camera from "~/webgl/scene/Camera";
-import type Environment from "~/webgl/scene/Environment"
+import type Environment from "~/webgl/scene/Environment";
 
 interface FogControls {
   updateFogColor: (color: THREE.Color) => void;
@@ -28,9 +28,12 @@ export const useWorld = defineStore("useWorld", () => {
 
   const impactsParts = {
     fog: null as any,
-    waterLevel: null as THREE.Object3D | null,
+    lake: null as THREE.Object3D | null,
     factory: null as THREE.Object3D | null,
     rocks: null as THREE.Object3D | null,
+    fields: null as THREE.Object3D | null,
+    sheeps: null as THREE.Object3D | null,
+    chickens: null as THREE.Object3D | null,
   };
 
   return {

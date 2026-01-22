@@ -1,12 +1,23 @@
 import * as THREE from "three";
 import gsap from "gsap";
 import { delay } from "../utils";
+import { useAudio } from "~/composables/useAudio";
+
+
+// camera sound
+const { playCamera } = useAudio();
 
 // couleurs du sol
 const healthy_color = new THREE.Color("#007411");
 const dry_color = new THREE.Color("#a89a02");
 
-import { calculateParmasAssetsNumber, hideElements } from "./elementsManager";
+import {
+  calculateParmasAssetsNumber,
+  hideElements,
+  hideInstanceChildren,
+  updateCity,
+} from "./elementsManager";
+import type { impactType } from "~/types/config";
 
 export async function moveToStep(target: number | "next" | "previous") {
   const worldStore = useWorld();
@@ -31,6 +42,7 @@ export async function moveToStep(target: number | "next" | "previous") {
 
   const currentTemperature = currentStep.temperature;
   updateGroundColor(currentTemperature);
+  updateCity(currentTemperature);
 
   const currentFogValue = currentStep.impacts.fog?.value || 0;
 
@@ -67,36 +79,58 @@ export async function moveToStep(target: number | "next" | "previous") {
   });
 
   Object.values(configStore.worldImpacts).forEach((impact) => {
-    updateImpact(impact.name, currentStep.impacts[impact.name]);
+    updateImpact(impact.name, currentStep.impacts[impact.name].value);
   });
   await delay(500);
   await uiStore.cloudsTransition?.hideClouds();
 }
 
 function updateImpact(
-  type: "fog" | "waterLevel" | "factory" | "rocks",
+  type: "fog" | "lake" | "factory" | "rocks" | "fields" | "sheeps" | "chickens",
   evolution: number,
 ) {
   const worldStore = useWorld();
+
   switch (type) {
     case "fog":
       // worldStore.impactsParts.fog.update(evolution) //function de la classe fog
       break;
-    case "waterLevel":
-      const levelWater = getLevel(evolution);
-      worldStore.impactsParts.waterLevel?.children.forEach((child) => {
-        child.visible = child.name === levelWater;
+    case "fields":
+      const fieldsState = getLevel(evolution);
+      console.log("FIELDSEEE", fieldsState, evolution);
+
+      worldStore.impactsParts.fields?.children.forEach((child) => {
+        if (child.name.includes(fieldsState!)) {
+          child.visible = true;
+        } else {
+          child.visible = false;
+        }
+        // child.visible = child.name === fieldsState;
+      });
+      break;
+    case "sheeps":
+      updateImpactNumber({ name: "sheeps", value: evolution });
+      break;
+    case "chickens":
+      updateImpactNumber({ name: "chickens", value: evolution });
+      break;
+    case "lake":
+      const lakeState = getLevel(evolution);
+
+      worldStore.impactsParts.lake?.children.forEach((child) => {
+        child.visible = child.name === lakeState;
+        console.log(child.visible);
       });
       break;
     case "factory":
       const levelFactory = getLevel(evolution);
-      worldStore.impactsParts.waterLevel?.children.forEach((child) => {
+      worldStore.impactsParts.lake?.children.forEach((child) => {
         child.visible = child.name === levelFactory;
       });
       break;
     case "rocks":
       const levelRocks = getLevel(evolution);
-      worldStore.impactsParts.waterLevel?.children.forEach((child) => {
+      worldStore.impactsParts.lake?.children.forEach((child) => {
         child.visible = child.name === levelRocks;
       });
       break;
@@ -106,10 +140,23 @@ function updateImpact(
 }
 
 function getLevel(evolution: number) {
-  if (evolution >= 75) return "high";
-  if (evolution >= 50) return "mid";
-  if (evolution >= 25) return "low";
-  return "normal";
+  if (evolution < 20) return "high";
+  if (evolution >= 20 && evolution < 75) return "mid";
+  if (evolution >= 75) return "low";
+}
+
+export function updateImpactNumber(impact: impactType) {
+  const worldStore = useWorld();
+  const targetInstancedMesh = worldStore.impactsParts[impact.name];
+  console.log(targetInstancedMesh);
+
+  const targetInstances = Math.ceil(
+    (targetInstancedMesh.count / 100) * impact.value,
+  );
+
+  for (let i = 0; i < targetInstances; i++) {
+    hideInstanceChildren(targetInstancedMesh, i);
+  }
 }
 
 function getCurrentState(
@@ -129,6 +176,7 @@ function getCurrentState(
 // }
 
 export function goToCameraSpot(index: number) {
+  playCamera();
   const worldStore = useWorld();
   worldStore.camera?.goToSpot(index);
 }

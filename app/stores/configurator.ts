@@ -2,7 +2,7 @@ import type { UserConfigType, worldImpactsType } from "~/types/config";
 
 export const useConfig = defineStore("useConfig", () => {
   const formParams = {
-    step: 5,
+    step: 8,
     currentStep: 0,
   };
 
@@ -14,6 +14,7 @@ export const useConfig = defineStore("useConfig", () => {
     currentTemperature: 1.2,
     minTemperature: 0,
     pivotScore: 25,
+    currentImpactValue: 20,
   };
 
   const worldParams = {
@@ -30,17 +31,26 @@ export const useConfig = defineStore("useConfig", () => {
     meat: {
       name: "meat",
       globalWeight: 0.15, // 15%
-      impacts: [{ type: "waterLevel", weight: 0.7 }],
+      impacts: [
+        { type: "lake", weight: 0.3 },
+        { type: "sheeps", weight: 0.7 },
+        { type: "chickens", weight: 0.7 },
+      ],
     },
     promptIA: {
       name: "promptIA",
       globalWeight: 0.02, // 2%
-      impacts: [{ type: "waterLevel", weight: 0.3 }],
+      impacts: [{ type: "lake", weight: 0.5 }],
     },
     products: {
       name: "products",
       globalWeight: 0.15, // 15%
-      impacts: [{ type: "factory", weight: 0.5 }],
+      impacts: [
+        { type: "factory", weight: 0.5 },
+        { type: "sheeps", weight: 0.3 },
+        { type: "chickens", weight: 0.3 },
+        { type: "fields", weight: 1.0 },
+      ],
     },
     phone: {
       name: "phone",
@@ -58,7 +68,10 @@ export const useConfig = defineStore("useConfig", () => {
     clothes: {
       name: "clothes",
       globalWeight: 0.08, // 8%
-      impacts: [{ type: "factory", weight: 0.35 }],
+      impacts: [
+        { type: "factory", weight: 0.35 },
+        { type: "lake", weight: 0.2 },
+      ],
     },
   };
 
@@ -67,16 +80,25 @@ export const useConfig = defineStore("useConfig", () => {
       name: "fog",
       value: 0,
     },
-    waterLevel: {
-      name: "waterLevel",
+    lake: {
+      name: "lake",
       value: 0,
     },
     factory: {
       name: "factory",
       value: 0,
     },
-    rocks: {
-      name: "rocks",
+
+    fields: {
+      name: "fields",
+      value: 0,
+    },
+    sheeps: {
+      name: "sheeps",
+      value: 0,
+    },
+    chickens: {
+      name: "chickens",
       value: 0,
     },
   };
