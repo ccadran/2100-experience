@@ -51,7 +51,7 @@ export function initScene(): Promise<void> {
       // "/3d/2100-map__V1.glb",
       // "/3d/map.glb",
       // "/3d/map-v10.glb",
-      "/3d/map-20.glb",
+      "/3d/map-v23.glb",
       // "/3d/map-spots.glb",
       (gltf: any) => {
         gltf.scene.scale.set(1, 1, 1);
@@ -93,13 +93,16 @@ export function initScene(): Promise<void> {
         ]
           .filter(Boolean)
           .map((s) => markRaw(s));
+        const lookAts = [
+          gltf.scene.getObjectByName("target-1"),
+          gltf.scene.getObjectByName("target-2"),
+          gltf.scene.getObjectByName("target-3"),
+        ]
+          .filter(Boolean)
+          .map((s) => markRaw(s));
 
         if (worldStore.camera) {
-          worldStore.camera.setSpots(spots, [
-            new THREE.Vector3(0, 0, 0),
-            new THREE.Vector3(100, 0, -10),
-            new THREE.Vector3(-5, 0, 5),
-          ]);
+          worldStore.camera.setSpots(spots, lookAts);
           worldStore.camera.goToSpot(0);
         }
 
