@@ -231,7 +231,7 @@ export function revealElements() {
         gsap.to(part.position, {
           y: 0,
           duration: 1,
-          ease: "power2.inOut",
+          ease: "power2.out",
         });
       });
       worldStore.hiddenSceneParts = [];
@@ -247,7 +247,7 @@ export function revealElements() {
     gsap.to(worldStore.hiddenSceneParts[randIndex].position, {
       y: 0,
       duration: 1,
-      ease: "power2.inOut",
+      ease: "power2.out",
     });
     console.log(worldStore.hiddenSceneParts[randIndex]);
     configStore.formParams.currentStep += 1;
