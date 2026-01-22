@@ -5,17 +5,17 @@ import Camera from "./Camera";
 import Environment from "./Environment";
 import { moveToStep } from "./experience";
 
-import gsap from "gsap";
-import { addWorldSpaceFog } from "./Fog";
 import {
   hideElements,
-  setupDecorInstances,
-  setupInstances,
+  setupAllImpacts,
+  setupParamsInstances,
+  updateCity,
 } from "./elementsManager";
 
 export function initScene(): Promise<void> {
   return new Promise((resolve, reject) => {
     const worldStore = useWorld();
+    const configStore = useConfig();
     const container = document.querySelector(".scene");
     if (!container) return;
     const globalScene = new THREE.Scene();
@@ -46,7 +46,9 @@ export function initScene(): Promise<void> {
     loader.load(
       // "/3d/states.glb",
       // "/3d/2100-map__V1.glb",
-      "/3d/map.glb",
+      // "/3d/map.glb",
+      // "/3d/map-v10.glb",
+      "/3d/map-v18.glb",
       // "/3d/map-spots.glb",
       (gltf: any) => {
         gltf.scene.scale.set(1, 1, 1);
@@ -90,7 +92,7 @@ export function initScene(): Promise<void> {
 
         if (worldStore.camera) {
           worldStore.camera.setSpots(spots, [
-            new THREE.Vector3(100, 0, 0),
+            new THREE.Vector3(0, 0, 0),
             new THREE.Vector3(100, 0, -10),
             new THREE.Vector3(-5, 0, 5),
           ]);
@@ -102,14 +104,16 @@ export function initScene(): Promise<void> {
         sceneChildrens?.forEach((child) => {
           if (child.name.includes("group")) {
             worldStore.paramsParts.push(markRaw(child));
-          } else if (child.name.includes("impacts")) {
-            if (child.name.includes("waterLevel")) {
-              worldStore.impactsParts.waterLevel = markRaw(child);
-            } else if (child.name.includes("factory")) {
-              worldStore.impactsParts.factory = markRaw(child);
-            } else if (child.name.includes("rocks")) {
-              worldStore.impactsParts.rocks = markRaw(child);
-            }
+          } else if (child.name.includes("IMPACTS")) {
+            child.children.forEach((c) => {
+              if (c.name.includes("fields")) {
+                worldStore.impactsParts.fields = markRaw(c);
+              } else if (c.name.includes("lake")) {
+                console.log(c);
+
+                worldStore.impactsParts.lake = markRaw(c);
+              }
+            });
           }
         });
         let meshCount = 0;
@@ -117,9 +121,14 @@ export function initScene(): Promise<void> {
           meshCount++;
         });
 
-        setupInstances();
-        setupDecorInstances();
+        setupParamsInstances();
+        // setupImpactsInstances();
+        // setupImpactsPool();
+        setupAllImpacts();
+        // setupDecorInstances()
+        updateCity(configStore.configParams.currentTemperature);
         hideElements();
+        console.log(worldStore.sceneMeshes);
 
         environment.initFog();
         worldStore.fogControls = environment.getFogControls();
@@ -151,8 +160,6 @@ export function handleFormValidations(userData: UserConfigType) {
   const uiStore = useUi();
   const configStore = useConfig();
   const finalUserData: any = {};
-
-  console.log(userData);
 
   configStore.isFormValidated = true;
   const worldStore = useWorld();
@@ -265,18 +272,38 @@ function calculateExperienceSteps() {
     const currentWorldImpacts = {} as any;
     Object.keys(configStore.worldImpacts).forEach((impactKey) => {
       currentWorldImpacts[impactKey] = {
-        value: 0,
+        value: configStore.configParams.currentImpactValue,
       };
     });
 
     Object.values(configStore.worldParams).forEach((param: any) => {
-      const paramValue = worldState.params[param.name];
+      const userParam = (configStore.userConfig as any)[param.name];
+      const userGoalPercentage = userParam.percentage;
+      const pivot = configStore.configParams.pivotScore;
 
-      if (paramValue !== undefined) {
+      if (userGoalPercentage !== undefined) {
         param.impacts.forEach((impact: any) => {
           if (currentWorldImpacts[impact.type]) {
+            let finalContribution = 0;
+
+            if (userGoalPercentage > pivot) {
+              finalContribution = (userGoalPercentage - pivot) * impact.weight;
+            } else {
+              const improvementRatio = (pivot - userGoalPercentage) / pivot;
+
+              finalContribution =
+                -1 *
+                (improvementRatio *
+                  configStore.configParams.currentImpactValue *
+                  impact.weight);
+            }
+
             currentWorldImpacts[impact.type].value +=
-              paramValue * impact.weight;
+              finalContribution * progress;
+
+            currentWorldImpacts[impact.type].value = parseFloat(
+              currentWorldImpacts[impact.type].value.toFixed(4),
+            );
           }
         });
       }
