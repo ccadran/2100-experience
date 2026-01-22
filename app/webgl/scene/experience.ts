@@ -57,6 +57,7 @@ export async function moveToStep(target: number | "next" | "previous") {
     const firstChild = part.children[0];
 
     if (!firstChild) return;
+    console.log(part);
 
     const currentState = getCurrentState(
       firstChild.userData.states,
@@ -79,6 +80,8 @@ export async function moveToStep(target: number | "next" | "previous") {
   });
 
   Object.values(configStore.worldImpacts).forEach((impact) => {
+    console.log(impact.name);
+
     updateImpact(impact.name, currentStep.impacts[impact.name].value);
   });
   await delay(500);
@@ -86,7 +89,14 @@ export async function moveToStep(target: number | "next" | "previous") {
 }
 
 function updateImpact(
-  type: "fog" | "lake" | "factory" | "rocks" | "fields" | "sheeps" | "chickens",
+  type:
+    | "fog"
+    | "lake"
+    | "farmhouse"
+    | "rocks"
+    | "fields"
+    | "sheeps"
+    | "chickens",
   evolution: number,
 ) {
   const worldStore = useWorld();
@@ -122,7 +132,22 @@ function updateImpact(
           child.visible = false;
         }
       });
-      console.log(worldStore.impactsParts.lake);
+
+      break;
+    case "farmhouse":
+      console.log("____________farmhouse case");
+
+      const farmhouseState = getLevel(evolution);
+      console.log("____________farmhouse case", farmhouseState);
+
+      worldStore.impactsParts.farmhouse?.children.forEach((child) => {
+        if (child.name.includes(farmhouseState!)) {
+          child.visible = true;
+        } else {
+          child.visible = false;
+        }
+      });
+      console.log(worldStore.impactsParts.farmhouse);
 
       break;
     default:
@@ -138,9 +163,8 @@ function getLevel(evolution: number) {
 
 export function updateImpactNumber(impact: impactType) {
   const worldStore = useWorld();
-  console.log(worldStore.impactsParts);
+
   const targetInstancedMesh = worldStore.impactsParts[impact.name];
-  console.log(targetInstancedMesh);
 
   const targetInstances = Math.ceil(
     (targetInstancedMesh.count / 100) * impact.value,
@@ -155,7 +179,6 @@ function getCurrentState(
   states: Record<string, number>,
   temperature: number,
 ): string | null {
-  console.log("STATES", states);
   if (!states) return null;
 
   return (

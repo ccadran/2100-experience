@@ -26,7 +26,10 @@ export const useConfig = defineStore("useConfig", () => {
     transport: {
       name: "transport",
       globalWeight: 0.25, // 25%
-      impacts: [{ type: "fog", weight: 0.2 }],
+      impacts: [
+        { type: "fog", weight: 0.2 },
+        { type: "farmhouse", weight: 0.2 },
+      ],
     },
     meat: {
       name: "meat",
@@ -35,6 +38,7 @@ export const useConfig = defineStore("useConfig", () => {
         { type: "lake", weight: 0.3 },
         { type: "sheeps", weight: 0.7 },
         { type: "chickens", weight: 0.7 },
+        { type: "farmhouse", weight: 0.5 },
       ],
     },
     promptIA: {
@@ -50,6 +54,7 @@ export const useConfig = defineStore("useConfig", () => {
         { type: "sheeps", weight: 0.3 },
         { type: "chickens", weight: 0.3 },
         { type: "fields", weight: 1.0 },
+        { type: "farmhouse", weight: 0.3 },
       ],
     },
     phone: {
@@ -84,8 +89,8 @@ export const useConfig = defineStore("useConfig", () => {
       name: "lake",
       value: 0,
     },
-    factory: {
-      name: "factory",
+    farmhouse: {
+      name: "farmhouse",
       value: 0,
     },
 

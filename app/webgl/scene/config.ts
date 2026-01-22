@@ -52,7 +52,7 @@ export function initScene(): Promise<void> {
       // "/3d/2100-map__V1.glb",
       // "/3d/map.glb",
       // "/3d/map-v10.glb",
-      "/3d/map-v29.glb",
+      "/3d/map-v30.glb",
       // "/3d/map-spots.glb",
       (gltf: any) => {
         gltf.scene.scale.set(1, 1, 1);
@@ -117,9 +117,9 @@ export function initScene(): Promise<void> {
               if (c.name.includes("fields")) {
                 worldStore.impactsParts.fields = markRaw(c);
               } else if (c.name.includes("lake")) {
-                console.log(c);
-
                 worldStore.impactsParts.lake = markRaw(c);
+              } else if (c.name.includes("farm_buildings")) {
+                worldStore.impactsParts.farmhouse = markRaw(c);
               }
             });
           }
@@ -136,9 +136,6 @@ export function initScene(): Promise<void> {
         setupDecorInstances();
         updateCity(configStore.configParams.currentTemperature);
         hideElements();
-        console.log(worldStore.sceneMeshes);
-
-        console.log(worldStore.paramsParts);
 
         environment.initFog();
         worldStore.fogControls = environment.getFogControls();
@@ -373,8 +370,7 @@ function setupObjectsData() {
   const objectDataMap: Record<string, any> = {
     tree: configStore.objectsData.trees,
     bush: configStore.objectsData.bushes,
-    fleur: configStore.objectsData.flowers,
-    water: configStore.objectsData.water,
+    flowers: configStore.objectsData.flowers,
     // trees: configStore.objectsData.trees,
     // bushes: configStore.objectsData.bushes,
     // flowers: configStore.objectsData.flowers,

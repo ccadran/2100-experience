@@ -305,8 +305,6 @@ export function hideInstanceChildren(
 }
 
 export function resetParmasAssets(instancedMesh: THREE.InstancedMesh) {
-  console.log(instancedMesh.userData.originalMatrix);
-
   instancedMesh.instanceMatrix.copy(instancedMesh.userData.originalMatrix);
 
   instancedMesh.instanceMatrix.needsUpdate = true;
@@ -351,8 +349,6 @@ export function setupAllImpacts() {
       impactNamesMap[value.name] = impactName;
 
       value.children.forEach((child: any) => {
-        // console.log(child.name, child);
-
         // if (child instanceof THREE.Mesh) {
         if (child.name.includes("high") || child.name.includes("low")) {
           child.visible = false;
@@ -377,6 +373,7 @@ export function setupAllImpacts() {
           const matchingKey = Object.keys(worldStore.impactsParts).find((k) =>
             group.name.includes(k),
           );
+
           if (matchingKey) impactNamesMap[group.name] = matchingKey;
 
           group.children.forEach((mesh) => {
@@ -421,6 +418,7 @@ export function setupAllImpacts() {
     if (isSimplePool) {
       // --- CAS A : POOL (Direct InstancedMesh) ---
       const meshList = meshesByType["default"];
+
       const instancedMesh = createInstancedMeshFromList(
         meshList,
         groupName,
