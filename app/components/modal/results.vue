@@ -295,7 +295,7 @@ defineExpose({
               <p>{{ questionsData[currentQuestion]?.officialData.text }}</p>
               <p class="source">
                 Source :
-                <a :href="questionsData[currentQuestion]?.officialData.link">{{
+                <a :href="questionsData[currentQuestion]?.officialData.link" target="_blank">{{
                   questionsData[currentQuestion]?.officialData.linkText
                 }}</a>
               </p>
