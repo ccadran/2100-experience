@@ -2,66 +2,63 @@ import { Howl, Howler } from "howler";
 
 // son d'ambiance
 const ambient = new Howl({
-  src: ["/audio/ambient.mp3"],
+  src: ["/audio/ambient.ogg"],
   loop: true,
-  volume: 0.5,
+  volume: 0.1,
   html5: true,
 });
 
 const ambientDark = new Howl({
-  src: ["/audio/dark-ambient.mp3"],
+  src: ["/audio/dark-ambient.ogg"],
   loop: true,
-  volume: 0.5,
+  volume: 0.3,
   html5: true,
 });
 
 const onboardingSound = new Howl({
   src: ["/audio/onboarding.wav"],
-  volume: 0.8,
+  volume: 0.7,
 });
 
-const revealSound = new Howl({
-  src: ["/audio/appear.wav"],
-  volume: 0.8,
-});
+
+const revealSounds = [
+  new Howl({
+    src: ["/audio/pop1.wav"],
+    volume: 0.8,
+  }),
+  new Howl({
+    src: ["/audio/pop3.wav"],
+    volume: 0.8,
+  }),
+  new Howl({
+    src: ["/audio/pop3.wav"],
+    volume: 0.8,
+  }),
+];
 
 const cloudsSound = new Howl({
-  src: ["/audio/appear.wav"],
-  volume: 0.8,
+  src: ["/audio/clouds.wav"],
+  volume: 1.8,
 });
 
 const cameraSound = new Howl({
-  src: ["/audio/appear.wav"],
-  volume: 0.8,
+  src: ["/audio/camera.mp3"],
+  volume: 0.2,
 });
 
-const voiceSound = new Howl({
-  src: ["/audio/voice1.wav"],
-  volume: 0.8,
-});
-
-const voiceSound2 = new Howl({
-  src: ["/audio/voice2.wav"],
-  volume: 0.8,
-});
-
-const voiceSound3 = new Howl({
-  src: ["/audio/voice3.wav"],
-  volume: 0.8,
-});
 
 const successSound = new Howl({
-  src: ["/audio/onboarding.wav"],
+  src: ["/audio/success.wav"],
   volume: 0.8,
 });
 
 const midSound = new Howl({
-  src: ["/audio/voice2.wav"],
+  src: ["/audio/mid.wav"],
   volume: 0.8,
 });
 
 const defeatSound = new Howl({
-  src: ["/audio/appear.wav"],
+  src: ["/audio/defeat.wav"],
   volume: 0.8,
 });
 
@@ -76,8 +73,9 @@ export const useAudio = () => {
 
   // musique ambiance
   const playGoodAmbient = () => {
-    ambient.stop();
-    ambient.volume(0.5);
+    if (ambient.playing()) return;
+
+    ambient.volume(0.1);
     ambient.play();
 
     if (ambientDark.playing()) {
@@ -87,8 +85,9 @@ export const useAudio = () => {
   };
 
   const playDarkAmbient = () => {
-    ambientDark.stop();
-    ambientDark.volume(0.5);
+    if (ambientDark.playing()) return;
+
+    ambientDark.volume(0.3);
     ambientDark.play();
 
     if (ambient.playing()) {
@@ -104,8 +103,9 @@ export const useAudio = () => {
 
   const playReveal = () => {
     setTimeout(() => {
-      revealSound.play();
-    }, 300);
+      const randomIndex = Math.floor(Math.random() * revealSounds.length);
+      revealSounds[randomIndex].play();
+    }, 500);
   };
 
   const playClouds = () => {
@@ -113,56 +113,9 @@ export const useAudio = () => {
   };
 
   const playCamera = () => {
-    cameraSound.play();
-  };
-
-  // sounds onboarding voices
-  const playVoice1 = () => {
-    voiceSound.stop();
-    voiceSound.volume(0.8);
-
-    const id = voiceSound.play();
     setTimeout(() => {
-      if (voiceSound.playing(id)) {
-        voiceSound.fade(0.8, 0, 500, id);
-      }
-    }, 2200);
-
-    setTimeout(() => {
-      voiceSound.stop(id);
-    }, 2500);
-  };
-
-  const playVoice2 = () => {
-    voiceSound2.stop();
-    voiceSound2.volume(0.8);
-
-    const id = voiceSound2.play();
-    setTimeout(() => {
-      if (voiceSound2.playing(id)) {
-        voiceSound2.fade(0.8, 0, 500, id);
-      }
-    }, 2200);
-
-    setTimeout(() => {
-      voiceSound2.stop(id);
-    }, 2500);
-  };
-
-  const playVoice3 = () => {
-    voiceSound3.stop();
-    voiceSound3.volume(0.8);
-
-    const id = voiceSound3.play();
-    setTimeout(() => {
-      if (voiceSound3.playing(id)) {
-        voiceSound3.fade(0.8, 0, 500, id);
-      }
-    }, 2200);
-
-    setTimeout(() => {
-      voiceSound3.stop(id);
-    }, 2500);
+      cameraSound.play();
+    }, 300);
   };
 
   // success sounds
@@ -184,9 +137,6 @@ export const useAudio = () => {
     playGoodAmbient,
     playDarkAmbient,
     playOnboarding,
-    playVoice1,
-    playVoice2,
-    playVoice3,
     playReveal,
     playClouds,
     playCamera,
