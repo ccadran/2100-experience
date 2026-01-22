@@ -178,6 +178,7 @@ export function setupDecorInstances() {
 
     instancedMesh.instanceMatrix.needsUpdate = true;
     instancedMesh.frustumCulled = true;
+    console.log(instancedMesh.name, instancedMesh);
 
     worldStore.globalScene!.add(instancedMesh);
 
@@ -190,6 +191,10 @@ export function setupDecorInstances() {
       }
     });
   });
+
+  //hide base
+
+  //TODO
 }
 
 export function hideElements() {
