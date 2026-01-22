@@ -181,8 +181,6 @@ export function setupDecorInstances() {
     instancedMesh.frustumCulled = true;
     instancedMesh.castShadow = true;
 
-    console.log(instancedMesh.name, instancedMesh);
-
     worldStore.globalScene!.add(instancedMesh);
 
     group.children.forEach((mesh) => {
@@ -213,10 +211,8 @@ export function hideElements() {
       if (mesh.name.includes("normal") || mesh.name.includes("mid")) {
         mesh.position.y = -10;
         worldStore.hiddenSceneParts.push(mesh);
-        // console.log(mesh.name);
       }
     });
-    // console.log(worldStore.hiddenSceneParts);
   });
 }
 
@@ -227,10 +223,11 @@ export function revealElements() {
 
   if (configStore.formParams.currentStep <= configStore.formParams.step) {
     if (worldStore.hiddenSceneParts.length < 1) return;
-    console.log(configStore.formParams.currentStep);
 
     if (configStore.formParams.currentStep === configStore.formParams.step) {
       worldStore.hiddenSceneParts.forEach((part) => {
+        console.log("!!!!", part);
+
         part.visible = true;
         gsap.to(part.position, {
           y: 0,
@@ -246,14 +243,16 @@ export function revealElements() {
       Math.random() * worldStore.hiddenSceneParts.length,
     );
 
+    console.log("!!!!", worldStore.hiddenSceneParts[randIndex]);
     worldStore.hiddenSceneParts[randIndex].visible = true;
+    console.log("!!!!", worldStore.hiddenSceneParts[randIndex]);
 
     gsap.to(worldStore.hiddenSceneParts[randIndex].position, {
       y: 0,
       duration: 1,
       ease: "power2.out",
     });
-    console.log(worldStore.hiddenSceneParts[randIndex]);
+
     configStore.formParams.currentStep += 1;
     worldStore.hiddenSceneParts.splice(randIndex, 1);
   }
@@ -281,8 +280,6 @@ export function calculateParmasAssetsNumber(
     instancedMesh.count -
       (instancedMesh.count / 100) * visibleInstancePercentage,
   );
-
-  console.log(instancedMesh.userData);
 
   for (let i = 0; i < targetInstances; i++) {
     hideInstanceChildren(
@@ -325,7 +322,6 @@ export function setupAllImpacts() {
   // =========================================================
   Object.entries(worldStore.impactsParts).forEach(([key, value]) => {
     if (!value) return;
-    console.log(value);
 
     if (value.name.includes("states-instances")) {
       keysToRemove.push(key);
@@ -336,8 +332,6 @@ export function setupAllImpacts() {
       value.children.forEach((child: any) => {
         child.children.forEach((c: any) => {
           if (c instanceof THREE.Mesh) {
-            // console.log(child);
-
             c.visible = false;
             if (c.name.includes("high")) stockMesh(value.name, "high", c);
             else if (c.name.includes("mid")) stockMesh(value.name, "mid", c);
@@ -346,19 +340,20 @@ export function setupAllImpacts() {
         });
       });
     } else if (value.name.includes("states-raw")) {
-      console.log("WEEEEEE");
-
       const impactName = key;
       impactNamesMap[value.name] = impactName;
 
       value.children.forEach((child: any) => {
-        if (child instanceof THREE.Mesh) {
-          if (child.name.includes("high") || child.name.includes("low")) {
-            child.visible = false;
-          } else if (child.name.includes("mid")) {
-            child.visible = true;
-          }
+        // console.log(child.name, child);
+
+        // if (child instanceof THREE.Mesh) {
+        if (child.name.includes("high") || child.name.includes("low")) {
+          child.visible = false;
+        } else if (child.name.includes("mid")) {
+          child.visible = true;
+          console.log(child);
         }
+        // }
       });
       worldStore.sceneMeshes[value.name] = markRaw(value);
     }
@@ -383,7 +378,7 @@ export function setupAllImpacts() {
               stockMesh(group.name, "default", mesh);
             }
           });
-          console.log(matchingKey);
+
           //  updateImpactNumber ({
           //     name: matchingKey as impactType["name"],
           //     value: 0.2,
@@ -471,8 +466,6 @@ export function setupAllImpacts() {
       }
     }
     if (isSimplePool && storeKey) {
-      console.log(`Initialisation du pool : ${storeKey}`);
-
       updateImpactNumber({
         name: storeKey as impactType["name"],
         value: 20,

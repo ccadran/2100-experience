@@ -116,11 +116,7 @@ function updateImpact(
 
       worldStore.impactsParts.lake?.children.forEach((child) => {
         if (child.name.includes(lakeState!)) {
-          console.log("__________________");
-          console.log("Visibilité avant :", child.visible);
           child.visible = true;
-          console.log("Visibilité après :", child.visible);
-          console.log(child);
         } else {
           child.visible = false;
         }
@@ -185,6 +181,16 @@ export function resetExperience() {
   configStore.worldStateSteps = [];
   configStore.globalPercentage = 0;
   configStore.currentStep = 0;
+
+  if (worldStore.environment) {
+    // On appelle la méthode qu'on vient de créer
+    // Tu peux passer 'true' ou changer la durée dans updateSkyAndFog si tu veux un reset instantané
+    worldStore.environment.updateSkyAndFog(0);
+  }
+
+  updateGroundColor(configStore.configParams.currentTemperature);
+  updateCity(configStore.configParams.currentTemperature);
+
   hideElements();
   worldStore.camera?.goToSpot(0);
 }

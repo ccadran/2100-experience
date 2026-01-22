@@ -52,7 +52,7 @@ export function initScene(): Promise<void> {
       // "/3d/2100-map__V1.glb",
       // "/3d/map.glb",
       // "/3d/map-v10.glb",
-      "/3d/map-v26.glb",
+      "/3d/map-v29.glb",
       // "/3d/map-spots.glb",
       (gltf: any) => {
         gltf.scene.scale.set(1, 1, 1);
@@ -234,7 +234,6 @@ export function handleFormValidations(userData: UserConfigType) {
   });
 
   configStore.userConfig = finalUserData;
-  console.log(finalUserData);
 
   calculateExperienceSteps();
   setupObjectsData();
