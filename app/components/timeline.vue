@@ -9,11 +9,42 @@ const worldYears = ref<any[]>();
 const yearsStepsRefs = ref<HTMLElement[]>([]);
 const timeline = ref<HTMLElement>();
 
+const coucouVideo = ref<HTMLVideoElement>();
+const hotVideo = ref<HTMLVideoElement>();
+
 const stepWidth = ref<number>(0);
 const yearWidth = ref<number>(0);
 const baseOffset = ref<number>(0);
 
 let lastTarget: number | null = null;
+
+
+const currentTemperature = computed(() => {
+  if (!configStore.isFormValidated) return null;
+  const step = uiStore.previewStep ?? configStore.currentStep;
+  if (step == null) return null;
+  return configStore.worldStateSteps[step]?.temperature + 27;
+});
+
+
+//video via temp
+
+const isHot = computed(() => {
+  return currentTemperature.value !== null && currentTemperature.value > 29.5;
+});
+
+watch(isHot, (hot) => {
+  if (!hotVideo.value || !coucouVideo.value) return;
+  if (hot) {
+    gsap.to(coucouVideo.value, { opacity: 0, duration: 0.5 });
+    gsap.to(hotVideo.value, { opacity: 1, duration: 0.5 });
+  } else {
+    gsap.to(hotVideo.value, { opacity: 0, duration: 0.5 });
+    gsap.to(coucouVideo.value, { opacity: 1, duration: 0.5 });
+  }
+});
+
+
 
 watch(
   () => uiStore.previewStep ?? configStore.currentStep,
@@ -137,7 +168,8 @@ function entryTimeline() {
 <template>
   <div class="timeline-container">
     <div class="timeline-mascot">
-      <video src="/videos/3-coucou.webm" autoplay loop muted></video>
+      <video ref="coucouVideo" src="/videos/3-coucou.webm" class="mascot-video mascot-video--base" :style="{ opacity: 1 }" autoplay loop muted></video>
+      <video ref="hotVideo" src="/videos/hot.webm" class="mascot-video mascot-video--overlay" :style="{ opacity: 0 }" autoplay loop muted></video>
     </div>
     <div class="timeline" ref="timeline">
       <div
@@ -182,11 +214,24 @@ function entryTimeline() {
     rotate: 15deg;
     opacity: 0;
     z-index: 1;
-    > video {
-      height: 100%;
+
+    > .mascot-video {
       width: 100%;
       object-fit: contain;
     }
+
+    > .mascot-video--base {
+      position: relative;
+      display: block;
+    }
+
+    > .mascot-video--overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+    }
+
   }
   .timeline {
     margin-left: 50%;
