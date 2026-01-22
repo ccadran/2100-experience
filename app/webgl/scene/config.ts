@@ -51,13 +51,14 @@ export function initScene(): Promise<void> {
       // "/3d/2100-map__V1.glb",
       // "/3d/map.glb",
       // "/3d/map-v10.glb",
-      "/3d/map-v18.glb",
+      "/3d/map-20.glb",
       // "/3d/map-spots.glb",
       (gltf: any) => {
         gltf.scene.scale.set(1, 1, 1);
 
         gltf.scene.traverse((child: any) => {
           // booster les mat des objets
+
           if (child.isMesh) {
             child.castShadow = true;
             child.receiveShadow = true;
@@ -146,7 +147,7 @@ export function initScene(): Promise<void> {
       requestAnimationFrame(animate);
 
       if (worldStore.environment) {
-          worldStore.environment.tick();
+        worldStore.environment.tick();
       }
 
       renderer.render(globalScene, worldStore.camera!.instance);
