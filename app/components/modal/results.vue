@@ -24,16 +24,19 @@ const currentQuestionUserRanking = ref<number>(0);
 const currentQuestionUserExplanation = ref<number>(0);
 const questionsList = ref<HTMLElement[]>([]);
 
-const isExplanationsShown = ref<boolean>(false);
+const resultsReady = ref(false);
+{/* const rankEl = ref<HTMLElement | null>(null); */}
+
+
 const userPercentages = ref<any>();
 
 const rankingIcons = [
-  "/icons/rank-a.png",
-  "/icons/rank-b.png",
-  "/icons/rank-c.png",
-  "/icons/rank-d.png",
-  "/icons/rank-e.png",
-  "/icons/rank-f.png",
+  "/icons/rank-a.webp",
+  "/icons/rank-b.webp",
+  "/icons/rank-c.webp",
+  "/icons/rank-d.webp",
+  "/icons/rank-e.webp",
+  "/icons/rank-f.webp",
 ];
 
 // changer les %name par le vrai username
@@ -73,7 +76,7 @@ function getResultSound(rankIndex: number): ResultSound {
 
 
 // méthode pour révéler le modal des résultats
-function revealResultsModal() {
+async function revealResultsModal() {
   const lastStep =
     configStore.worldStateSteps[configStore.worldStateSteps.length - 1];
   userPercentages.value = lastStep?.params ?? {};
@@ -82,6 +85,12 @@ function revealResultsModal() {
     (configStore.globalPercentage / 100) * (resultsData.length - 1),
   );
 
+  resultsReady.value = true;
+
+  await nextTick();
+
+  await waitForImageLoad('.result-description .rank img');
+  
   const resultSound = getResultSound(userGlobalRanking.value);
 
   if (resultSound === "success") playSuccess();
@@ -129,7 +138,7 @@ function revealResultsModal() {
       { opacity: 0, transform: "translateX(-50%) scale(3)" },
       {
         opacity: 1,
-        transform: "translateX(-50%) scale(1)",
+        transform: "translateX(-50%) scale(1) rotate(-10deg)",
         duration: 0.725,
         ease: "elastic.out(0.65,0.4)",
       },
@@ -142,13 +151,15 @@ watch(
   (newValue) => {
     if (newValue) {
       showExplanations();
+    } else {
+      gsap.set(".explanations", { opacity: 0 });
     }
   },
 );
 
+
 // méthode pour afficher les explications
 async function showExplanations() {
-  isExplanationsShown.value = true;
 
   await nextTick();
 
@@ -157,6 +168,14 @@ async function showExplanations() {
   });
 
   const questions = document.querySelectorAll(".question");
+
+  const illuImg = document.querySelector('.explanation-illu .illu') as HTMLImageElement;
+  if (illuImg && !illuImg.complete) {
+    await new Promise((resolve) => {
+      illuImg.onload = resolve;
+      illuImg.onerror = resolve;
+    });
+  }
 
   gsap
     .timeline({ defaults: { ease: "cubic-bezier(0.25, 0.95, 0, 1)" } })
@@ -194,13 +213,13 @@ function changeBackgroundFocus(target: number) {
 
 // close les explications
 async function closeResultsModal() {
-  await gsap.to([".explanations", modal.value!, opacityLayer.value], {
+  await gsap.to([ modal.value!, opacityLayer.value], {
     opacity: 0,
     duration: 0.5,
   });
 
   gsap.set([modal.value!, opacityLayer.value], { display: "none" });
-  isExplanationsShown.value = false;
+  uiStore.isExplanationsShown = false;
 }
 
 watch(
@@ -210,12 +229,22 @@ watch(
   },
 );
 
+{/* async function closeExplanations() {
+  await gsap.to(".explanations", {
+    opacity: 0,
+    duration: 0.4,
+  });
+
+  uiStore.isExplanationsShown = false;
+} */}
+
+
 // méthode pour changer de question
 async function changeQuestion(target: number) {
   const currentBg =
     questionsList.value[currentQuestion.value]?.querySelector(".background");
 
-  gsap
+  await gsap
     .timeline()
     .to(".explanations-content", { opacity: 0 })
     .to(currentBg, { opacity: 0 });
@@ -235,6 +264,10 @@ async function changeQuestion(target: number) {
       (questionsData[currentQuestion.value]?.explanations.length - 1 || 0),
   );
 
+  await nextTick();
+
+  await waitForImageLoad('.explanation-illu .illu');
+
   gsap
     .timeline()
     .add(changeBackgroundFocus(target))
@@ -247,6 +280,26 @@ async function changeQuestion(target: number) {
       { scale: 1, opacity: 1, ease: "elastic.out(0.65,0.5)", duration: 0.7 },
       0.65,
     );
+}
+
+
+
+//attendre img chargement
+
+function waitForImageLoad(selector: string): Promise<void> {
+  return new Promise((resolve) => {
+    const img = document.querySelector(selector) as HTMLImageElement;
+    if (!img) {
+      resolve();
+      return;
+    }
+    if (img.complete) {
+      resolve();
+    } else {
+      img.onload = () => resolve();
+      img.onerror = () => resolve();
+    }
+  });
 }
 
 // expose les méthodes pour que le parent puisse les appeler via ref
@@ -262,15 +315,15 @@ defineExpose({
   <div class="results">
     <div
       class="modalResults"
-      :class="{ explanation: isExplanationsShown }"
+      :class="{ explanation: uiStore.isExplanationsShown }"
       ref="modal"
     >
       <div class="title">
-        <p>Resultats</p>
-      </div>
-      <div class="ranking" v-if="!isExplanationsShown">
+        <p>Résultats</p>
+      </div>  
+      <div class="ranking" v-if="!uiStore.isExplanationsShown">
         <div class="result-description">
-          <div class="rank">
+          <div v-if="resultsReady" class="rank">
             <img :src="resultsData[userGlobalRanking]?.rank" alt="" />
           </div>
           <p>
@@ -302,20 +355,24 @@ defineExpose({
             </div>
           </div>
           <div class="explanation-illu">
-            <img
-              class="illu"
-              :src="
-                questionsData[currentQuestion]?.explanations[
-                  currentQuestionUserExplanation
-                ]?.illustration
-              "
-              alt=""
-            />
-            <img
-              :src="rankingIcons[currentQuestionUserRanking]"
-              alt=""
-              class="rank"
-            />
+            <div class="illu-container">
+              <img
+                class="illu"
+                :src="
+                  questionsData[currentQuestion]?.explanations[
+                    currentQuestionUserExplanation
+                  ]?.illustration
+                "
+                alt=""
+              />
+            </div>
+            <div class="rank-container">
+              <img
+                :src="rankingIcons[currentQuestionUserRanking]"
+                alt=""
+                class="rank"
+              />
+            </div>
           </div>
         </div>
         <div class="questions-list">
@@ -393,11 +450,12 @@ defineExpose({
       > .result-description {
         position: relative;
         > .rank {
-          width: 120px;
+          width: 140px;
           position: absolute;
-          top: -70px;
+          top: -120px;
           left: 50%;
           transform: translateX(-50%);
+          opacity: 0;
         }
         > p {
           font-size: 4vw;
@@ -409,7 +467,7 @@ defineExpose({
         position: absolute;
         left: 50%;
         transform: translateX(-50%);
-        bottom: -11%;
+        bottom: -15%;
         width: 33%;
         > video {
           width: 100%;
@@ -419,11 +477,11 @@ defineExpose({
       }
     }
     .explanations {
-      padding: 0 60px;
+      padding: 0 32px;
       display: flex;
       flex-direction: column;
-      gap: 5vh;
-      margin-bottom: 80px;
+      gap: 3vh;
+      margin-bottom: 64px;
       opacity: 0;
       .explanations-content {
         display: flex;
@@ -485,21 +543,35 @@ defineExpose({
           }
         }
         > .explanation-illu {
-          border-radius: 48px;
           width: 48%;
-          overflow: hidden;
           position: relative;
-          > .illu {
+          > .illu-container {
+            border-radius: 48px;
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            overflow: hidden;
+            
+            > .illu {
+              width: 100%;
+              height: 100%;
+              object-fit: cover;
+            }
+
           }
-          > .rank {
+          > .rank-container {
             bottom: 20%;
-            width: 15%;
+            width: 16%;
             position: absolute;
-            right: 0;
+            right: -4%;
+            rotate: -20deg;
+
+            > .rank {
+              width: 100%;
+              height: 100;
+            }
           }
+          
+          
         }
       }
       .questions-list {
