@@ -1,4 +1,9 @@
 import gsap from "gsap";
+import { useAudio } from "~/composables/useAudio";
+
+
+// cloouds transi sound
+const { playClouds } = useAudio();
 
 export default class CloudsTransition {
   clouds: HTMLElement[];
@@ -73,6 +78,7 @@ export default class CloudsTransition {
   }
 
   async showClouds() {
+    playClouds();
     await this.showTimeline.restart().then();
   }
 

@@ -2,6 +2,7 @@
 import gsap from "gsap";
 import { storeToRefs } from "pinia";
 import { delay } from "~/webgl/utils";
+import { useAudio } from "~/composables/useAudio";
 
 const webSocketStore = useWebSocket();
 const { userName } = storeToRefs(webSocketStore);
@@ -17,7 +18,14 @@ const isModal3revealed = ref<boolean>(false);
 
 const configStore = useConfig();
 
+// voices
+const { playVoice1 } = useAudio();
+const { playVoice2 } = useAudio();
+const { playVoice3 } = useAudio();
+
 function revealContainer() {
+  playVoice1();
+
   gsap.set(modals.value!, { display: "flex" });
   return gsap
     .timeline({ defaults: { ease: "cubic-bezier(0.25, 0.95, 0, 1)" } })
@@ -31,6 +39,8 @@ function revealContainer() {
 }
 
 function revealModal2() {
+  playVoice2();
+
   return gsap.fromTo(
     modal2.value!,
     { x: "150%", rotation: 0 },
@@ -46,6 +56,8 @@ function revealModal2() {
 }
 
 function revealModal3() {
+  playVoice3();
+
   return gsap.fromTo(
     modal3.value!,
     { x: "150%", rotation: 0 },

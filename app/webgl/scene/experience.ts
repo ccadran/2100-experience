@@ -1,6 +1,11 @@
 import * as THREE from "three";
 import gsap from "gsap";
 import { delay } from "../utils";
+import { useAudio } from "~/composables/useAudio";
+
+
+// camera sound
+const { playCamera } = useAudio();
 
 // couleurs du sol
 const healthy_color = new THREE.Color("#007411");
@@ -129,6 +134,7 @@ function getCurrentState(
 // }
 
 export function goToCameraSpot(index: number) {
+  playCamera();
   const worldStore = useWorld();
   worldStore.camera?.goToSpot(index);
 }
