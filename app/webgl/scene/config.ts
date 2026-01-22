@@ -48,7 +48,7 @@ export function initScene(): Promise<void> {
       // "/3d/2100-map__V1.glb",
       // "/3d/map.glb",
       // "/3d/map-v10.glb",
-      "/3d/map-v13.glb",
+      "/3d/map-v18.glb",
       // "/3d/map-spots.glb",
       (gltf: any) => {
         gltf.scene.scale.set(1, 1, 1);
@@ -108,6 +108,10 @@ export function initScene(): Promise<void> {
             child.children.forEach((c) => {
               if (c.name.includes("fields")) {
                 worldStore.impactsParts.fields = markRaw(c);
+              } else if (c.name.includes("lake")) {
+                console.log(c);
+
+                worldStore.impactsParts.lake = markRaw(c);
               }
             });
           }
@@ -124,6 +128,7 @@ export function initScene(): Promise<void> {
         // setupDecorInstances()
         updateCity(configStore.configParams.currentTemperature);
         hideElements();
+        console.log(worldStore.sceneMeshes);
 
         environment.initFog();
         worldStore.fogControls = environment.getFogControls();

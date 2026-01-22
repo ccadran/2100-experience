@@ -2,7 +2,7 @@ import type { UserConfigType, worldImpactsType } from "~/types/config";
 
 export const useConfig = defineStore("useConfig", () => {
   const formParams = {
-    step: 5,
+    step: 8,
     currentStep: 0,
   };
 
@@ -32,7 +32,7 @@ export const useConfig = defineStore("useConfig", () => {
       name: "meat",
       globalWeight: 0.15, // 15%
       impacts: [
-        { type: "waterLevel", weight: 0.7 },
+        { type: "lake", weight: 0.3 },
         { type: "sheeps", weight: 0.7 },
         { type: "chickens", weight: 0.7 },
       ],
@@ -40,7 +40,7 @@ export const useConfig = defineStore("useConfig", () => {
     promptIA: {
       name: "promptIA",
       globalWeight: 0.02, // 2%
-      impacts: [{ type: "waterLevel", weight: 0.3 }],
+      impacts: [{ type: "lake", weight: 0.5 }],
     },
     products: {
       name: "products",
@@ -49,6 +49,7 @@ export const useConfig = defineStore("useConfig", () => {
         { type: "factory", weight: 0.5 },
         { type: "sheeps", weight: 0.3 },
         { type: "chickens", weight: 0.3 },
+        { type: "fields", weight: 1.0 },
       ],
     },
     phone: {
@@ -67,7 +68,10 @@ export const useConfig = defineStore("useConfig", () => {
     clothes: {
       name: "clothes",
       globalWeight: 0.08, // 8%
-      impacts: [{ type: "factory", weight: 0.35 }],
+      impacts: [
+        { type: "factory", weight: 0.35 },
+        { type: "lake", weight: 0.2 },
+      ],
     },
   };
 
@@ -76,8 +80,8 @@ export const useConfig = defineStore("useConfig", () => {
       name: "fog",
       value: 0,
     },
-    waterLevel: {
-      name: "waterLevel",
+    lake: {
+      name: "lake",
       value: 0,
     },
     factory: {

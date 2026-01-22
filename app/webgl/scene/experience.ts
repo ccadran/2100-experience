@@ -81,18 +81,10 @@ export async function moveToStep(target: number | "next" | "previous") {
 }
 
 function updateImpact(
-  type:
-    | "fog"
-    | "waterLevel"
-    | "factory"
-    | "rocks"
-    | "fields"
-    | "sheeps"
-    | "chickens",
+  type: "fog" | "lake" | "factory" | "rocks" | "fields" | "sheeps" | "chickens",
   evolution: number,
 ) {
   const worldStore = useWorld();
-  console.log(type);
 
   switch (type) {
     case "fog":
@@ -100,9 +92,15 @@ function updateImpact(
       break;
     case "fields":
       const fieldsState = getLevel(evolution);
+      console.log("FIELDSEEE", fieldsState, evolution);
 
       worldStore.impactsParts.fields?.children.forEach((child) => {
-        child.visible = child.name === fieldsState;
+        if (child.name.includes(fieldsState!)) {
+          child.visible = true;
+        } else {
+          child.visible = false;
+        }
+        // child.visible = child.name === fieldsState;
       });
       break;
     case "sheeps":
@@ -111,21 +109,23 @@ function updateImpact(
     case "chickens":
       updateImpactNumber({ name: "chickens", value: evolution });
       break;
-    case "waterLevel":
-      const levelWater = getLevel(evolution);
-      worldStore.impactsParts.waterLevel?.children.forEach((child) => {
-        child.visible = child.name === levelWater;
+    case "lake":
+      const lakeState = getLevel(evolution);
+
+      worldStore.impactsParts.lake?.children.forEach((child) => {
+        child.visible = child.name === lakeState;
+        console.log(child.visible);
       });
       break;
     case "factory":
       const levelFactory = getLevel(evolution);
-      worldStore.impactsParts.waterLevel?.children.forEach((child) => {
+      worldStore.impactsParts.lake?.children.forEach((child) => {
         child.visible = child.name === levelFactory;
       });
       break;
     case "rocks":
       const levelRocks = getLevel(evolution);
-      worldStore.impactsParts.waterLevel?.children.forEach((child) => {
+      worldStore.impactsParts.lake?.children.forEach((child) => {
         child.visible = child.name === levelRocks;
       });
       break;
@@ -136,8 +136,8 @@ function updateImpact(
 
 function getLevel(evolution: number) {
   if (evolution < 20) return "high";
-  if (evolution < 50) return "mid";
-  if (evolution < 75) return "low";
+  if (evolution >= 20 && evolution < 75) return "mid";
+  if (evolution >= 75) return "low";
 }
 
 export function updateImpactNumber(impact: impactType) {

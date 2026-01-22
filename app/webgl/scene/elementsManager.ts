@@ -192,15 +192,12 @@ export function hideElements() {
   worldStore.hiddenSceneParts = [];
 
   Object.values(worldStore.sceneMeshes).forEach((meshGroup) => {
-    console.log(meshGroup.name);
-
     if (
       meshGroup.name.includes("sheeps") ||
       meshGroup.name.includes("chickens")
     ) {
       meshGroup.position.y = -10;
       worldStore.hiddenSceneParts.push(meshGroup);
-      console.log(worldStore.hiddenSceneParts);
     }
     meshGroup.children.forEach((mesh) => {
       mesh.visible = false;
@@ -210,7 +207,6 @@ export function hideElements() {
       }
     });
   });
-  console.log(worldStore.hiddenSceneParts);
 }
 
 export function revealElements() {
@@ -301,7 +297,9 @@ export function setupAllImpacts() {
   // =========================================================
   Object.entries(worldStore.impactsParts).forEach(([key, value]) => {
     if (!value) return;
-    if (value.name.includes("states")) {
+    console.log(value);
+
+    if (value.name.includes("states-instances")) {
       keysToRemove.push(key);
       const impactName = key;
       impactNamesMap[value.name] = impactName;
@@ -310,6 +308,8 @@ export function setupAllImpacts() {
       value.children.forEach((child: any) => {
         child.children.forEach((c: any) => {
           if (c instanceof THREE.Mesh) {
+            // console.log(child);
+
             c.visible = false;
             if (c.name.includes("high")) stockMesh(value.name, "high", c);
             else if (c.name.includes("mid")) stockMesh(value.name, "mid", c);
@@ -317,6 +317,22 @@ export function setupAllImpacts() {
           }
         });
       });
+    } else if (value.name.includes("states-raw")) {
+      console.log("WEEEEEE");
+
+      const impactName = key;
+      impactNamesMap[value.name] = impactName;
+
+      value.children.forEach((child: any) => {
+        if (child instanceof THREE.Mesh) {
+          if (child.name.includes("high") || child.name.includes("low")) {
+            child.visible = false;
+          } else if (child.name.includes("mid")) {
+            child.visible = true;
+          }
+        }
+      });
+      worldStore.sceneMeshes[value.name] = markRaw(value);
     }
   });
 
@@ -483,40 +499,34 @@ export function setupAllImpacts() {
   }
 }
 
-//TODO change to upodate
 export function updateCity(temperature: number) {
   const worldStore = useWorld();
   const configStore = useConfig();
 
   const cityGroup = worldStore.globalScene?.getObjectByName("City")!;
 
-  const citySpotNumber = 5;
+  const citySpotNumber = cityGroup.children.length;
 
   const focusedSpot = Math.round(
     (temperature / configStore.configParams.maxTemperature) * citySpotNumber,
   );
-  console.log(focusedSpot);
 
   for (let i = 0; i < cityGroup.children.length!; i++) {
     const citySpot = cityGroup.children[i]!;
 
     citySpot.children.forEach((child) => {
       if (child.name.includes("house")) {
-        console.log(i, focusedSpot);
-
         if (i < focusedSpot) {
           child.visible = false;
         } else {
           child.visible = true;
         }
-        console.log(child.visible);
       } else if (child.name.includes("building")) {
         if (i < focusedSpot) {
           child.visible = true;
         } else {
           child.visible = false;
         }
-        console.log(child.visible);
       }
     });
   }

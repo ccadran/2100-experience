@@ -12,13 +12,13 @@ export interface UserConfigType {
 }
 
 interface impactType {
-  name: "fog" | "waterLevel" | "factory" | "fields" | "sheeps" | "chickens";
+  name: "fog" | "lake" | "factory" | "fields" | "sheeps" | "chickens";
   value: number;
 }
 
 export interface worldImpactsType {
   fog: impactType;
-  waterLevel: impactType;
+  lake: impactType;
   factory: impactType;
 
   fields: impactType;

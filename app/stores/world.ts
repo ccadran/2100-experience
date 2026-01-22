@@ -27,7 +27,7 @@ export const useWorld = defineStore("useWorld", () => {
 
   const impactsParts = {
     fog: null as any,
-    waterLevel: null as THREE.Object3D | null,
+    lake: null as THREE.Object3D | null,
     factory: null as THREE.Object3D | null,
     rocks: null as THREE.Object3D | null,
     fields: null as THREE.Object3D | null,
