@@ -209,8 +209,10 @@ export function hideElements() {
       if (mesh.name.includes("normal") || mesh.name.includes("mid")) {
         mesh.position.y = -10;
         worldStore.hiddenSceneParts.push(mesh);
+        // console.log(mesh.name);
       }
     });
+    // console.log(worldStore.hiddenSceneParts);
   });
 }
 

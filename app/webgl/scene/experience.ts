@@ -97,7 +97,6 @@ function updateImpact(
       break;
     case "fields":
       const fieldsState = getLevel(evolution);
-      console.log("FIELDSEEE", fieldsState, evolution);
 
       worldStore.impactsParts.fields?.children.forEach((child) => {
         if (child.name.includes(fieldsState!)) {
@@ -105,7 +104,6 @@ function updateImpact(
         } else {
           child.visible = false;
         }
-        // child.visible = child.name === fieldsState;
       });
       break;
     case "sheeps":
@@ -118,21 +116,18 @@ function updateImpact(
       const lakeState = getLevel(evolution);
 
       worldStore.impactsParts.lake?.children.forEach((child) => {
-        child.visible = child.name === lakeState;
-        console.log(child.visible);
+        if (child.name.includes(lakeState!)) {
+          console.log("__________________");
+          console.log("Visibilité avant :", child.visible);
+          child.visible = true;
+          console.log("Visibilité après :", child.visible);
+          console.log(child);
+        } else {
+          child.visible = false;
+        }
       });
-      break;
-    case "factory":
-      const levelFactory = getLevel(evolution);
-      worldStore.impactsParts.lake?.children.forEach((child) => {
-        child.visible = child.name === levelFactory;
-      });
-      break;
-    case "rocks":
-      const levelRocks = getLevel(evolution);
-      worldStore.impactsParts.lake?.children.forEach((child) => {
-        child.visible = child.name === levelRocks;
-      });
+      console.log(worldStore.impactsParts.lake);
+
       break;
     default:
       break;
