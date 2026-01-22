@@ -223,9 +223,25 @@ export function revealElements() {
 
   if (configStore.formParams.currentStep <= configStore.formParams.step) {
     if (worldStore.hiddenSceneParts.length < 1) return;
+    console.log(configStore.formParams.currentStep);
+
+    if (configStore.formParams.currentStep === configStore.formParams.step) {
+      worldStore.hiddenSceneParts.forEach((part) => {
+        part.visible = true;
+        gsap.to(part.position, {
+          y: 0,
+          duration: 1,
+          ease: "power2.inOut",
+        });
+      });
+      worldStore.hiddenSceneParts = [];
+      return;
+    }
+
     const randIndex = Math.floor(
       Math.random() * worldStore.hiddenSceneParts.length,
     );
+
     worldStore.hiddenSceneParts[randIndex].visible = true;
 
     gsap.to(worldStore.hiddenSceneParts[randIndex].position, {
