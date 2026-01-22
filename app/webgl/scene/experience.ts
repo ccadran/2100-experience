@@ -3,7 +3,6 @@ import gsap from "gsap";
 import { delay } from "../utils";
 import { useAudio } from "~/composables/useAudio";
 
-
 // camera sound
 const { playCamera } = useAudio();
 
@@ -142,6 +141,7 @@ function getLevel(evolution: number) {
 
 export function updateImpactNumber(impact: impactType) {
   const worldStore = useWorld();
+  console.log(worldStore.impactsParts);
   const targetInstancedMesh = worldStore.impactsParts[impact.name];
   console.log(targetInstancedMesh);
 

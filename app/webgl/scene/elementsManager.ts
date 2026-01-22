@@ -2,10 +2,10 @@ import * as THREE from "three";
 import gsap from "gsap";
 import { useAudio } from "~/composables/useAudio";
 import { updateImpactNumber } from "./experience";
+import type { impactType } from "~/types/config";
 
 // appear sound
 const { playReveal } = useAudio();
-
 
 export function setupParamsInstances() {
   const worldStore = useWorld();
@@ -363,6 +363,11 @@ export function setupAllImpacts() {
               stockMesh(group.name, "default", mesh);
             }
           });
+          console.log(matchingKey);
+          //  updateImpactNumber ({
+          //     name: matchingKey as impactType["name"],
+          //     value: 0.2,
+          //   });
         }
       });
     }
@@ -442,6 +447,14 @@ export function setupAllImpacts() {
       if (!worldStore.impactsParts[groupName]) {
         worldStore.impactsParts[groupName] = markRaw(finalObject);
       }
+    }
+    if (isSimplePool && storeKey) {
+      console.log(`Initialisation du pool : ${storeKey}`);
+
+      updateImpactNumber({
+        name: storeKey as impactType["name"],
+        value: 20,
+      });
     }
   });
 
