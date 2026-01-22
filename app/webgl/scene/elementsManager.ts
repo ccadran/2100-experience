@@ -84,6 +84,9 @@ export function setupParamsInstances() {
       instancedMesh.instanceMatrix.needsUpdate = true;
       instancedMesh.frustumCulled = false;
       instancedMesh.castShadow = true;
+      instancedMesh.userData.originalMatrix =
+        instancedMesh.instanceMatrix.clone();
+      // console.log("___________", instancedMesh.userData);
 
       targetGroups[targetGroup].add(instancedMesh);
 
@@ -226,8 +229,6 @@ export function revealElements() {
 
     if (configStore.formParams.currentStep === configStore.formParams.step) {
       worldStore.hiddenSceneParts.forEach((part) => {
-        console.log("!!!!", part);
-
         part.visible = true;
         gsap.to(part.position, {
           y: 0,
@@ -243,9 +244,7 @@ export function revealElements() {
       Math.random() * worldStore.hiddenSceneParts.length,
     );
 
-    console.log("!!!!", worldStore.hiddenSceneParts[randIndex]);
     worldStore.hiddenSceneParts[randIndex].visible = true;
-    console.log("!!!!", worldStore.hiddenSceneParts[randIndex]);
 
     gsap.to(worldStore.hiddenSceneParts[randIndex].position, {
       y: 0,
@@ -305,6 +304,14 @@ export function hideInstanceChildren(
   instancedMesh.instanceMatrix.needsUpdate = true;
 }
 
+export function resetParmasAssets(instancedMesh: THREE.InstancedMesh) {
+  console.log(instancedMesh.userData.originalMatrix);
+
+  instancedMesh.instanceMatrix.copy(instancedMesh.userData.originalMatrix);
+
+  instancedMesh.instanceMatrix.needsUpdate = true;
+}
+
 export function setupAllImpacts() {
   const worldStore = useWorld();
 
@@ -351,7 +358,6 @@ export function setupAllImpacts() {
           child.visible = false;
         } else if (child.name.includes("mid")) {
           child.visible = true;
-          console.log(child);
         }
         // }
       });

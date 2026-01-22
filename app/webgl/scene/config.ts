@@ -138,6 +138,8 @@ export function initScene(): Promise<void> {
         hideElements();
         console.log(worldStore.sceneMeshes);
 
+        console.log(worldStore.paramsParts);
+
         environment.initFog();
         worldStore.fogControls = environment.getFogControls();
 
@@ -174,6 +176,7 @@ export function handleFormValidations(userData: UserConfigType) {
   const finalUserData: any = {};
 
   configStore.isFormValidated = true;
+  configStore.formParams.currentStep = 0;
   const worldStore = useWorld();
   worldStore.camera?.entryAnim();
 
@@ -386,7 +389,7 @@ function setupObjectsData() {
     if (objectType) {
       paramPart.children.forEach((child) => {
         if (child instanceof THREE.InstancedMesh) {
-          child.userData = objectDataMap[objectType];
+          child.userData.states = objectDataMap[objectType];
 
           let instancedMeshCountArray = [];
           for (let i = 0; i < child.count; i++) {

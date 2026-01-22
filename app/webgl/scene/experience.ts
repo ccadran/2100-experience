@@ -14,6 +14,7 @@ import {
   calculateParmasAssetsNumber,
   hideElements,
   hideInstanceChildren,
+  resetParmasAssets,
   updateCity,
 } from "./elementsManager";
 import type { impactType } from "~/types/config";
@@ -58,7 +59,7 @@ export async function moveToStep(target: number | "next" | "previous") {
     if (!firstChild) return;
 
     const currentState = getCurrentState(
-      firstChild.userData,
+      firstChild.userData.states,
       currentTemperature,
     );
 
@@ -154,6 +155,9 @@ function getCurrentState(
   states: Record<string, number>,
   temperature: number,
 ): string | null {
+  console.log("STATES", states);
+  if (!states) return null;
+
   return (
     (Object.entries(states) as [string, number][])
       .sort(([, a], [, b]) => b - a)
@@ -190,8 +194,18 @@ export function resetExperience() {
 
   updateGroundColor(configStore.configParams.currentTemperature);
   updateCity(configStore.configParams.currentTemperature);
+  console.log(worldStore.paramsParts);
+
+  worldStore.paramsParts.forEach((part) => {
+    part.children.forEach((child) => {
+      // console.log(child);
+
+      resetParmasAssets(child as THREE.InstancedMesh);
+    });
+  });
 
   hideElements();
+
   worldStore.camera?.goToSpot(0);
 }
 
