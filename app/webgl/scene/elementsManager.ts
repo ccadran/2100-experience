@@ -83,6 +83,7 @@ export function setupParamsInstances() {
 
       instancedMesh.instanceMatrix.needsUpdate = true;
       instancedMesh.frustumCulled = false;
+      instancedMesh.castShadow = true;
 
       targetGroups[targetGroup].add(instancedMesh);
 
@@ -178,6 +179,8 @@ export function setupDecorInstances() {
 
     instancedMesh.instanceMatrix.needsUpdate = true;
     instancedMesh.frustumCulled = true;
+    instancedMesh.castShadow = true;
+
     console.log(instancedMesh.name, instancedMesh);
 
     worldStore.globalScene!.add(instancedMesh);
@@ -191,10 +194,6 @@ export function setupDecorInstances() {
       }
     });
   });
-
-  //hide base
-
-  //TODO
 }
 
 export function hideElements() {
@@ -429,6 +428,7 @@ export function setupAllImpacts() {
 
       // On nomme l'instance directement avec le nom logique (ex: "forest")
       instancedMesh.name = logicalName;
+      instancedMesh.castShadow = true;
 
       worldStore.scene3d?.add(instancedMesh);
       finalObject = instancedMesh;
@@ -444,6 +444,7 @@ export function setupAllImpacts() {
           type,
         );
         group.add(instancedMesh);
+        instancedMesh.castShadow = true;
       });
 
       worldStore.scene3d?.add(group);
