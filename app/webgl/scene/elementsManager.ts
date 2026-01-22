@@ -1,6 +1,11 @@
 import * as THREE from "three";
 import gsap from "gsap";
+import { useAudio } from "~/composables/useAudio";
 import { updateImpactNumber } from "./experience";
+
+// appear sound
+const { playReveal } = useAudio();
+
 
 export function setupParamsInstances() {
   const worldStore = useWorld();
@@ -210,6 +215,7 @@ export function hideElements() {
 }
 
 export function revealElements() {
+  playReveal();
   const configStore = useConfig();
   const worldStore = useWorld();
 
