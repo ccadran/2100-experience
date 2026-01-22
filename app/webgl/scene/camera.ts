@@ -24,7 +24,7 @@ export default class Camera {
   lerpFactor: number;
 
   private spots: THREE.Object3D[] = [];
-  private lookAtTargets: THREE.Vector3[] = [];
+  private lookAtTargets: THREE.Object3D[] = [];
   private currentSpotIndex = 0;
 
   constructor({
@@ -59,7 +59,6 @@ export default class Camera {
   }
 
   private createOverlay(): THREE.Mesh {
-    
     const overlayCanvas = document.createElement("canvas");
     overlayCanvas.width = 1;
     overlayCanvas.height = 128;
@@ -67,34 +66,33 @@ export default class Camera {
 
     if (overlayCtx) {
       const grad = overlayCtx.createLinearGradient(0, 0, 0, 128);
-      grad.addColorStop(0, "rgba(255, 255, 255, 1)"); 
-      grad.addColorStop(0.6, "rgba(255, 255, 255, 0)"); 
+      grad.addColorStop(0, "rgba(255, 255, 255, 1)");
+      grad.addColorStop(0.6, "rgba(255, 255, 255, 0)");
       overlayCtx.fillStyle = grad;
       overlayCtx.fillRect(0, 0, 1, 128);
     }
-    
+
     const overlayTexture = new THREE.CanvasTexture(overlayCanvas);
     overlayTexture.colorSpace = THREE.SRGBColorSpace;
 
-    const overlayGeo = new THREE.PlaneGeometry(4, 2); 
-    
+    const overlayGeo = new THREE.PlaneGeometry(4, 2);
+
     const overlayMat = new THREE.MeshBasicMaterial({
       color: 0x3377ed,
       map: overlayTexture,
       transparent: true,
       opacity: 0.8,
-      depthTest: false, 
+      depthTest: false,
       depthWrite: false,
-      fog: false
+      fog: false,
     });
 
     const mesh = new THREE.Mesh(overlayGeo, overlayMat);
-    mesh.position.set(0, 0, -1.1); 
+    mesh.position.set(0, 0, -1.1);
     mesh.renderOrder = 9999;
-    
+
     return mesh;
   }
-
 
   private startLoop() {
     const loop = () => {
@@ -105,9 +103,10 @@ export default class Camera {
     loop();
   }
 
-  setSpots(spots: THREE.Object3D[], lookAtTargets: THREE.Vector3[]) {
+  setSpots(spots: THREE.Object3D[], lookAtTargets: THREE.Object3D[]) {
     this.spots = spots;
     this.lookAtTargets = lookAtTargets;
+
     this.currentSpotIndex = 0;
   }
 
@@ -128,9 +127,9 @@ export default class Camera {
     });
 
     gsap.to(this.targetLookAt, {
-      x: lookAt.x,
-      y: lookAt.y,
-      z: lookAt.z,
+      x: lookAt.position.x,
+      y: lookAt.position.y,
+      z: lookAt.position.z,
       duration: 1.2,
       ease: "power2.inOut",
     });
