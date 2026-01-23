@@ -151,6 +151,7 @@ watch(
   (newValue) => {
     if (newValue) {
       showExplanations();
+      console.log("show explanations");
     } else {
       gsap.set(".explanations", { opacity: 0 });
     }

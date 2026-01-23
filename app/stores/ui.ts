@@ -18,6 +18,9 @@ export const useUi = defineStore("useUi", () => {
   function toggleModalResult() {
     isModalResultShown.value = !isModalResultShown.value;
   }
+  function showModalResult() {
+    isModalResultShown.value = true;
+  }
 
   function showExplanations() {
     isExplanationsShown.value = true;
@@ -31,6 +34,7 @@ export const useUi = defineStore("useUi", () => {
     isModalResultShown,
     isExplanationsShown,
     showExplanations,
+    showModalResult,
     focusedExplanationQuestion,
     changeFocusedExplanationQuestion,
   };
