@@ -175,7 +175,7 @@ export function handleFormValidations(userData: UserConfigType) {
   configStore.isFormValidated = true;
   configStore.formParams.currentStep = 0;
   const worldStore = useWorld();
-  worldStore.camera?.entryAnim();
+  // worldStore.camera?.entryAnim();
 
   Object.entries(userData).forEach(([key, value]) => {
     switch (key) {
