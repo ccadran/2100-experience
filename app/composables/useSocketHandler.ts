@@ -85,6 +85,8 @@ export function useSocketHandler() {
       /*------- EXPERIENCE END -------*/
       case "END_EXPERIENCE":
         uiStore.toggleModalResult();
+        console.log(uiStore.isModalResultShown);
+
         console.log("Payload → END_EXPERIENCE");
         break;
 
