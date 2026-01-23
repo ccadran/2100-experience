@@ -122,6 +122,8 @@ export function initScene(): Promise<void> {
                 worldStore.impactsParts.farmhouse = markRaw(c);
               }
             });
+          } else if (child.name.includes("City")) {
+            worldStore.sceneMeshes["city"] = child;
           }
         });
         let meshCount = 0;
@@ -135,6 +137,7 @@ export function initScene(): Promise<void> {
         setupAllImpacts();
         setupDecorInstances();
         updateCity(configStore.configParams.currentTemperature);
+
         hideElements();
 
         environment.initFog();

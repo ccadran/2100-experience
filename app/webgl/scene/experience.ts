@@ -57,7 +57,6 @@ export async function moveToStep(target: number | "next" | "previous") {
     const firstChild = part.children[0];
 
     if (!firstChild) return;
-    console.log(part);
 
     const currentState = getCurrentState(
       firstChild.userData.states,
@@ -135,10 +134,7 @@ function updateImpact(
 
       break;
     case "farmhouse":
-      console.log("____________farmhouse case");
-
       const farmhouseState = getLevel(evolution);
-      console.log("____________farmhouse case", farmhouseState);
 
       worldStore.impactsParts.farmhouse?.children.forEach((child) => {
         if (child.name.includes(farmhouseState!)) {
@@ -147,7 +143,6 @@ function updateImpact(
           child.visible = false;
         }
       });
-      console.log(worldStore.impactsParts.farmhouse);
 
       break;
     default:

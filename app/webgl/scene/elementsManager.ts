@@ -204,18 +204,20 @@ export function hideElements() {
   Object.values(worldStore.sceneMeshes).forEach((meshGroup) => {
     if (
       meshGroup.name.includes("sheeps") ||
-      meshGroup.name.includes("chickens")
+      meshGroup.name.includes("chickens") ||
+      meshGroup.name.includes("City")
     ) {
       meshGroup.position.y = -10;
       worldStore.hiddenSceneParts.push(meshGroup);
+    } else {
+      meshGroup.children.forEach((mesh) => {
+        mesh.visible = false;
+        if (mesh.name.includes("normal") || mesh.name.includes("mid")) {
+          mesh.position.y = -10;
+          worldStore.hiddenSceneParts.push(mesh);
+        }
+      });
     }
-    meshGroup.children.forEach((mesh) => {
-      mesh.visible = false;
-      if (mesh.name.includes("normal") || mesh.name.includes("mid")) {
-        mesh.position.y = -10;
-        worldStore.hiddenSceneParts.push(mesh);
-      }
-    });
   });
 }
 
