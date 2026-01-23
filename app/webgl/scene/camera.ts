@@ -122,7 +122,7 @@ export default class Camera {
       x: spot.position.x,
       y: spot.position.y,
       z: spot.position.z,
-      duration: 1.2,
+      duration: 2,
       ease: "power2.inOut",
     });
 
@@ -130,7 +130,7 @@ export default class Camera {
       x: lookAt.position.x,
       y: lookAt.position.y,
       z: lookAt.position.z,
-      duration: 1.2,
+      duration: 2,
       ease: "power2.inOut",
     });
   }
