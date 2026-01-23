@@ -1,68 +1,110 @@
-import type { userConfigParams } from "~/types/config";
+import type { UserConfigType, worldImpactsType } from "~/types/config";
 
 export const useConfig = defineStore("useConfig", () => {
   const formParams = {
-    step: 5,
+    step: 8,
     currentStep: 0,
   };
 
   const configParams = {
-    yearsStep: 10, //in years
+    yearsStep: 25, //in years
     currentYear: 2025,
     targetYear: 2100,
     maxTemperature: 5.7,
     currentTemperature: 1.2,
     minTemperature: 0,
     pivotScore: 25,
+    currentImpactValue: 20,
   };
 
   const worldParams = {
     plane: {
       name: "plane",
-      description: "Impact des vols long et court-courriers.",
-      weight: 0.1, // 10%
+      globalWeight: 0.1, // 10%
+      impacts: [{ type: "fog", weight: 0.5 }],
     },
     transport: {
       name: "transport",
-      description:
-        "Impact de la voiture individuelle, bus, train (hors avion).",
-      weight: 0.25, // 25%
+      globalWeight: 0.25, // 25%
+      impacts: [
+        { type: "fog", weight: 0.2 },
+        { type: "farmhouse", weight: 0.2 },
+      ],
     },
     meat: {
       name: "meat",
-      description:
-        "Impact lié à la production de viande et produits animaux (méthane, déforestation).",
-      weight: 0.15, // 15%
+      globalWeight: 0.15, // 15%
+      impacts: [
+        { type: "lake", weight: 0.3 },
+        { type: "sheeps", weight: 0.7 },
+        { type: "chickens", weight: 0.7 },
+        { type: "farmhouse", weight: 0.5 },
+      ],
     },
     promptIA: {
       name: "promptIA",
-      description:
-        "Impact lié aux data centers, streaming, et requêtes IA/ChatGPT.",
-      weight: 0.02, // 2%
+      globalWeight: 0.02, // 2%
+      impacts: [{ type: "lake", weight: 0.5 }],
     },
     products: {
       name: "products",
-      description:
-        "Impact lié à l'importation de nourriture et à la fabrication de produits manufacturés (hors textile et tech).",
-      weight: 0.15, // 15%
+      globalWeight: 0.15, // 15%
+      impacts: [
+        { type: "factory", weight: 0.5 },
+        { type: "sheeps", weight: 0.3 },
+        { type: "chickens", weight: 0.3 },
+        { type: "fields", weight: 1.0 },
+        { type: "farmhouse", weight: 0.3 },
+      ],
     },
     phone: {
       name: "phone",
-      description:
-        "Impact lié à la fabrication (extraction de métaux) et à l'infrastructure des appareils électroniques (téléphones, PC).",
-      weight: 0.05, // 5%
+      globalWeight: 0.05, // 5%
+      impacts: [
+        { type: "factory", weight: 0.15 },
+        { type: "rocks", weight: 1 },
+      ],
     },
     energy: {
       name: "energy",
-      description:
-        "Impact lié au chauffage (gaz, fioul) et à l'électricité domestique.",
-      weight: 0.2, // 20%
+      globalWeight: 0.2, // 20%
+      impacts: [{ type: "fog", weight: 0.3 }],
     },
     clothes: {
       name: "clothes",
-      description:
-        "Impact lié à la production, la teinture et le transport des textiles (Fast Fashion).",
-      weight: 0.08, // 8%
+      globalWeight: 0.08, // 8%
+      impacts: [
+        { type: "factory", weight: 0.35 },
+        { type: "lake", weight: 0.2 },
+      ],
+    },
+  };
+
+  const worldImpacts: worldImpactsType = {
+    fog: {
+      name: "fog",
+      value: 0,
+    },
+    lake: {
+      name: "lake",
+      value: 0,
+    },
+    farmhouse: {
+      name: "farmhouse",
+      value: 0,
+    },
+
+    fields: {
+      name: "fields",
+      value: 0,
+    },
+    sheeps: {
+      name: "sheeps",
+      value: 0,
+    },
+    chickens: {
+      name: "chickens",
+      value: 0,
     },
   };
 
@@ -83,26 +125,30 @@ export const useConfig = defineStore("useConfig", () => {
       normal: 1.2,
       best: 0.2,
     },
-    water: {
-      worst: 2.5,
-      normal: 1.2,
-      best: 0.5,
-    },
   };
 
-  const userConfig: Partial<userConfigParams> = {};
+  const userConfig: Partial<UserConfigType> = {};
 
   const worldStateSteps: any[] = [];
 
   const currentStep = ref<number>(0);
+
+  const isFormValidated = ref<boolean>(false);
+  const isTutoEnded = ref<boolean>(false);
+
+  const globalPercentage = ref<number>(0);
 
   return {
     formParams,
     userConfig,
     configParams,
     worldParams,
+    worldImpacts,
     worldStateSteps,
     objectsData,
     currentStep,
+    isFormValidated,
+    isTutoEnded,
+    globalPercentage,
   };
 });

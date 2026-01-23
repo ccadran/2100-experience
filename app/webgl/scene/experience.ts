@@ -1,4 +1,23 @@
+import * as THREE from "three";
 import gsap from "gsap";
+import { delay } from "../utils";
+import { useAudio } from "~/composables/useAudio";
+
+// camera sound
+const { playCamera } = useAudio();
+
+// couleurs du sol
+const healthy_color = new THREE.Color("#007411");
+const dry_color = new THREE.Color("#aaa245");
+
+import {
+  calculateParmasAssetsNumber,
+  hideElements,
+  hideInstanceChildren,
+  resetParmasAssets,
+  updateCity,
+} from "./elementsManager";
+import type { impactType } from "~/types/config";
 
 export async function moveToStep(target: number | "next" | "previous") {
   const worldStore = useWorld();
@@ -22,60 +41,146 @@ export async function moveToStep(target: number | "next" | "previous") {
   const currentStep = configStore.worldStateSteps[configStore.currentStep];
 
   const currentTemperature = currentStep.temperature;
+  updateGroundColor(currentTemperature);
+  updateCity(currentTemperature);
 
-  worldStore.sceneParts.forEach((part) => {
-    if (part.name.includes("group")) {
-      const firstChild = part.children[0];
-      console.log(firstChild);
+  const currentFogValue = currentStep.impacts.fog?.value || 0;
 
-      if (!firstChild) return;
+  if (worldStore.environment) {
+    worldStore.environment.updateSkyAndFog(
+      currentFogValue,
+      worldStore.cameraOverlay || undefined,
+    );
+  }
 
-      const currentState = getCurrentState(
-        firstChild.userData,
-        currentTemperature
-      );
+  worldStore.paramsParts.forEach((part) => {
+    const firstChild = part.children[0];
 
-      if (!currentState) return;
+    if (!firstChild) return;
+    console.log(part);
 
-      part.children.forEach((child) => {
-        if (child.name.includes(currentState)) {
+    const currentState = getCurrentState(
+      firstChild.userData.states,
+      currentTemperature,
+    );
+
+    if (!currentState) return;
+
+    part.children.forEach((child) => {
+      if (
+        child.name.includes(currentState) &&
+        child instanceof THREE.InstancedMesh
+      ) {
+        child.visible = true;
+        calculateParmasAssetsNumber(child);
+      } else {
+        child.visible = false;
+      }
+    });
+  });
+
+  Object.values(configStore.worldImpacts).forEach((impact) => {
+    console.log(impact.name);
+
+    updateImpact(impact.name, currentStep.impacts[impact.name].value);
+  });
+  await delay(500);
+  await uiStore.cloudsTransition?.hideClouds();
+}
+
+function updateImpact(
+  type:
+    | "fog"
+    | "lake"
+    | "farmhouse"
+    | "rocks"
+    | "fields"
+    | "sheeps"
+    | "chickens",
+  evolution: number,
+) {
+  const worldStore = useWorld();
+
+  switch (type) {
+    case "fog":
+      // worldStore.impactsParts.fog.update(evolution) //function de la classe fog
+      break;
+    case "fields":
+      const fieldsState = getLevel(evolution);
+
+      worldStore.impactsParts.fields?.children.forEach((child) => {
+        if (child.name.includes(fieldsState!)) {
           child.visible = true;
         } else {
           child.visible = false;
         }
       });
-    }
+      break;
+    case "sheeps":
+      updateImpactNumber({ name: "sheeps", value: evolution });
+      break;
+    case "chickens":
+      updateImpactNumber({ name: "chickens", value: evolution });
+      break;
+    case "lake":
+      const lakeState = getLevel(evolution);
 
-    //TODO regarder la hiérarchie du part.children.forEach
-    else if (part.name.includes("impact")) {
-      Object.entries(configStore.worldParams).forEach(([key, value]) => {
-        if (!part.name.includes(key)) return;
-
-        const paramValue = currentStep.params[key];
-
-        const levels = {
-          low: paramValue >= 25,
-          mid: paramValue >= 50,
-          high: paramValue >= 75,
-        };
-
-        part.children.forEach((child) => {
-          const level = Object.keys(levels).find((l) =>
-            child.name.includes(l)
-          ) as keyof typeof levels;
-          child.visible = level ? levels[level] : false;
-        });
+      worldStore.impactsParts.lake?.children.forEach((child) => {
+        if (child.name.includes(lakeState!)) {
+          child.visible = true;
+        } else {
+          child.visible = false;
+        }
       });
-    }
-  });
 
-  await uiStore.cloudsTransition?.hideClouds();
+      break;
+    case "farmhouse":
+      console.log("____________farmhouse case");
+
+      const farmhouseState = getLevel(evolution);
+      console.log("____________farmhouse case", farmhouseState);
+
+      worldStore.impactsParts.farmhouse?.children.forEach((child) => {
+        if (child.name.includes(farmhouseState!)) {
+          child.visible = true;
+        } else {
+          child.visible = false;
+        }
+      });
+      console.log(worldStore.impactsParts.farmhouse);
+
+      break;
+    default:
+      break;
+  }
+}
+
+function getLevel(evolution: number) {
+  if (evolution < 20) return "high";
+  if (evolution >= 20 && evolution < 75) return "mid";
+  if (evolution >= 75) return "low";
+}
+
+export function updateImpactNumber(impact: impactType) {
+  const worldStore = useWorld();
+
+  const targetInstancedMesh = worldStore.impactsParts[impact.name];
+
+  const targetInstances = Math.ceil(
+    (targetInstancedMesh.count / 100) * impact.value,
+  );
+
+  for (let i = 0; i < targetInstances; i++) {
+    hideInstanceChildren(targetInstancedMesh, i);
+  }
 }
 
 function getCurrentState(
   states: Record<string, number>,
-  temperature: number
+  temperature: number,
 ): string | null {
+  if (!states) return null;
+
   return (
     (Object.entries(states) as [string, number][])
       .sort(([, a], [, b]) => b - a)
@@ -83,34 +188,72 @@ function getCurrentState(
   );
 }
 
-export function handleCameraMovements(
-  direction: "forward" | "back" | "left" | "right",
-  strength: number
-) {
+// export function handleCameraZoom(value: number) {
+//   const worldStore = useWorld();
+//   worldStore.camera?.zoom(value);
+// }
+
+export function goToCameraSpot(index: number) {
+  playCamera();
   const worldStore = useWorld();
-
-  if (strength === 0) {
-    worldStore.camera?.stopMoving();
-    return;
-  }
-
-  switch (direction) {
-    case "forward":
-      worldStore.camera?.moveForward(strength);
-      break;
-    case "back":
-      worldStore.camera?.moveBack(strength);
-      break;
-    case "left":
-      worldStore.camera?.moveLeft(strength);
-      break;
-    case "right":
-      worldStore.camera?.moveRight(strength);
-      break;
-  }
+  worldStore.camera?.goToSpot(index);
 }
 
-export function handleCameraZoom(value: number) {
+export function resetExperience() {
+  const configStore = useConfig();
   const worldStore = useWorld();
-  worldStore.camera?.zoom(value);
+
+  configStore.isFormValidated = false;
+  configStore.userConfig = {};
+  configStore.worldStateSteps = [];
+  configStore.globalPercentage = 0;
+  configStore.currentStep = 0;
+
+  if (worldStore.environment) {
+    // On appelle la méthode qu'on vient de créer
+    // Tu peux passer 'true' ou changer la durée dans updateSkyAndFog si tu veux un reset instantané
+    worldStore.environment.updateSkyAndFog(0);
+  }
+
+  updateGroundColor(configStore.configParams.currentTemperature);
+  updateCity(configStore.configParams.currentTemperature);
+  console.log(worldStore.paramsParts);
+
+  worldStore.paramsParts.forEach((part) => {
+    part.children.forEach((child) => {
+      // console.log(child);
+
+      resetParmasAssets(child as THREE.InstancedMesh);
+    });
+  });
+
+  hideElements();
+
+  worldStore.camera?.goToSpot(0);
+}
+
+// couleur du sol via la temp
+function updateGroundColor(currentTemp: number) {
+  const worldStore = useWorld();
+  const configStore = useConfig();
+
+  if (!worldStore.ground) return;
+
+  const minTemp = configStore.configParams.minTemperature;
+  const maxTemp = configStore.configParams.maxTemperature;
+
+  let ratio = (currentTemp - minTemp) / (maxTemp - minTemp);
+  ratio = Math.max(0, Math.min(1, ratio));
+
+  const targetColor = new THREE.Color()
+    .copy(healthy_color)
+    .lerp(dry_color, ratio);
+
+  gsap.to((worldStore.ground.material as THREE.MeshStandardMaterial).color, {
+    r: targetColor.r,
+    g: targetColor.g,
+    b: targetColor.b,
+    duration: 1.5,
+    ease: "power2.inOut",
+  });
 }

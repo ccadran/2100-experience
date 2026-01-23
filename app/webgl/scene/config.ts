@@ -1,65 +1,157 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import type { userConfigParams } from "~/types/config";
+import type { UserConfigType } from "~/types/config";
 import Camera from "./Camera";
+import Environment from "./Environment";
 import { moveToStep } from "./experience";
-import gsap from "gsap";
+
+import {
+  hideElements,
+  setupAllImpacts,
+  setupDecorInstances,
+  setupParamsInstances,
+  updateCity,
+} from "./elementsManager";
 
 export function initScene(): Promise<void> {
   return new Promise((resolve, reject) => {
     const worldStore = useWorld();
-    const container = document.querySelector(".webgl");
+    const configStore = useConfig();
+    const container = document.querySelector(".scene");
     if (!container) return;
-
     const globalScene = new THREE.Scene();
-    globalScene.background = new THREE.Color(0xaaaaaa);
-    worldStore.globalScene = globalScene;
 
+    worldStore.globalScene = globalScene;
     worldStore.camera = new Camera();
+    globalScene.add(worldStore.camera.instance);
+
+    if (worldStore.camera.overlay) {
+      worldStore.cameraOverlay = markRaw(worldStore.camera.overlay);
+    }
 
     const canvas = container.querySelector("canvas");
     if (!canvas) return;
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     renderer.setSize(container.clientWidth, container.clientHeight);
 
-    const light = new THREE.DirectionalLight(0xffffff, 1);
-    light.position.set(5, 10, 7.5);
-    globalScene.add(light);
+    const environment = new Environment(globalScene, renderer);
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-    globalScene.add(ambientLight);
+    worldStore.skyContext = environment.getSkyContext();
+    worldStore.skyTexture = environment.getSkyTexture();
+    worldStore.skyMesh = markRaw(environment.getSkyMesh()!);
+    worldStore.hemiLight = markRaw(environment.getHemiLight());
+    worldStore.sunLight = markRaw(environment.getSunLight());
+    worldStore.environment = markRaw(environment);
+    if (environment.getPollutionCloud()) {
+      worldStore.pollutionCloud = markRaw(environment.getPollutionCloud()!);
+    }
 
     const loader = new GLTFLoader();
     loader.load(
       // "/3d/states.glb",
       // "/3d/2100-map__V1.glb",
-      "/3d/Map-V3-group.glb",
+      // "/3d/map.glb",
+      // "/3d/map-v10.glb",
+      "/3d/map-v30.glb",
+      // "/3d/map-spots.glb",
       (gltf: any) => {
-        gltf.scene.scale.set(0.1, 0.1, 0.1);
+        gltf.scene.scale.set(1, 1, 1);
+
+        gltf.scene.traverse((child: any) => {
+          // booster les mat des objets
+
+          if (child.isMesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+
+            if (child.material.map) {
+              child.material.map.colorSpace = THREE.SRGBColorSpace;
+            }
+
+            if (child.material.metalness > 0.5) child.material.metalness = 0.1;
+            child.material.roughness = 0.7;
+          }
+        });
+
         globalScene.add(gltf.scene);
 
-        const target = globalScene.getObjectByName("Scene");
+        // ground color
+        const groundMesh = gltf.scene.getObjectByName("ground");
+        if (groundMesh && groundMesh instanceof THREE.Mesh) {
+          groundMesh.material = groundMesh.material.clone();
+          groundMesh.material.color = new THREE.Color(0x007411);
+          worldStore.ground = markRaw(groundMesh);
+        }
 
-        worldStore.scene3d = target as THREE.Group;
+        const target = globalScene.getObjectByName("Scene");
+        worldStore.scene3d = markRaw(target as THREE.Group);
+
+        // spots pov
+        const spots = [
+          gltf.scene.getObjectByName("spot-1"),
+          gltf.scene.getObjectByName("spot-2"),
+          gltf.scene.getObjectByName("spot-3"),
+        ]
+          .filter(Boolean)
+          .map((s) => markRaw(s));
+        const lookAts = [
+          gltf.scene.getObjectByName("target-1"),
+          gltf.scene.getObjectByName("target-2"),
+          gltf.scene.getObjectByName("target-3"),
+        ]
+          .filter(Boolean)
+          .map((s) => markRaw(s));
+
+        if (worldStore.camera) {
+          worldStore.camera.setSpots(spots, lookAts);
+          worldStore.camera.goToSpot(0);
+        }
 
         const sceneChildrens = worldStore.scene3d?.children;
 
         sceneChildrens?.forEach((child) => {
-          if (child.name.includes("group") || child.name.includes("impact")) {
-            worldStore.sceneParts.push(child);
+          if (child.name.includes("group")) {
+            worldStore.paramsParts.push(markRaw(child));
+          } else if (child.name.includes("IMPACTS")) {
+            child.children.forEach((c) => {
+              if (c.name.includes("fields")) {
+                worldStore.impactsParts.fields = markRaw(c);
+              } else if (c.name.includes("lake")) {
+                worldStore.impactsParts.lake = markRaw(c);
+              } else if (c.name.includes("farm_buildings")) {
+                worldStore.impactsParts.farmhouse = markRaw(c);
+              }
+            });
           }
         });
-        setupInstances();
+        let meshCount = 0;
+        globalScene.traverse((object) => {
+          meshCount++;
+        });
+
+        setupParamsInstances();
+        // setupImpactsInstances();
+        // setupImpactsPool();
+        setupAllImpacts();
+        setupDecorInstances();
+        updateCity(configStore.configParams.currentTemperature);
         hideElements();
+
+        environment.initFog();
+        worldStore.fogControls = environment.getFogControls();
 
         resolve();
       },
       undefined,
-      reject
+      reject,
     );
 
     function animate() {
       requestAnimationFrame(animate);
+
+      if (worldStore.environment) {
+        worldStore.environment.tick();
+      }
 
       renderer.render(globalScene, worldStore.camera!.instance);
     }
@@ -75,220 +167,63 @@ export function initScene(): Promise<void> {
   });
 }
 
-function setupInstances() {
-  const worldStore = useWorld();
-
-  const allMeshes: Record<string, any> = {};
-  const targetGroups: Record<string, THREE.Group> = {};
-
-  //stock meshes in objects
-  worldStore.sceneParts.forEach((group) => {
-    allMeshes[group.name] = {};
-
-    if (!group.name.includes("group")) return;
-
-    group.children.forEach((child) => {
-      child.children.forEach((c) => {
-        if (c instanceof THREE.Mesh) {
-          c.visible = false;
-          if (c.name.includes("best")) {
-            stockMesh("best", c);
-          } else if (c.name.includes("normal")) {
-            stockMesh("normal", c);
-          } else if (c.name.includes("bad")) {
-            stockMesh("bad", c);
-          } else if (c.name.includes("worst")) {
-            stockMesh("worst", c);
-          }
-        }
-      });
-    });
-  });
-  worldStore.sceneParts = [];
-
-  //create instances
-  Object.values(allMeshes).forEach((meshesType) => {
-    Object.values(meshesType as THREE.Mesh[][]).forEach((meshGroup) => {
-      if (!meshGroup[0]) return;
-      const mesheNumbers = meshGroup.length;
-      const taregtGroup = meshGroup[0]?.parent?.parent?.name;
-      const targetType = meshGroup[0].name;
-
-      if (!taregtGroup) return;
-
-      if (!targetGroups[taregtGroup]) {
-        const newGroup = new THREE.Group();
-        newGroup.name = taregtGroup;
-        targetGroups[taregtGroup] = newGroup;
-        worldStore.scene3d?.add(newGroup);
-      }
-
-      const instancedMesh = new THREE.InstancedMesh(
-        meshGroup[0]?.geometry,
-        meshGroup[0]?.material,
-        mesheNumbers
-      );
-      instancedMesh.name = targetType;
-
-      if (worldStore.scene3d) worldStore.scene3d.updateMatrixWorld(true);
-
-      const parentMatrix = worldStore.scene3d!.matrixWorld;
-      const parentInverse = new THREE.Matrix4().copy(parentMatrix).invert();
-
-      const tempMatrix = new THREE.Matrix4();
-
-      for (let i = 0; i < mesheNumbers; i++) {
-        const ogObject = meshGroup[i];
-        if (!ogObject) continue;
-
-        ogObject.updateMatrixWorld();
-
-        tempMatrix.copy(ogObject.matrixWorld);
-        tempMatrix.premultiply(parentInverse);
-
-        instancedMesh.setMatrixAt(i, tempMatrix);
-      }
-
-      instancedMesh.instanceMatrix.needsUpdate = true;
-      instancedMesh.frustumCulled = false;
-
-      targetGroups[taregtGroup].add(instancedMesh);
-
-      //stock mesh in store object
-      worldStore.sceneMeshes[taregtGroup] = targetGroups[taregtGroup];
-      if (!worldStore.sceneParts.includes(targetGroups[taregtGroup])) {
-        worldStore.sceneParts.push(targetGroups[taregtGroup]);
-      }
-
-      //delete old meshes
-      meshGroup.forEach((mesh) => {
-        const parent = mesh.parent;
-        mesh.removeFromParent();
-
-        if (parent && parent.children.length === 0) {
-          parent.removeFromParent();
-        }
-      });
-      //DELETE THE BASE mesh
-      const objectsToRemove = [] as any[];
-
-      worldStore.scene3d?.traverse((o) => {
-        if (o.name.includes(mesheNumbers.toString())) {
-          objectsToRemove.push(o);
-        }
-      });
-    });
-  });
-
-  //TODO remove
-  // worldStore.sceneMeshes.trees_group?.children.forEach((c) => {
-  //   c.visible = c.name === "worst";
-  // });
-
-  /*functions*/
-
-  //stock mesh & create objects
-  function stockMesh(
-    type: "best" | "normal" | "bad" | "worst",
-    object: THREE.Mesh
-  ) {
-    if (!allMeshes[object.parent!.parent!.name][type]) {
-      allMeshes[object.parent!.parent!.name][type] = [];
-    }
-    allMeshes[object.parent!.parent!.name][type].push(object);
-  }
-
-  console.log(worldStore.sceneParts);
-}
-
-export function hideElements() {
-  const worldStore = useWorld();
-  worldStore.hiddenSceneParts = [];
-
-  Object.values(worldStore.sceneMeshes).forEach((meshGroup) => {
-    meshGroup.position.y = -10;
-
-    meshGroup.visible = false;
-    worldStore.hiddenSceneParts.push(meshGroup);
-  });
-}
-
-export function revealElements() {
-  const configStore = useConfig();
-  const worldStore = useWorld();
-
-  if (configStore.formParams.currentStep <= configStore.formParams.step) {
-    if (worldStore.hiddenSceneParts.length < 1) return;
-    const randIndex = Math.floor(
-      Math.random() * worldStore.hiddenSceneParts.length
-    );
-    worldStore.hiddenSceneParts[randIndex].visible = true;
-    gsap.to(worldStore.hiddenSceneParts[randIndex].position, {
-      y: 0,
-      duration: 1,
-      ease: "power2.inOut",
-    });
-    configStore.formParams.currentStep += 1;
-    worldStore.hiddenSceneParts.splice(randIndex, 1);
-  }
-}
-
-export function handleFormValidations(userData: userConfigParams) {
+export function handleFormValidations(userData: UserConfigType) {
   const uiStore = useUi();
   const configStore = useConfig();
   const finalUserData: any = {};
 
-  uiStore.isFormValidated = true;
+  configStore.isFormValidated = true;
+  configStore.formParams.currentStep = 0;
   const worldStore = useWorld();
-  worldStore.camera?.entryAnim();
+  // worldStore.camera?.entryAnim();
 
   Object.entries(userData).forEach(([key, value]) => {
     switch (key) {
       case "plane":
         finalUserData.plane = {
-          weight: configStore.worldParams[key].weight,
+          weight: configStore.worldParams[key].globalWeight,
           percentage: value,
         };
         break;
       case "transport":
         finalUserData.transport = {
-          weight: configStore.worldParams[key].weight,
+          weight: configStore.worldParams[key].globalWeight,
           percentage: value,
         };
         break;
       case "meat":
         finalUserData.meat = {
-          weight: configStore.worldParams[key].weight,
+          weight: configStore.worldParams[key].globalWeight,
           percentage: value,
         };
         break;
       case "promptIA":
         finalUserData.promptIA = {
-          weight: configStore.worldParams[key].weight,
+          weight: configStore.worldParams[key].globalWeight,
           percentage: value,
         };
         break;
       case "products":
         finalUserData.products = {
-          weight: configStore.worldParams[key].weight,
+          weight: configStore.worldParams[key].globalWeight,
           percentage: value,
         };
         break;
       case "phone":
         finalUserData.phone = {
-          weight: configStore.worldParams[key].weight,
+          weight: configStore.worldParams[key].globalWeight,
           percentage: value,
         };
         break;
       case "energy":
         finalUserData.energy = {
-          weight: configStore.worldParams[key].weight,
+          weight: configStore.worldParams[key].globalWeight,
           percentage: value,
         };
         break;
       case "clothes":
         finalUserData.clothes = {
-          weight: configStore.worldParams[key].weight,
+          weight: configStore.worldParams[key].globalWeight,
           percentage: value,
         };
         break;
@@ -314,7 +249,7 @@ function calculateExperienceSteps() {
   const stepYears: number[] = [currentYear];
 
   let nextYear = currentYear + yearsPerStep;
-  while (nextYear < targetYear - yearsPerStep) {
+  while (nextYear <= targetYear - yearsPerStep) {
     stepYears.push(nextYear);
     nextYear += yearsPerStep;
   }
@@ -334,6 +269,7 @@ function calculateExperienceSteps() {
 
     const worldState: any = {
       params: {},
+      impacts: {},
     };
     worldState.year = stepYears[i];
     Object.entries(configStore.userConfig).forEach(([key, value]) => {
@@ -343,6 +279,47 @@ function calculateExperienceSteps() {
       configStore.configParams.currentTemperature +
       progress *
         (targetTemperature - configStore.configParams.currentTemperature);
+
+    const currentWorldImpacts = {} as any;
+    Object.keys(configStore.worldImpacts).forEach((impactKey) => {
+      currentWorldImpacts[impactKey] = {
+        value: configStore.configParams.currentImpactValue,
+      };
+    });
+
+    Object.values(configStore.worldParams).forEach((param: any) => {
+      const userParam = (configStore.userConfig as any)[param.name];
+      const userGoalPercentage = userParam.percentage;
+      const pivot = configStore.configParams.pivotScore;
+
+      if (userGoalPercentage !== undefined) {
+        param.impacts.forEach((impact: any) => {
+          if (currentWorldImpacts[impact.type]) {
+            let finalContribution = 0;
+
+            if (userGoalPercentage > pivot) {
+              finalContribution = (userGoalPercentage - pivot) * impact.weight;
+            } else {
+              const improvementRatio = (pivot - userGoalPercentage) / pivot;
+
+              finalContribution =
+                -1 *
+                (improvementRatio *
+                  configStore.configParams.currentImpactValue *
+                  impact.weight);
+            }
+
+            currentWorldImpacts[impact.type].value +=
+              finalContribution * progress;
+
+            currentWorldImpacts[impact.type].value = parseFloat(
+              currentWorldImpacts[impact.type].value.toFixed(4),
+            );
+          }
+        });
+      }
+    });
+    worldState.impacts = currentWorldImpacts;
     worldStateSteps.push(worldState);
   }
   configStore.worldStateSteps = worldStateSteps;
@@ -353,25 +330,18 @@ function calculateMaxTemperature() {
   const configStore = useConfig();
 
   const globalPercentage = Object.entries(
-    configStore.userConfig
+    configStore.userConfig,
   ).reduce<number>((acc, [key, value]) => {
     const weight = value.weight;
     return acc + value.percentage * weight;
   }, 0);
+
+  configStore.globalPercentage = globalPercentage;
   let targetTemp: number;
   if (configStore.configParams.pivotScore >= globalPercentage) {
-    console.log("POLLUE PAS");
     const improvementRatio =
       (configStore.configParams.pivotScore - globalPercentage) /
       configStore.configParams.pivotScore;
-    console.log(improvementRatio);
-
-    console.log(
-      configStore.configParams.currentTemperature -
-        improvementRatio *
-          (configStore.configParams.currentTemperature -
-            configStore.configParams.minTemperature)
-    );
 
     targetTemp =
       configStore.configParams.currentTemperature -
@@ -398,20 +368,33 @@ function setupObjectsData() {
   const configStore = useConfig();
 
   const objectDataMap: Record<string, any> = {
-    trees: configStore.objectsData.trees,
-    bushes: configStore.objectsData.bushes,
+    tree: configStore.objectsData.trees,
+    bush: configStore.objectsData.bushes,
     flowers: configStore.objectsData.flowers,
-    water: configStore.objectsData.water,
+    // trees: configStore.objectsData.trees,
+    // bushes: configStore.objectsData.bushes,
+    // flowers: configStore.objectsData.flowers,
+    // water: configStore.objectsData.water,
   };
 
-  worldStore.sceneParts.forEach((scenePart) => {
+  worldStore.paramsParts.forEach((paramPart) => {
     const objectType = Object.keys(objectDataMap).find((key) =>
-      scenePart.name.includes(key)
+      paramPart.name.includes(key),
     );
 
     if (objectType) {
-      scenePart.children.forEach((child) => {
-        child.userData = objectDataMap[objectType];
+      paramPart.children.forEach((child) => {
+        if (child instanceof THREE.InstancedMesh) {
+          child.userData.states = objectDataMap[objectType];
+
+          let instancedMeshCountArray = [];
+          for (let i = 0; i < child.count; i++) {
+            instancedMeshCountArray.push(i);
+          }
+          instancedMeshCountArray.sort(() => Math.random() - 0.5);
+
+          child.userData.childrenArray = instancedMeshCountArray;
+        }
       });
     }
   });
