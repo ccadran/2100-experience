@@ -270,11 +270,11 @@ export function calculateParmasAssetsNumber(
   if (instancedMesh.name.includes("best")) {
     visibleInstancePercentage = 100 * randomMultiplier;
   } else if (instancedMesh.name.includes("normal")) {
-    visibleInstancePercentage = 75 * randomMultiplier;
+    visibleInstancePercentage = 85 * randomMultiplier;
   } else if (instancedMesh.name.includes("bad")) {
-    visibleInstancePercentage = 50 * randomMultiplier;
+    visibleInstancePercentage = 75 * randomMultiplier;
   } else if (instancedMesh.name.includes("worst")) {
-    visibleInstancePercentage = 25 * randomMultiplier;
+    visibleInstancePercentage = 65 * randomMultiplier;
   }
 
   const targetInstances = Math.round(
