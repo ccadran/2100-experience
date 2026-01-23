@@ -194,7 +194,9 @@ export function goToCameraSpot(index: number) {
   worldStore.camera?.goToSpot(index);
 }
 
-export function resetExperience() {
+export async function resetExperience() {
+  const uiStore = useUi();
+  await uiStore.cloudsTransition?.showClouds();
   const configStore = useConfig();
   const worldStore = useWorld();
 
@@ -225,6 +227,7 @@ export function resetExperience() {
   hideElements();
 
   worldStore.camera?.goToSpot(0);
+  await uiStore.cloudsTransition?.hideClouds();
 }
 
 // couleur du sol via la temp
