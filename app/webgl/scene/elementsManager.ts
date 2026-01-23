@@ -224,39 +224,41 @@ export function revealElements() {
   const configStore = useConfig();
   const worldStore = useWorld();
 
-  if (configStore.formParams.currentStep <= configStore.formParams.step) {
-    if (worldStore.hiddenSceneParts.length < 1) return;
+  if (configStore.formParams.currentStep >= configStore.formParams.step) return;
+  if (worldStore.hiddenSceneParts.length < 1) return;
 
-    if (configStore.formParams.currentStep === configStore.formParams.step) {
-      worldStore.hiddenSceneParts.forEach((part) => {
-        part.visible = true;
-        gsap.to(part.position, {
-          y: 0,
-          duration: 1,
-          ease: "power2.out",
-        });
-      });
-      worldStore.hiddenSceneParts = [];
-      return;
-    }
+  let stepsRemaining =
+    configStore.formParams.step - configStore.formParams.currentStep;
+  if (stepsRemaining < 1) stepsRemaining = 1;
+
+  const numberToReveal = Math.ceil(
+    worldStore.hiddenSceneParts.length / stepsRemaining,
+  );
+
+  for (let i = 0; i < numberToReveal; i++) {
+    if (worldStore.hiddenSceneParts.length === 0) break;
 
     const randIndex = Math.floor(
       Math.random() * worldStore.hiddenSceneParts.length,
     );
+    const partToReveal = worldStore.hiddenSceneParts[randIndex];
 
-    worldStore.hiddenSceneParts[randIndex].visible = true;
+    if (partToReveal) {
+      partToReveal.visible = true;
 
-    gsap.to(worldStore.hiddenSceneParts[randIndex].position, {
-      y: 0,
-      duration: 1,
-      ease: "power2.out",
-    });
+      gsap.to(partToReveal.position, {
+        y: 0,
+        duration: 1,
+        ease: "power2.out",
+        delay: i * 0.05,
+      });
 
-    configStore.formParams.currentStep += 1;
-    worldStore.hiddenSceneParts.splice(randIndex, 1);
+      worldStore.hiddenSceneParts.splice(randIndex, 1);
+    }
   }
-}
 
+  configStore.formParams.currentStep += 1;
+}
 /*___________INSTANCE CHILDRENS_________*/
 
 export function calculateParmasAssetsNumber(

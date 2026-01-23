@@ -52,7 +52,7 @@ export function initScene(): Promise<void> {
       // "/3d/2100-map__V1.glb",
       // "/3d/map.glb",
       // "/3d/map-v10.glb",
-      "/3d/map-v30.glb",
+      "/3d/map-v33.glb",
       // "/3d/map-spots.glb",
       (gltf: any) => {
         gltf.scene.scale.set(1, 1, 1);
@@ -368,13 +368,11 @@ function setupObjectsData() {
   const configStore = useConfig();
 
   const objectDataMap: Record<string, any> = {
-    tree: configStore.objectsData.trees,
-    bush: configStore.objectsData.bushes,
+    trees1: configStore.objectsData.trees1,
+    trees2: configStore.objectsData.trees2,
+    trees3: configStore.objectsData.trees3,
+    bushes: configStore.objectsData.bushes,
     flowers: configStore.objectsData.flowers,
-    // trees: configStore.objectsData.trees,
-    // bushes: configStore.objectsData.bushes,
-    // flowers: configStore.objectsData.flowers,
-    // water: configStore.objectsData.water,
   };
 
   worldStore.paramsParts.forEach((paramPart) => {
