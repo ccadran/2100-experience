@@ -207,7 +207,7 @@ function entryTimeline() {
   bottom: 0;
   > .timeline-mascot {
     position: fixed;
-    bottom: -13%;
+    bottom: -16%;
     width: 32vw;
     height: auto;
     left: -8%;
