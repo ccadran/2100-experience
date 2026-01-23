@@ -123,7 +123,7 @@ export function initScene(): Promise<void> {
               }
             });
           } else if (child.name.includes("City")) {
-            worldStore.sceneMeshes["city"] = child;
+            worldStore.sceneMeshes["city"] = markRaw(child);
           }
         });
         let meshCount = 0;

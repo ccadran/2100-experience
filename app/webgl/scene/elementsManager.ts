@@ -144,7 +144,7 @@ export function setupDecorInstances() {
     if (child.name.includes("DECORS")) {
       child.children.forEach((c) => {
         if (c.name.includes("instance")) {
-          instancesGroup.push(c);
+          instancesGroup.push(markRaw(c));
         }
       });
     }
@@ -208,13 +208,13 @@ export function hideElements() {
       meshGroup.name.includes("City")
     ) {
       meshGroup.position.y = -10;
-      worldStore.hiddenSceneParts.push(meshGroup);
+      worldStore.hiddenSceneParts.push(markRaw(meshGroup));
     } else {
       meshGroup.children.forEach((mesh) => {
         mesh.visible = false;
         if (mesh.name.includes("normal") || mesh.name.includes("mid")) {
           mesh.position.y = -10;
-          worldStore.hiddenSceneParts.push(mesh);
+          worldStore.hiddenSceneParts.push(markRaw(mesh));
         }
       });
     }
