@@ -21,6 +21,12 @@ export const useAmbient = () => {
             playGoodAmbient();
         }, 100);
     };
+
+    const resetAmbient = () => {
+        if (transitionTimeout) clearTimeout(transitionTimeout);
+        hasStarted.value = true;
+        playGoodAmbient();
+    }
     
     let transitionTimeout: NodeJS.Timeout | null = null;
     
@@ -42,5 +48,5 @@ export const useAmbient = () => {
         { flush: 'post' }
     );
     
-    return { startAmbient };
+    return { startAmbient, resetAmbient};
 };

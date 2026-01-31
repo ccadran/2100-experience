@@ -2,6 +2,7 @@ import * as THREE from "three";
 import gsap from "gsap";
 import { delay } from "../utils";
 import { useAudio } from "~/composables/useAudio";
+import { useAmbient } from '~/composables/useAmbient';
 
 // camera sound
 const { playCamera } = useAudio();
@@ -195,6 +196,9 @@ export function goToCameraSpot(index: number) {
 }
 
 export async function resetExperience() {
+  const { resetAmbient } = useAmbient();
+  console.log("experience resret");
+  resetAmbient();
   const uiStore = useUi();
   await uiStore.cloudsTransition?.showClouds();
   const configStore = useConfig();
