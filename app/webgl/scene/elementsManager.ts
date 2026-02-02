@@ -222,42 +222,43 @@ export function hideElements() {
 }
 
 export function revealElements() {
-  playReveal();
   const configStore = useConfig();
   const worldStore = useWorld();
 
-  if (configStore.formParams.currentStep >= configStore.formParams.step) return;
-  if (worldStore.hiddenSceneParts.length < 1) return;
+  const totalHidden = worldStore.hiddenSceneParts.length;
+  if (totalHidden === 0) return;
 
-  let stepsRemaining =
+  const stepsLeft =
     configStore.formParams.step - configStore.formParams.currentStep;
-  if (stepsRemaining < 1) stepsRemaining = 1;
 
-  const numberToReveal = Math.ceil(
-    worldStore.hiddenSceneParts.length / stepsRemaining,
-  );
+  let numberToReveal;
+
+  if (stepsLeft <= 1) {
+    numberToReveal = totalHidden;
+  } else {
+    numberToReveal = Math.ceil(totalHidden / stepsLeft);
+  }
 
   for (let i = 0; i < numberToReveal; i++) {
-    if (worldStore.hiddenSceneParts.length === 0) break;
+    const remaining = worldStore.hiddenSceneParts.length;
+    if (remaining === 0) break;
 
-    const randIndex = Math.floor(
-      Math.random() * worldStore.hiddenSceneParts.length,
-    );
+    const randIndex = Math.floor(Math.random() * remaining);
     const partToReveal = worldStore.hiddenSceneParts[randIndex];
 
     if (partToReveal) {
       partToReveal.visible = true;
-
       gsap.to(partToReveal.position, {
         y: 0,
         duration: 1,
         ease: "power2.out",
         delay: i * 0.05,
       });
-
       worldStore.hiddenSceneParts.splice(randIndex, 1);
     }
   }
+
+  if (numberToReveal > 0) playReveal();
 
   configStore.formParams.currentStep += 1;
 }
