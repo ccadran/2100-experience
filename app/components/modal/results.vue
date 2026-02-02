@@ -433,7 +433,10 @@ defineExpose({
       -4px 13px 14px 0 rgba(0, 0, 0, 0.01),
       -1px 3px 8px 0 rgba(0, 0, 0, 0.02);
     &.explanation {
-      align-items: end;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      display: flex;
     }
     > .title {
       overflow: hidden;
@@ -484,7 +487,7 @@ defineExpose({
       display: flex;
       flex-direction: column;
       gap: 3vh;
-      margin-bottom: 64px;
+      margin-bottom: 6.6vh;
       opacity: 0;
       .explanations-content {
         display: flex;
@@ -578,6 +581,9 @@ defineExpose({
         display: flex;
         justify-content: space-between;
         padding: 0 56px;
+        width: 100%;
+        position: absolute;
+        bottom: 64px;
         > .question-container {
           overflow: hidden;
           width: fit-content;

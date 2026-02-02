@@ -107,7 +107,7 @@ watch(
 </script>
 
 <template>
-  <!-- <Debug /> -->
+  <Debug />
   <main>
     <Intro ref="introRef" />
     <ModalPhone ref="modalPhone" />
