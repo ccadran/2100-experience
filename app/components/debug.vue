@@ -46,7 +46,7 @@ const userData = {
   promptIA: 55,
   products: 30,
   phone: 10,
-  energy: 100,
+  energy: 0,
   clothes: 90,
 };
 const currentExplanation = ref<number>(0);

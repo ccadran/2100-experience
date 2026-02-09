@@ -18,7 +18,6 @@ const isModal3revealed = ref<boolean>(false);
 const configStore = useConfig();
 
 function revealContainer() {
-
   gsap.set(modals.value!, { display: "flex" });
   return gsap
     .timeline({ defaults: { ease: "cubic-bezier(0.25, 0.95, 0, 1)" } })
@@ -47,7 +46,6 @@ function revealModal2() {
 }
 
 function revealModal3() {
-
   return gsap.fromTo(
     modal3.value!,
     { x: "150%", rotation: 0 },
@@ -143,7 +141,7 @@ defineExpose({ animConfigModals, hideModals });
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 60px;
+      padding: 3.125vw;
       background: var(
         --white-gradient,
         linear-gradient(
@@ -168,7 +166,7 @@ defineExpose({ animConfigModals, hideModals });
   }
   > .mascot {
     position: absolute;
-    top: -130%;
+    top: -18vw;
     width: 28vw;
     height: auto;
     aspect-ratio: 459/334;

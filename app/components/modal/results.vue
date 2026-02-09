@@ -557,6 +557,7 @@ defineExpose({
         > .explanation-illu {
           width: 48%;
           position: relative;
+          height: 100%;
           > .illu-container {
             border-radius: 48px;
             width: 100%;
@@ -589,7 +590,9 @@ defineExpose({
         padding: 0 56px;
         width: 100%;
         position: absolute;
-        bottom: 64px;
+        bottom: 6.6vh;
+        left: 50%;
+        transform: translateX(-50%);
         > .question-container {
           overflow: hidden;
           width: fit-content;

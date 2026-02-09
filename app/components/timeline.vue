@@ -18,14 +18,12 @@ const baseOffset = ref<number>(0);
 
 let lastTarget: number | null = null;
 
-
 const currentTemperature = computed(() => {
   if (!configStore.isFormValidated) return null;
   const step = uiStore.previewStep ?? configStore.currentStep;
   if (step == null) return null;
   return configStore.worldStateSteps[step]?.temperature + 27;
 });
-
 
 //video via temp
 
@@ -43,8 +41,6 @@ watch(isHot, (hot) => {
     gsap.to(coucouVideo.value, { opacity: 1, duration: 0.5 });
   }
 });
-
-
 
 watch(
   () => uiStore.previewStep ?? configStore.currentStep,
@@ -168,8 +164,24 @@ function entryTimeline() {
 <template>
   <div class="timeline-container">
     <div class="timeline-mascot">
-      <video ref="coucouVideo" src="/videos/3-coucou.webm" class="mascot-video mascot-video--base" :style="{ opacity: 1 }" autoplay loop muted></video>
-      <video ref="hotVideo" src="/videos/hot.webm" class="mascot-video mascot-video--overlay" :style="{ opacity: 0 }" autoplay loop muted></video>
+      <video
+        ref="coucouVideo"
+        src="/videos/3-coucou.webm"
+        class="mascot-video mascot-video--base"
+        :style="{ opacity: 1 }"
+        autoplay
+        loop
+        muted
+      ></video>
+      <video
+        ref="hotVideo"
+        src="/videos/hot.webm"
+        class="mascot-video mascot-video--overlay"
+        :style="{ opacity: 0 }"
+        autoplay
+        loop
+        muted
+      ></video>
     </div>
     <div class="timeline" ref="timeline">
       <div
@@ -207,7 +219,7 @@ function entryTimeline() {
   bottom: 0;
   > .timeline-mascot {
     position: fixed;
-    bottom: -13%;
+    bottom: -8vw;
     width: 32vw;
     height: auto;
     left: -8%;
@@ -231,7 +243,6 @@ function entryTimeline() {
       left: 0;
       height: 100%;
     }
-
   }
   .timeline {
     margin-left: 50%;
