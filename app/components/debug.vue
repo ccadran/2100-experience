@@ -29,26 +29,31 @@ function simulateWsCo() {
 //   energy: 0,
 //   clothes: 0,
 // };
-const userData = {
-  plane: 100,
-  transport: 100,
-  meat: 100,
-  promptIA: 100,
-  products: 100,
-  phone: 100,
-  energy: 100,
-  clothes: 100,
-};
 // const userData = {
 //   plane: 100,
 //   transport: 100,
-//   meat: 70,
-//   promptIA: 55,
-//   products: 30,
-//   phone: 10,
+//   meat: 100,
+//   promptIA: 100,
+//   products: 100,
+//   phone: 100,
 //   energy: 100,
-//   clothes: 90,
+//   clothes: 100,
 // };
+const userData = {
+  plane: 100,
+  transport: 100,
+  meat: 70,
+  promptIA: 55,
+  products: 30,
+  phone: 10,
+  energy: 100,
+  clothes: 90,
+};
+const currentExplanation = ref<number>(0);
+function changeExplanationQuestion() {
+  currentExplanation.value += 1;
+  uiStore.changeFocusedExplanationQuestion(currentExplanation.value);
+}
 </script>
 
 <template>
@@ -102,9 +107,7 @@ const userData = {
         <h2>RESULTS</h2>
         <button @click="uiStore.toggleModalResult()">Finish experience</button>
         <button @click="uiStore.showExplanations()">Show explanations</button>
-        <button @click="uiStore.changeFocusedExplanationQuestion(3)">
-          changeQuestions
-        </button>
+        <button @click="changeExplanationQuestion">changeQuestions</button>
         <button @click="uiStore.toggleModalResult()">closeResults</button>
         <button @click="resetExperience">reset experience</button>
       </div>

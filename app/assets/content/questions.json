@@ -37,7 +37,7 @@
     },
     "explanations": [
       {
-        "text": "%name se déplace principalement en %reponse. Ce choix réduit fortement les émissions de CO₂ liées aux trajets du quotidien.",
+        "text": "%name se déplace principalement à pieds. Ce choix réduit fortement les émissions de CO₂ liées aux trajets du quotidien.",
         "illustration": "/images/ilu2.png"
       },
       {
@@ -121,7 +121,7 @@
     },
     "explanations": [
       {
-        "text": "%name consomme principalement des produits %reponse. Cela limite les émissions liées au transport et à la production hors saison.",
+        "text": "%name consomme principalement des produits locaux. Cela limite les émissions liées au transport et à la production hors saison.",
         "illustration": "/images/ilu5.png"
       },
       {
