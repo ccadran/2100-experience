@@ -5,13 +5,12 @@ import Camera from "./Camera";
 import Environment from "./Environment";
 import { moveToStep } from "./experience";
 
+import { hideElements, updateCity } from "./elementsManager";
 import {
-  hideElements,
   setupAllImpacts,
   setupDecorInstances,
   setupParamsInstances,
-  updateCity,
-} from "./elementsManager";
+} from "./createInstances";
 
 export function initScene(): Promise<void> {
   return new Promise((resolve, reject) => {

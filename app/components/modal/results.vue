@@ -201,6 +201,7 @@ async function showExplanations() {
       0.15,
     );
 
+  changeQuestion(0);
   changeBackgroundFocus(0);
 }
 
@@ -252,12 +253,17 @@ async function changeQuestion(target: number) {
 
   currentQuestion.value = target;
 
-  const currentParam = questionsData[currentQuestion.value]?.params;
+  const currentParam = questionsData[currentQuestion.value]!.params;
 
   const percentageValue = userPercentages.value[currentParam] ?? 0;
 
   currentQuestionUserRanking.value = Math.round(
     (percentageValue / 100) * (rankingIcons.length - 1),
+  );
+  console.log(
+    "TEST_____",
+    userPercentages.value[currentParam],
+    currentQuestionUserRanking.value,
   );
 
   currentQuestionUserExplanation.value = Math.round(
