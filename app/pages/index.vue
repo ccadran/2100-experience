@@ -82,7 +82,7 @@ watch(
     if (newValue) {
       await delay(1000);
       introRef.value.revealMap();
-      await delay(1400);
+      await delay(4000);
       await modalPhone.value.animModal();
     }
   },

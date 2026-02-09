@@ -78,13 +78,12 @@ function hideModals() {
 }
 
 async function animConfigModals() {
-  await delay(1000);
   if (configStore?.isFormValidated) return;
   await revealContainer();
-  await delay(5000);
+  await delay(8000);
   if (configStore?.isFormValidated) return;
   await revealModal2();
-  await delay(5000);
+  await delay(8000);
   if (configStore?.isFormValidated) return;
   await revealModal3();
 }
