@@ -41,11 +41,7 @@
         "illustration": "/images/ilu2.png"
       },
       {
-        "text": "%name alterne entre voiture et modes de transport plus sobres. Son impact reste intermédiaire, mais peut encore être réduit.",
-        "illustration": "/images/ilu2.png"
-      },
-      {
-        "text": "%name utilise majoritairement la voiture pour ses déplacements. Cela génère des émissions importantes, surtout sur les trajets courts.",
+        "text": "%name utilise majoritairement les transports en commun pour ses déplacements. Cela génère des émissions importantes, surtout sur les trajets courts.",
         "illustration": "/images/ilu2.png"
       },
       {

@@ -41,7 +41,7 @@ function simulateWsCo() {
 // };
 const userData = {
   plane: 100,
-  transport: 100,
+  transport: 66,
   meat: 70,
   promptIA: 55,
   products: 30,
