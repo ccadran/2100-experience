@@ -201,7 +201,7 @@ async function showExplanations() {
       0.15,
     );
 
-  changeQuestion(0);
+  calculateCurrentRanking(0);
   changeBackgroundFocus(0);
 }
 
@@ -245,31 +245,12 @@ watch(
 async function changeQuestion(target: number) {
   const currentBg =
     questionsList.value[currentQuestion.value]?.querySelector(".background");
+  await calculateCurrentRanking(target);
 
   await gsap
     .timeline()
     .to(".explanations-content", { opacity: 0 })
     .to(currentBg, { opacity: 0 });
-
-  currentQuestion.value = target;
-
-  const currentParam = questionsData[currentQuestion.value]!.params;
-
-  const percentageValue = userPercentages.value[currentParam] ?? 0;
-
-  currentQuestionUserRanking.value = Math.round(
-    (percentageValue / 100) * (rankingIcons.length - 1),
-  );
-  console.log(
-    "TEST_____",
-    userPercentages.value[currentParam],
-    currentQuestionUserRanking.value,
-  );
-
-  currentQuestionUserExplanation.value = Math.round(
-    (percentageValue / 100) *
-      (questionsData[currentQuestion.value]?.explanations.length - 1 || 0),
-  );
 
   await nextTick();
 
@@ -287,6 +268,23 @@ async function changeQuestion(target: number) {
       { scale: 1, opacity: 1, ease: "elastic.out(0.65,0.5)", duration: 0.7 },
       0.65,
     );
+}
+
+async function calculateCurrentRanking(target: number) {
+  currentQuestion.value = target;
+
+  const currentParam = questionsData[currentQuestion.value]!.params;
+
+  const percentageValue = userPercentages.value[currentParam] ?? 0;
+
+  currentQuestionUserRanking.value = Math.round(
+    (percentageValue / 100) * (rankingIcons.length - 1),
+  );
+
+  currentQuestionUserExplanation.value = Math.round(
+    (percentageValue / 100) *
+      (questionsData[currentQuestion.value]?.explanations.length - 1 || 0),
+  );
 }
 
 //attendre img chargement
