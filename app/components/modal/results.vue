@@ -245,12 +245,11 @@ watch(
 async function changeQuestion(target: number) {
   const currentBg =
     questionsList.value[currentQuestion.value]?.querySelector(".background");
-  await calculateCurrentRanking(target);
-
   await gsap
     .timeline()
     .to(".explanations-content", { opacity: 0 })
     .to(currentBg, { opacity: 0 });
+  await calculateCurrentRanking(target);
 
   await nextTick();
 
