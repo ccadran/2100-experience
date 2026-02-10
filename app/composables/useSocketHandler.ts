@@ -22,7 +22,7 @@ export function useSocketHandler() {
   // Gestion du changement d'année avec délai
   let pendingYear: number | null = null;
   let yearValidationTimeout: ReturnType<typeof setTimeout> | null = null;
-  const YEAR_VALIDATION_DELAY = 2000;
+  const YEAR_VALIDATION_DELAY = 500;
 
   function handleIncomingPayload(payload: IncomingPayload) {
     console.log("Incoming payload:", payload);
@@ -84,7 +84,7 @@ export function useSocketHandler() {
 
       /*------- EXPERIENCE END -------*/
       case "END_EXPERIENCE":
-        uiStore.showModalResult(); 
+        uiStore.showModalResult();
         console.log(uiStore.isModalResultShown);
         console.log("Payload → END_EXPERIENCE");
         break;
