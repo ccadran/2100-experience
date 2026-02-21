@@ -86,16 +86,13 @@ export function setupInstances() {
         sourceInstance.children.length,
       );
 
-      //placer dans impactsParts avec la bonne clé
-      // console.log(worldStore.impactsParts);
       const matchingKey = Object.keys(worldStore.impactsParts).find((k) =>
         instanceName.includes(k),
       );
-      console.log(worldStore.impactsParts);
 
-      console.log(worldStore.impactsParts[matchingKey]);
-
-      // worldStore.impactsParts[matchingKey!] = markRaw(instance);
+      worldStore.impactsParts[
+        matchingKey as keyof typeof worldStore.impactsParts
+      ] = markRaw(instance);
 
       worldStore.sceneMeshes[instanceName] = markRaw(instance);
     } else {
@@ -106,16 +103,28 @@ export function setupInstances() {
         sourceInstance.children as THREE.Mesh[],
         instanceName,
         sourceInstance.children.length,
+        true,
       );
-      worldStore.scene3d?.add(instance);
+
+      sourceInstance.parent?.add(instance);
+
+      // worldStore.scene3d?.add(instance);
     }
   });
+
+  //delete sources
+  // sourceInstances.forEach((source) => {
+  //   source.removeFromParent();
+  // });
+  //delete base mesh (scene center)
+  deleteBaseMeshes();
 }
 
 function createInstances(
   meshes: THREE.Mesh[],
   name: string,
   meshNumbers: number,
+  log?: boolean,
 ) {
   const worldStore = useWorld();
 
@@ -124,6 +133,10 @@ function createInstances(
     meshes[0]?.material,
     meshNumbers,
   );
+  if (log) {
+    console.log(instancedMesh);
+  }
+
   instancedMesh.name = name;
 
   if (worldStore.scene3d) worldStore.scene3d.updateMatrixWorld(true);
@@ -146,7 +159,7 @@ function createInstances(
   }
 
   instancedMesh.instanceMatrix.needsUpdate = true;
-  instancedMesh.frustumCulled = false;
+  instancedMesh.frustumCulled = true;
   instancedMesh.castShadow = true;
   instancedMesh.userData.originalMatrix = instancedMesh.instanceMatrix.clone();
   // console.log("___________", instancedMesh.userData);
@@ -160,209 +173,20 @@ function createInstances(
       parent.removeFromParent();
     }
   });
-  //DELETE THE BASE mesh
-  worldStore.globalScene?.traverse((o) => {
-    if (o instanceof THREE.Mesh) {
-      if (
-        o.name.includes("normal") ||
-        o.name.includes("bad") ||
-        o.name.includes("worst") ||
-        o.name.includes("best")
-      ) {
-        o.visible = false;
-      }
-    }
-  });
 
   return instancedMesh;
 }
 
-export function setupParamsInstances() {
+function deleteBaseMeshes() {
   const worldStore = useWorld();
-
-  const allMeshes: Record<string, any> = {};
-  const targetGroups: Record<string, THREE.Group> = {};
-
-  //stock meshes in objects
-  worldStore.paramsParts.forEach((group) => {
-    allMeshes[group.name] = {};
-
-    if (!group.name.includes("group")) return;
-
-    group.children.forEach((child) => {
-      child.children.forEach((c) => {
-        if (c instanceof THREE.Mesh) {
-          c.visible = false;
-          if (c.name.includes("best")) {
-            stockMesh("best", c);
-          } else if (c.name.includes("normal")) {
-            stockMesh("normal", c);
-          } else if (c.name.includes("bad")) {
-            stockMesh("bad", c);
-          } else if (c.name.includes("worst")) {
-            stockMesh("worst", c);
-          }
-        }
-      });
-    });
-  });
-  worldStore.paramsParts = [];
-
-  //create instances
-  Object.values(allMeshes).forEach((meshesType) => {
-    Object.values(meshesType as THREE.Mesh[][]).forEach((meshGroup) => {
-      if (!meshGroup[0]) return;
-      const mesheNumbers = meshGroup.length;
-      const targetGroup = meshGroup[0]?.parent?.parent?.name;
-      const targetType = meshGroup[0].name;
-
-      if (!targetGroup) return;
-
-      if (!targetGroups[targetGroup]) {
-        const newGroup = new THREE.Group();
-        newGroup.name = targetGroup;
-        targetGroups[targetGroup] = newGroup;
-        worldStore.scene3d?.add(newGroup);
-      }
-
-      const instancedMesh = new THREE.InstancedMesh(
-        meshGroup[0]?.geometry,
-        meshGroup[0]?.material,
-        mesheNumbers,
-      );
-      instancedMesh.name = targetType;
-
-      if (worldStore.scene3d) worldStore.scene3d.updateMatrixWorld(true);
-
-      const parentMatrix = worldStore.scene3d!.matrixWorld;
-      const parentInverse = new THREE.Matrix4().copy(parentMatrix).invert();
-
-      const tempMatrix = new THREE.Matrix4();
-
-      for (let i = 0; i < mesheNumbers; i++) {
-        const ogObject = meshGroup[i];
-        if (!ogObject) continue;
-
-        ogObject.updateMatrixWorld();
-
-        tempMatrix.copy(ogObject.matrixWorld);
-        tempMatrix.premultiply(parentInverse);
-
-        instancedMesh.setMatrixAt(i, tempMatrix);
-      }
-
-      instancedMesh.instanceMatrix.needsUpdate = true;
-      instancedMesh.frustumCulled = false;
-      instancedMesh.castShadow = true;
-      instancedMesh.userData.originalMatrix =
-        instancedMesh.instanceMatrix.clone();
-      // console.log("___________", instancedMesh.userData);
-
-      targetGroups[targetGroup].add(instancedMesh);
-
-      //stock mesh in store object
-      worldStore.sceneMeshes[targetGroup] = markRaw(targetGroups[targetGroup]);
-      if (!worldStore.paramsParts.includes(targetGroups[targetGroup])) {
-        worldStore.paramsParts.push(markRaw(targetGroups[targetGroup]));
-      }
-
-      //delete old meshes
-      meshGroup.forEach((mesh) => {
-        const parent = mesh.parent;
-        mesh.removeFromParent();
-
-        if (parent && parent.children.length === 0) {
-          parent.removeFromParent();
-        }
-      });
-      //DELETE THE BASE mesh
-      worldStore.globalScene?.traverse((o) => {
-        if (o instanceof THREE.Mesh) {
-          if (
-            o.name.includes("normal") ||
-            o.name.includes("bad") ||
-            o.name.includes("worst") ||
-            o.name.includes("best")
-          ) {
-            o.visible = false;
-          }
-        }
-      });
-    });
-  });
-
-  /*functions*/
-
-  //stock mesh & create objects
-  function stockMesh(
-    type: "best" | "normal" | "bad" | "worst",
-    object: THREE.Mesh,
-  ) {
-    if (!allMeshes[object.parent!.parent!.name][type]) {
-      allMeshes[object.parent!.parent!.name][type] = [];
+  worldStore.globalScene?.traverse((o) => {
+    if (
+      o.name.includes("normal") ||
+      o.name.includes("bad") ||
+      o.name.includes("worst") ||
+      o.name.includes("best")
+    ) {
+      o.visible = false;
     }
-    allMeshes[object.parent!.parent!.name][type].push(object);
-  }
-}
-
-export function setupDecorInstances() {
-  const worldStore = useWorld();
-
-  const instancesGroup: THREE.Object3D[] = [];
-
-  worldStore.globalScene?.traverse((child) => {
-    if (child.name.includes("DECORS")) {
-      child.children.forEach((c) => {
-        if (c.name.includes("instance")) {
-          instancesGroup.push(markRaw(c));
-        }
-      });
-    }
-  });
-
-  instancesGroup.forEach((group) => {
-    const firstChild = group.children[0] as THREE.Mesh;
-
-    const instancedMesh = new THREE.InstancedMesh(
-      firstChild.geometry,
-      firstChild.material,
-      group.children.length,
-    );
-    instancedMesh.name = group.name;
-
-    if (worldStore.scene3d) worldStore.scene3d.updateMatrixWorld(true);
-
-    const parentMatrix = worldStore.scene3d!.matrixWorld;
-    const parentInverse = new THREE.Matrix4().copy(parentMatrix).invert();
-
-    const tempMatrix = new THREE.Matrix4();
-
-    for (let i = 0; i < group.children.length; i++) {
-      const ogObject = group.children[i];
-
-      if (!ogObject) continue;
-
-      ogObject.updateMatrixWorld();
-
-      tempMatrix.copy(ogObject.matrixWorld);
-      tempMatrix.premultiply(parentInverse);
-
-      instancedMesh.setMatrixAt(i, tempMatrix);
-    }
-
-    instancedMesh.instanceMatrix.needsUpdate = true;
-    instancedMesh.frustumCulled = true;
-    instancedMesh.castShadow = true;
-
-    worldStore.globalScene!.add(instancedMesh);
-
-    group.children.forEach((mesh) => {
-      const parent = mesh.parent;
-      mesh.removeFromParent();
-
-      if (parent && parent.children.length === 0) {
-        parent.removeFromParent();
-      }
-    });
   });
 }
