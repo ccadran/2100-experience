@@ -2,6 +2,181 @@ import * as THREE from "three";
 import gsap from "gsap";
 import { updateImpactNumber } from "./experience";
 
+export function setupInstances() {
+  const worldStore = useWorld();
+  const sourceInstances = <THREE.Object3D[]>[];
+
+  worldStore.scene3d?.traverse((o) => {
+    if (o.name.includes("instances")) {
+      sourceInstances.push(o);
+    }
+  });
+  sourceInstances.forEach((sourceInstance) => {
+    if (sourceInstance.name.includes("group")) {
+      const splitName = sourceInstance.name.split("-");
+      const groupName = splitName[0]!;
+      const sortedStates: Record<string, THREE.Mesh[]> = {
+        best: [],
+        bad: [],
+        normal: [],
+        worst: [],
+      };
+      const newGroup = new THREE.Group();
+      newGroup.name = groupName;
+      worldStore.scene3d?.add(newGroup);
+      sourceInstance.children.forEach((child) => {
+        child.children.forEach((c) => {
+          if (c.name.includes("best")) {
+            sortedStates.best?.push(c as THREE.Mesh);
+          } else if (c.name.includes("normal")) {
+            sortedStates.normal?.push(c as THREE.Mesh);
+          } else if (c.name.includes("bad")) {
+            sortedStates.bad?.push(c as THREE.Mesh);
+          } else if (c.name.includes("worst")) {
+            sortedStates.worst?.push(c as THREE.Mesh);
+          }
+        });
+      });
+
+      // console.log(sortedStates);
+      Object.entries(sortedStates).forEach((state) => {
+        const instance = createInstances(state[1], state[0], state[1].length);
+        newGroup.add(instance);
+      });
+      worldStore.sceneMeshes[groupName] = markRaw(newGroup);
+
+      worldStore.paramsParts.push(markRaw(newGroup));
+    } else if (sourceInstance.name.includes("states")) {
+      const splitName = sourceInstance.name.split("-");
+      const groupName = splitName[0]!;
+      const sortedStates: Record<string, THREE.Mesh[]> = {
+        high: [],
+        mid: [],
+        low: [],
+      };
+      const newGroup = new THREE.Group();
+      newGroup.name = groupName;
+
+      sourceInstance.parent?.add(newGroup);
+      sourceInstance.children.forEach((child) => {
+        child.children.forEach((c) => {
+          if (c.name.includes("high")) {
+            sortedStates.high?.push(c as THREE.Mesh);
+          } else if (c.name.includes("low")) {
+            sortedStates.low?.push(c as THREE.Mesh);
+          } else if (c.name.includes("mid")) {
+            sortedStates.mid?.push(c as THREE.Mesh);
+          }
+        });
+      });
+
+      Object.entries(sortedStates).forEach((state) => {
+        const instance = createInstances(state[1], state[0], state[1].length);
+        newGroup.add(instance);
+      });
+
+      worldStore.sceneMeshes[groupName] = markRaw(newGroup);
+    } else if (sourceInstance.name.includes("pool")) {
+      const splitName = sourceInstance.name.split("-");
+      const instanceName = splitName[0]!;
+
+      const instance = createInstances(
+        sourceInstance.children as THREE.Mesh[],
+        instanceName,
+        sourceInstance.children.length,
+      );
+
+      //placer dans impactsParts avec la bonne clé
+      // console.log(worldStore.impactsParts);
+      const matchingKey = Object.keys(worldStore.impactsParts).find((k) =>
+        instanceName.includes(k),
+      );
+      console.log(worldStore.impactsParts);
+
+      console.log(worldStore.impactsParts[matchingKey]);
+
+      // worldStore.impactsParts[matchingKey!] = markRaw(instance);
+
+      worldStore.sceneMeshes[instanceName] = markRaw(instance);
+    } else {
+      const splitName = sourceInstance.name.split("-");
+      const instanceName = splitName[0]!;
+
+      const instance = createInstances(
+        sourceInstance.children as THREE.Mesh[],
+        instanceName,
+        sourceInstance.children.length,
+      );
+      worldStore.scene3d?.add(instance);
+    }
+  });
+}
+
+function createInstances(
+  meshes: THREE.Mesh[],
+  name: string,
+  meshNumbers: number,
+) {
+  const worldStore = useWorld();
+
+  const instancedMesh = new THREE.InstancedMesh(
+    meshes[0]?.geometry,
+    meshes[0]?.material,
+    meshNumbers,
+  );
+  instancedMesh.name = name;
+
+  if (worldStore.scene3d) worldStore.scene3d.updateMatrixWorld(true);
+
+  const parentMatrix = worldStore.scene3d!.matrixWorld;
+  const parentInverse = new THREE.Matrix4().copy(parentMatrix).invert();
+
+  const tempMatrix = new THREE.Matrix4();
+
+  for (let i = 0; i < meshNumbers; i++) {
+    const ogObject = meshes[i];
+    if (!ogObject) continue;
+
+    ogObject.updateMatrixWorld();
+
+    tempMatrix.copy(ogObject.matrixWorld);
+    tempMatrix.premultiply(parentInverse);
+
+    instancedMesh.setMatrixAt(i, tempMatrix);
+  }
+
+  instancedMesh.instanceMatrix.needsUpdate = true;
+  instancedMesh.frustumCulled = false;
+  instancedMesh.castShadow = true;
+  instancedMesh.userData.originalMatrix = instancedMesh.instanceMatrix.clone();
+  // console.log("___________", instancedMesh.userData);
+
+  //delete old meshes
+  meshes.forEach((mesh) => {
+    const parent = mesh.parent;
+    mesh.removeFromParent();
+
+    if (parent && parent.children.length === 0) {
+      parent.removeFromParent();
+    }
+  });
+  //DELETE THE BASE mesh
+  worldStore.globalScene?.traverse((o) => {
+    if (o instanceof THREE.Mesh) {
+      if (
+        o.name.includes("normal") ||
+        o.name.includes("bad") ||
+        o.name.includes("worst") ||
+        o.name.includes("best")
+      ) {
+        o.visible = false;
+      }
+    }
+  });
+
+  return instancedMesh;
+}
+
 export function setupParamsInstances() {
   const worldStore = useWorld();
 
@@ -190,229 +365,4 @@ export function setupDecorInstances() {
       }
     });
   });
-}
-
-export function setupAllImpacts() {
-  const worldStore = useWorld();
-
-  const allMeshes: Record<string, Record<string, THREE.Mesh[]>> = {};
-
-  const impactNamesMap: Record<string, string> = {};
-  const keysToRemove: string[] = [];
-
-  // =========================================================
-  // ÉTAPE 1 : COLLECTE DES "STATES" (Inchangé)
-  // =========================================================
-  Object.entries(worldStore.impactsParts).forEach(([key, value]) => {
-    if (!value) return;
-
-    if (value.name.includes("states-instances")) {
-      keysToRemove.push(key);
-      const impactName = key;
-      impactNamesMap[value.name] = impactName;
-      if (!allMeshes[value.name]) allMeshes[value.name] = {};
-
-      value.children.forEach((child: any) => {
-        child.children.forEach((c: any) => {
-          if (c instanceof THREE.Mesh) {
-            c.visible = false;
-            if (c.name.includes("high")) stockMesh(value.name, "high", c);
-            else if (c.name.includes("mid")) stockMesh(value.name, "mid", c);
-            else if (c.name.includes("low")) stockMesh(value.name, "low", c);
-          }
-        });
-      });
-    } else if (value.name.includes("states-raw")) {
-      const impactName = key;
-      impactNamesMap[value.name] = impactName;
-
-      value.children.forEach((child: any) => {
-        // if (child instanceof THREE.Mesh) {
-        if (child.name.includes("high") || child.name.includes("low")) {
-          child.visible = false;
-        } else if (child.name.includes("mid")) {
-          child.visible = true;
-        }
-        // }
-      });
-      worldStore.sceneMeshes[value.name] = markRaw(value);
-    }
-  });
-
-  // =========================================================
-  // ÉTAPE 2 : COLLECTE DES "POOLS" (Inchangé)
-  // =========================================================
-  worldStore.globalScene?.traverse((child) => {
-    if (child.name.includes("IMPACTS")) {
-      child.children.forEach((group) => {
-        if (group.name.includes("pool")) {
-          if (!allMeshes[group.name]) allMeshes[group.name] = {};
-
-          const matchingKey = Object.keys(worldStore.impactsParts).find((k) =>
-            group.name.includes(k),
-          );
-
-          if (matchingKey) impactNamesMap[group.name] = matchingKey;
-
-          group.children.forEach((mesh) => {
-            if (mesh instanceof THREE.Mesh) {
-              stockMesh(group.name, "default", mesh);
-            }
-          });
-
-          //  updateImpactNumber ({
-          //     name: matchingKey as impactType["name"],
-          //     value: 0.2,
-          //   });
-        }
-      });
-    }
-  });
-
-  // =========================================================
-  // ÉTAPE 3 : NETTOYAGE DU STORE (Inchangé)
-  // =========================================================
-  keysToRemove.forEach((key) => delete worldStore.impactsParts[key]);
-
-  // =========================================================
-  // ÉTAPE 4 : GÉNÉRATION INTELLIGENTE (Group VS InstancedMesh)
-  // =========================================================
-
-  if (worldStore.scene3d) worldStore.scene3d.updateMatrixWorld(true);
-  const parentMatrix = worldStore.scene3d!.matrixWorld;
-  const parentInverse = new THREE.Matrix4().copy(parentMatrix).invert();
-  const tempMatrix = new THREE.Matrix4();
-
-  Object.entries(allMeshes).forEach(([groupName, meshesByType]) => {
-    const logicalName = impactNamesMap[groupName] || groupName;
-    const meshTypes = Object.keys(meshesByType);
-
-    // DÉCISION : Est-ce un Pool (Direct) ou un State (Group) ?
-    // Si on a un seul type et que c'est "default", on considère que c'est un Pool simple.
-    const isSimplePool = meshTypes.length === 1 && meshTypes[0] === "default";
-
-    let finalObject: THREE.Object3D;
-
-    if (isSimplePool) {
-      // --- CAS A : POOL (Direct InstancedMesh) ---
-      const meshList = meshesByType["default"];
-
-      const instancedMesh = createInstancedMeshFromList(
-        meshList,
-        groupName,
-        "default",
-      );
-
-      // On nomme l'instance directement avec le nom logique (ex: "forest")
-      instancedMesh.name = logicalName;
-      instancedMesh.castShadow = true;
-
-      worldStore.scene3d?.add(instancedMesh);
-      finalObject = instancedMesh;
-    } else {
-      // --- CAS B : STATES (Group Container avec LODs) ---
-      const group = new THREE.Group();
-      group.name = logicalName;
-
-      Object.entries(meshesByType).forEach(([type, meshList]) => {
-        const instancedMesh = createInstancedMeshFromList(
-          meshList,
-          groupName,
-          type,
-        );
-        group.add(instancedMesh);
-        instancedMesh.castShadow = true;
-      });
-
-      worldStore.scene3d?.add(group);
-      finalObject = group;
-    }
-
-    // =========================================================
-    // ÉTAPE 5 : STOCKAGE FINAL
-    // =========================================================
-
-    // 1. Stockage technique
-    worldStore.sceneMeshes[groupName] = markRaw(finalObject);
-
-    // 2. Stockage logique (Store)
-    const storeKey = impactNamesMap[groupName];
-
-    if (storeKey) {
-      if (!worldStore.impactsParts[storeKey]) {
-        worldStore.impactsParts[storeKey] = markRaw(finalObject);
-      }
-    } else {
-      if (!worldStore.impactsParts[groupName]) {
-        worldStore.impactsParts[groupName] = markRaw(finalObject);
-      }
-    }
-    if (isSimplePool && storeKey) {
-      updateImpactNumber({
-        name: storeKey as impactType["name"],
-        value: 20,
-      });
-    }
-  });
-
-  cleanupSceneArtifacts(worldStore);
-
-  /* --- HELPER FUNCTION POUR EVITER LA DUPLICATION DE CODE --- */
-  function createInstancedMeshFromList(
-    meshList: THREE.Mesh[],
-    groupName: string,
-    type: string,
-  ) {
-    if (!meshList || meshList.length === 0)
-      return new THREE.InstancedMesh(undefined, undefined, 0);
-
-    const count = meshList.length;
-    const geometry = meshList[0].geometry;
-    const material = meshList[0].material;
-
-    const instancedMesh = new THREE.InstancedMesh(geometry, material, count);
-    // Si c'est un pool simple, le nom sera écrasé par logicalName plus haut, sinon ça garde ce format
-    instancedMesh.name = `${groupName}_${type}`;
-
-    for (let i = 0; i < count; i++) {
-      const original = meshList[i];
-      original.updateMatrixWorld();
-
-      tempMatrix.copy(original.matrixWorld);
-      tempMatrix.premultiply(parentInverse);
-      instancedMesh.setMatrixAt(i, tempMatrix);
-    }
-
-    instancedMesh.instanceMatrix.needsUpdate = true;
-    instancedMesh.frustumCulled = true;
-
-    // Nettoyage des originaux
-    meshList.forEach((mesh) => {
-      const parent = mesh.parent;
-      mesh.removeFromParent();
-      if (parent && parent.children.length === 0) parent.removeFromParent();
-    });
-
-    return instancedMesh;
-  }
-
-  /* --- UTILITAIRES --- */
-  function stockMesh(groupName: string, type: string, mesh: THREE.Mesh) {
-    if (!allMeshes[groupName][type]) allMeshes[groupName][type] = [];
-    allMeshes[groupName][type].push(mesh);
-  }
-
-  function cleanupSceneArtifacts(store: any) {
-    store.globalScene?.traverse((o: any) => {
-      if (o instanceof THREE.Mesh) {
-        if (
-          ["normal", "bad", "worst", "best", "high", "mid", "low"].some((tag) =>
-            o.name.includes(tag),
-          )
-        ) {
-          o.visible = false;
-        }
-      }
-    });
-  }
 }

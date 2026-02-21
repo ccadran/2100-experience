@@ -7,10 +7,11 @@ import { moveToStep } from "./experience";
 
 import { hideElements, updateCity } from "./elementsManager";
 import {
-  setupAllImpacts,
   setupDecorInstances,
+  setupInstances,
   setupParamsInstances,
 } from "./createInstances";
+import { setupAllImpacts } from "./setupImpacts";
 
 export function initScene(): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -51,7 +52,7 @@ export function initScene(): Promise<void> {
       // "/3d/2100-map__V1.glb",
       // "/3d/map.glb",
       // "/3d/map-v10.glb",
-      "/3d/map-v33.glb",
+      "/3d/map-v35.glb",
       // "/3d/map-spots.glb",
       (gltf: any) => {
         gltf.scene.scale.set(1, 1, 1);
@@ -107,11 +108,10 @@ export function initScene(): Promise<void> {
         }
 
         const sceneChildrens = worldStore.scene3d?.children;
+        setupInstances();
 
         sceneChildrens?.forEach((child) => {
-          if (child.name.includes("group")) {
-            worldStore.paramsParts.push(markRaw(child));
-          } else if (child.name.includes("IMPACTS")) {
+          if (child.name.includes("IMPACTS")) {
             child.children.forEach((c) => {
               if (c.name.includes("fields")) {
                 worldStore.impactsParts.fields = markRaw(c);
@@ -125,16 +125,12 @@ export function initScene(): Promise<void> {
             worldStore.sceneMeshes["city"] = markRaw(child);
           }
         });
-        let meshCount = 0;
-        globalScene.traverse((object) => {
-          meshCount++;
-        });
 
-        setupParamsInstances();
+        // setupParamsInstances();
         // setupImpactsInstances();
         // setupImpactsPool();
         setupAllImpacts();
-        setupDecorInstances();
+        // setupDecorInstances();
         updateCity(configStore.configParams.currentTemperature);
 
         hideElements();
