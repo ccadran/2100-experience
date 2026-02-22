@@ -107,15 +107,15 @@ export function setupInstances() {
       );
 
       sourceInstance.parent?.add(instance);
-
+      // sourceInstance.visible = false;
       // worldStore.scene3d?.add(instance);
     }
   });
 
-  //delete sources
-  // sourceInstances.forEach((source) => {
-  //   source.removeFromParent();
-  // });
+  // delete sources
+  sourceInstances.forEach((source) => {
+    source.removeFromParent();
+  });
   //delete base mesh (scene center)
   deleteBaseMeshes();
 }
@@ -133,9 +133,6 @@ function createInstances(
     meshes[0]?.material,
     meshNumbers,
   );
-  if (log) {
-    console.log(instancedMesh);
-  }
 
   instancedMesh.name = name;
 
@@ -173,7 +170,10 @@ function createInstances(
       parent.removeFromParent();
     }
   });
-
+  // if (log) {
+  //   console.log(instancedMesh);
+  //   console.log(meshes[0]);
+  // }
   return instancedMesh;
 }
 

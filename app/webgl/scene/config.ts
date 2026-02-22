@@ -104,6 +104,12 @@ export function initScene(): Promise<void> {
         }
 
         const sceneChildrens = worldStore.scene3d?.children;
+        console.log(
+          "CALLS",
+          renderer.info.render.calls,
+          "TRIANGLES",
+          renderer.info.render.triangles,
+        );
         setupInstances();
 
         sceneChildrens?.forEach((child) => {
@@ -130,6 +136,12 @@ export function initScene(): Promise<void> {
         updateCity(configStore.configParams.currentTemperature);
 
         hideElements();
+        console.log(
+          "CALLS",
+          renderer.info.render.calls,
+          "TRIANGLES",
+          renderer.info.render.triangles,
+        );
 
         environment.initFog();
         worldStore.fogControls = environment.getFogControls();
