@@ -29,26 +29,26 @@ function simulateWsCo() {
 //   energy: 0,
 //   clothes: 0,
 // };
-// const userData = {
-//   plane: 100,
-//   transport: 100,
-//   meat: 100,
-//   promptIA: 100,
-//   products: 100,
-//   phone: 100,
-//   energy: 100,
-//   clothes: 100,
-// };
 const userData = {
   plane: 100,
-  transport: 66,
-  meat: 70,
-  promptIA: 55,
-  products: 30,
-  phone: 10,
-  energy: 0,
-  clothes: 90,
+  transport: 100,
+  meat: 100,
+  promptIA: 100,
+  products: 100,
+  phone: 100,
+  energy: 100,
+  clothes: 100,
 };
+// const userData = {
+//   plane: 100,
+//   transport: 66,
+//   meat: 70,
+//   promptIA: 55,
+//   products: 30,
+//   phone: 10,
+//   energy: 0,
+//   clothes: 90,
+// };
 const currentExplanation = ref<number>(0);
 function changeExplanationQuestion() {
   currentExplanation.value += 1;

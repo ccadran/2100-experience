@@ -93,6 +93,7 @@ export function setupInstances() {
       worldStore.impactsParts[
         matchingKey as keyof typeof worldStore.impactsParts
       ] = markRaw(instance);
+      worldStore.scene3d?.add(instance);
 
       worldStore.sceneMeshes[instanceName] = markRaw(instance);
     } else {
@@ -111,6 +112,8 @@ export function setupInstances() {
       // worldStore.scene3d?.add(instance);
     }
   });
+
+  console.log(worldStore.sceneMeshes);
 
   // delete sources
   sourceInstances.forEach((source) => {

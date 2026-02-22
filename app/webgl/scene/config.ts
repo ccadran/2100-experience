@@ -17,8 +17,8 @@ export function initScene(): Promise<void> {
     if (!container) return;
     const globalScene = new THREE.Scene();
 
-    worldStore.globalScene = globalScene;
-    worldStore.camera = new Camera();
+    worldStore.globalScene = markRaw(globalScene);
+    worldStore.camera = markRaw(new Camera());
     globalScene.add(worldStore.camera.instance);
 
     if (worldStore.camera.overlay) {
@@ -28,16 +28,17 @@ export function initScene(): Promise<void> {
     const canvas = container.querySelector("canvas");
     if (!canvas) return;
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+
     renderer.setSize(container.clientWidth, container.clientHeight);
 
     const environment = new Environment(globalScene, renderer);
 
-    worldStore.skyContext = environment.getSkyContext();
-    worldStore.skyTexture = environment.getSkyTexture();
-    worldStore.skyMesh = markRaw(environment.getSkyMesh()!);
-    worldStore.hemiLight = markRaw(environment.getHemiLight());
-    worldStore.sunLight = markRaw(environment.getSunLight());
-    worldStore.environment = markRaw(environment);
+    // worldStore.skyContext = environment.getSkyContext();
+    // worldStore.skyTexture = environment.getSkyTexture();
+    // worldStore.skyMesh = markRaw(environment.getSkyMesh()!);
+    // worldStore.hemiLight = markRaw(environment.getHemiLight());
+    // worldStore.sunLight = markRaw(environment.getSunLight());
+    // worldStore.environment = markRaw(environment);
     if (environment.getPollutionCloud()) {
       worldStore.pollutionCloud = markRaw(environment.getPollutionCloud()!);
     }
@@ -104,12 +105,7 @@ export function initScene(): Promise<void> {
         }
 
         const sceneChildrens = worldStore.scene3d?.children;
-        console.log(
-          "CALLS",
-          renderer.info.render.calls,
-          "TRIANGLES",
-          renderer.info.render.triangles,
-        );
+
         setupInstances();
 
         sceneChildrens?.forEach((child) => {
@@ -128,11 +124,8 @@ export function initScene(): Promise<void> {
           }
         });
 
-        // setupParamsInstances();
-        // setupImpactsInstances();
-        // setupImpactsPool();
         setupAllImpacts();
-        // setupDecorInstances();
+
         updateCity(configStore.configParams.currentTemperature);
 
         hideElements();
