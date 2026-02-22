@@ -59,11 +59,13 @@ function connectToWsServer() {
       joinRoom(roomId);
       webSocketStore.setRoomId(roomId);
 
+      const link = `https://2100-configurateur.netlify.app/#room=${roomId}`;
+
       const canvasQr = document.querySelector(
         ".qrcode .inner",
       ) as HTMLCanvasElement;
       if (canvasQr) {
-        QRCode.toCanvas(canvasQr, roomId, function (error: any) {
+        QRCode.toCanvas(canvasQr, link, function (error: any) {
           if (error) console.error(error);
         });
       } else {
@@ -107,7 +109,6 @@ watch(
 </script>
 
 <template>
-  <Debug />
   <main>
     <Intro ref="introRef" />
     <ModalPhone ref="modalPhone" />
