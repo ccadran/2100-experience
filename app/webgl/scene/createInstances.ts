@@ -108,12 +108,10 @@ export function setupInstances() {
       );
 
       sourceInstance.parent?.add(instance);
-      // sourceInstance.visible = false;
-      // worldStore.scene3d?.add(instance);
     }
   });
 
-  console.log(worldStore.sceneMeshes);
+  // console.log(worldStore.sceneMeshes);
 
   // delete sources
   sourceInstances.forEach((source) => {
@@ -124,19 +122,43 @@ export function setupInstances() {
 }
 
 function createInstances(
-  meshes: THREE.Mesh[],
+  meshes: THREE.Object3D[], // On accepte Object3D au lieu de Mesh
   name: string,
   meshNumbers: number,
   log?: boolean,
 ) {
   const worldStore = useWorld();
 
+  // 1. Chercher la vraie géométrie et le vrai matériau
+  let baseGeometry: THREE.BufferGeometry | undefined;
+  let baseMaterial: THREE.Material | THREE.Material[] | undefined;
+
+  // On fouille dans le premier objet pour trouver le Mesh
+  if (meshes[0]) {
+    meshes[0].traverse((child: any) => {
+      if (child.isMesh && !baseGeometry) {
+        baseGeometry = child.geometry;
+        baseMaterial = child.material;
+      }
+    });
+  }
+
+  // 2. Sécurité
+  if (!baseGeometry || !baseMaterial) {
+    console.warn(
+      `[createInstances] Impossible de créer ${name}, pas de géométrie.`,
+    );
+    const emptyGroup = new THREE.Group();
+    emptyGroup.name = name;
+    return emptyGroup;
+  }
+
+  // 3. Création de l'instance avec les bonnes données
   const instancedMesh = new THREE.InstancedMesh(
-    meshes[0]?.geometry,
-    meshes[0]?.material,
+    baseGeometry,
+    baseMaterial,
     meshNumbers,
   );
-
   instancedMesh.name = name;
 
   if (worldStore.scene3d) worldStore.scene3d.updateMatrixWorld(true);
