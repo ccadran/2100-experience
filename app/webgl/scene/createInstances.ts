@@ -1,6 +1,4 @@
 import * as THREE from "three";
-import gsap from "gsap";
-import { updateImpactNumber } from "./experience";
 
 export function setupInstances() {
   const worldStore = useWorld();
@@ -111,8 +109,6 @@ export function setupInstances() {
     }
   });
 
-  // console.log(worldStore.sceneMeshes);
-
   // delete sources
   sourceInstances.forEach((source) => {
     source.removeFromParent();
@@ -129,11 +125,9 @@ function createInstances(
 ) {
   const worldStore = useWorld();
 
-  // 1. Chercher la vraie géométrie et le vrai matériau
   let baseGeometry: THREE.BufferGeometry | undefined;
   let baseMaterial: THREE.Material | THREE.Material[] | undefined;
 
-  // On fouille dans le premier objet pour trouver le Mesh
   if (meshes[0]) {
     meshes[0].traverse((child: any) => {
       if (child.isMesh && !baseGeometry) {
@@ -143,7 +137,6 @@ function createInstances(
     });
   }
 
-  // 2. Sécurité
   if (!baseGeometry || !baseMaterial) {
     console.warn(
       `[createInstances] Impossible de créer ${name}, pas de géométrie.`,
@@ -153,7 +146,6 @@ function createInstances(
     return emptyGroup;
   }
 
-  // 3. Création de l'instance avec les bonnes données
   const instancedMesh = new THREE.InstancedMesh(
     baseGeometry,
     baseMaterial,
@@ -184,7 +176,6 @@ function createInstances(
   instancedMesh.frustumCulled = true;
   instancedMesh.castShadow = true;
   instancedMesh.userData.originalMatrix = instancedMesh.instanceMatrix.clone();
-  // console.log("___________", instancedMesh.userData);
 
   //delete old meshes
   meshes.forEach((mesh) => {
@@ -195,10 +186,6 @@ function createInstances(
       parent.removeFromParent();
     }
   });
-  // if (log) {
-  //   console.log(instancedMesh);
-  //   console.log(meshes[0]);
-  // }
   return instancedMesh;
 }
 

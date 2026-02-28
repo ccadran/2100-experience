@@ -51,7 +51,6 @@ function connectToWsServer() {
   nextTick(() => {
     const id = Math.random().toString(36).substring(2, 10);
     const roomId = id;
-    // const roomId = "ROOM_1";
     connect();
     on("connect", () => {
       listenForUpdates();
