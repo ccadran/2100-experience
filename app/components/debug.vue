@@ -120,7 +120,7 @@ function changeExplanationQuestion() {
   height: 100vh;
   width: 100vw;
   position: fixed;
-  z-index: 2;
+  z-index: 100;
   > button {
     padding: 14px;
     bottom: 60px;

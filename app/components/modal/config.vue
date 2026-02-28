@@ -17,15 +17,19 @@ const isModal3revealed = ref<boolean>(false);
 
 const configStore = useConfig();
 
-function revealContainer() {
-  gsap.set(modals.value!, { display: "flex" });
+function revealModal1() {
   return gsap
     .timeline({ defaults: { ease: "cubic-bezier(0.25, 0.95, 0, 1)" } })
-    .fromTo(modals.value!, { x: "100%" }, { x: "0%" }, 0)
+    .fromTo(
+      modal1.value!,
+      { x: "150%" },
+      { x: "0%", duration: 0.75, ease: "elastic.out(0.8,0.7)" },
+      0,
+    )
     .fromTo(
       mascot.value!,
-      { rotation: 30, opacity: 0 },
-      { rotation: 0, opacity: 1 },
+      { rotation: 30, opacity: 0, x: "100%" },
+      { rotation: 0, opacity: 1, x: "0%" },
       0,
     );
 }
@@ -37,7 +41,8 @@ function revealModal2() {
     {
       x: "0%",
       rotation: -4,
-      ease: "cubic-bezier(0.25, 0.95, 0, 1)",
+      duration: 0.75,
+      ease: "elastic.out(0.8,0.7)",
       onComplete() {
         isModal2revealed.value = true;
       },
@@ -52,7 +57,8 @@ function revealModal3() {
     {
       x: "0%",
       rotation: 4,
-      ease: "cubic-bezier(0.25, 0.95, 0, 1)",
+      duration: 0.75,
+      ease: "elastic.out(0.8,0.7)",
       onComplete() {
         isModal3revealed.value = true;
       },
@@ -62,7 +68,7 @@ function revealModal3() {
 
 function hideModals() {
   const hideTl = gsap.timeline({
-    defaults: { ease: "cubic-bezier(0.25, 0.95, 0, 1)" },
+    defaults: { ease: "power3.inOut" },
     overwrite: true,
   });
 
@@ -73,18 +79,26 @@ function hideModals() {
     hideTl.add(gsap.to(modal2.value!, { x: "150%" }), 0.05);
   }
   hideTl
-    .to(modals.value!, { x: "150%" }, 0.125)
+    .to(modals.value!, { x: "150%" }, 0.085)
     .to(mascot.value!, { rotation: 30, opacity: 0 }, 0.125);
 }
+
+onMounted(() => {
+  animConfigModals();
+});
 
 async function animConfigModals() {
   if (configStore?.isFormValidated) return;
   await delay(8000);
-  await revealContainer();
+
+  gsap.set(modals.value!, { display: "flex", x: "0%" });
+  await revealModal1();
   await delay(8000);
+
   if (configStore?.isFormValidated) return;
   await revealModal2();
   await delay(8000);
+
   if (configStore?.isFormValidated) return;
   await revealModal3();
 }
@@ -127,6 +141,7 @@ defineExpose({ animConfigModals, hideModals });
   bottom: 5vh;
   right: 60px;
   z-index: 2;
+  z-index: 200;
   > .modals-container {
     position: relative;
     width: 100%;
@@ -136,6 +151,7 @@ defineExpose({ animConfigModals, hideModals });
 
     > .modal {
       // position: absolute;
+      transform: translateX(150%);
       grid-area: 1/1;
       border-radius: 32px;
       display: flex;
@@ -158,6 +174,7 @@ defineExpose({ animConfigModals, hideModals });
         -9px 29px 19px 0 rgba(0, 0, 0, 0.01),
         -4px 13px 14px 0 rgba(0, 0, 0, 0.01),
         -1px 3px 8px 0 rgba(0, 0, 0, 0.02);
+
       > p {
         font-size: 1.56vw;
         text-align: center;
@@ -170,7 +187,7 @@ defineExpose({ animConfigModals, hideModals });
     width: 28vw;
     height: auto;
     aspect-ratio: 459/334;
-    left: 50%;
+    // left: 50%;
     transform: translateX(-50%);
     z-index: -1;
     > video {
