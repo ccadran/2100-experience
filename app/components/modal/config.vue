@@ -83,10 +83,6 @@ function hideModals() {
     .to(mascot.value!, { rotation: 30, opacity: 0 }, 0.125);
 }
 
-onMounted(() => {
-  animConfigModals();
-});
-
 async function animConfigModals() {
   if (configStore?.isFormValidated) return;
   await delay(8000);

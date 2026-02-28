@@ -81,7 +81,7 @@ watch(
   async (newValue) => {
     console.log("isRoomFull", newValue);
     if (newValue) {
-      await delay(1000);
+      // await delay(1000);
       introRef.value.revealMap();
       await delay(4000);
       await modalPhone.value.animModal();
