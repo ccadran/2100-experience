@@ -116,7 +116,6 @@ async function revealResultsModal() {
         rank: resultData.rank,
       },
     });
-    console.log("resultats envoyés", resultData);
   }
 
   new SplitText(".result-description p", {
