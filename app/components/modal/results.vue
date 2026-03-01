@@ -273,24 +273,38 @@ async function changeQuestion(target: number) {
   await gsap
     .timeline()
     .to(".explanations-content", { opacity: 0 })
-    .to(currentBg, { opacity: 0 });
+    .to(currentBg, { opacity: 0 }, 0);
   await calculateCurrentRanking(target);
 
   await nextTick();
 
-  await waitForImageLoad(".explanation-illu .illu");
+  // await waitForImageLoad(".explanation-illu .illu");
 
   gsap
     .timeline()
     .add(changeBackgroundFocus(target))
-    .to(".explanations-content", {
-      opacity: 1,
-    })
+    .to(
+      ".explanations-content",
+      {
+        opacity: 1,
+      },
+      0,
+    )
+    .fromTo(
+      ".explanations-content .question-icon",
+      { opacity: 0, y: "8%" },
+      {
+        opacity: 1,
+        y: "0%",
+        ease: "power3.out",
+      },
+      0,
+    )
     .fromTo(
       ".explanation-illu .rank",
-      { scale: 2, opacity: 0 },
+      { scale: 3, opacity: 0 },
       { scale: 1, opacity: 1, ease: "elastic.out(0.65,0.5)", duration: 0.7 },
-      0.65,
+      0.45,
     );
 }
 
@@ -615,7 +629,7 @@ defineExpose({
         left: 50%;
         transform: translateX(-50%);
         > .question-container {
-          overflow: hidden;
+          overflow: visible;
           width: fit-content;
           > .question {
             display: flex;
