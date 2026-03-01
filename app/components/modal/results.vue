@@ -600,7 +600,7 @@ defineExpose({
             font-size: 1.875vw;
           }
           .official-data {
-            margin-top: 60px;
+            margin-top: 32px;
             display: flex;
             flex-direction: column;
             gap: 16px;

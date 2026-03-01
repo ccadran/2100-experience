@@ -9,7 +9,7 @@ const { playCamera } = useAudio();
 
 // couleurs du sol
 const healthy_color = new THREE.Color("#007411");
-const dry_color = new THREE.Color("#a89a02");
+const dry_color = new THREE.Color("#aaa245");
 
 import {
   calculateParmasAssetsNumber,
