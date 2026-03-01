@@ -118,6 +118,7 @@ watch(
     <ModalResults ref="modalResults" />
     <Clouds />
     <Debug />
+    <BlockMobile />
   </main>
 </template>
 
