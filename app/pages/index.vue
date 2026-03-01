@@ -83,8 +83,8 @@ watch(
     if (newValue) {
       await delay(200);
       introRef.value.revealMap();
-      // await delay(4000);
-      await delay(2000);
+      await delay(4000);
+
       await modalPhone.value.animModal();
     }
   },

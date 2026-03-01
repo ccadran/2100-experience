@@ -22,7 +22,10 @@ const currentTemperature = computed(() => {
   if (!configStore.isFormValidated) return null;
   const step = uiStore.previewStep ?? configStore.currentStep;
   if (step == null) return null;
-  return configStore.worldStateSteps[step]?.temperature + 27;
+  return (
+    configStore.worldStateSteps[step]?.temperature +
+    configStore.configParams.baseTemperature
+  );
 });
 
 //video via temp
@@ -46,6 +49,7 @@ watch(
   () => uiStore.previewStep ?? configStore.currentStep,
   (step) => {
     if (step == null || !worldYears.value) return;
+
     slideTimeline(step);
   },
 );
@@ -77,12 +81,12 @@ watch(
 function leaveTimeline() {
   const dateStep = timeline.value!.querySelectorAll(".step");
   gsap.to(dateStep, {
-    x: "100%",
+    x: "-100%",
     opacity: 0,
     ease: "cubic-bezier(0.25, 0.95, 0, 1)",
     stagger: {
       each: 0.075,
-      from: "end",
+      from: "start",
     },
   });
 }
@@ -142,9 +146,9 @@ function entryTimeline() {
       {
         x: "0%",
         opacity: 1,
-        stagger: 0.175,
+        stagger: 0.075,
         onStart() {
-          gsap.delayedCall(0.6, () => slideTimeline(0));
+          gsap.delayedCall(0.4, () => slideTimeline(0));
         },
       },
     )
@@ -154,8 +158,12 @@ function entryTimeline() {
         transform: "translateX(-100%) rotate(15deg)",
         opacity: 0,
       },
-      { transform: "translateX(0%) rotate(15deg)", opacity: 1 },
-
+      {
+        transform: "translateX(0%) rotate(15deg)",
+        opacity: 1,
+        duration: 0.75,
+        ease: "elastic.out(0.8,0.6)",
+      },
       0,
     );
 }
@@ -214,6 +222,7 @@ function entryTimeline() {
 }
 .timeline-container {
   z-index: 2;
+  z-index: 200;
   width: 100vw;
   position: absolute;
   bottom: 0;

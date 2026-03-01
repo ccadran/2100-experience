@@ -2,7 +2,7 @@ import * as THREE from "three";
 import gsap from "gsap";
 import { delay } from "../utils";
 import { useAudio } from "~/composables/useAudio";
-import { useAmbient } from '~/composables/useAmbient';
+import { useAmbient } from "~/composables/useAmbient";
 
 // camera sound
 const { playCamera } = useAudio();
@@ -24,7 +24,8 @@ export async function moveToStep(target: number | "next" | "previous") {
   const worldStore = useWorld();
   const configStore = useConfig();
   const uiStore = useUi();
-  await uiStore.cloudsTransition?.showClouds();
+  uiStore.cloudsTransition?.showClouds();
+  await delay(200);
 
   let targetStep: number = configStore.currentStep;
   if (typeof target === "number") {

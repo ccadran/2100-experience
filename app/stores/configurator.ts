@@ -15,6 +15,7 @@ export const useConfig = defineStore("useConfig", () => {
     minTemperature: 0,
     pivotScore: 25,
     currentImpactValue: 20,
+    baseTemperature: 27,
   };
 
   const worldParams = {

@@ -6,6 +6,7 @@ import questionsData from "~/assets/content/questions.json";
 import resultsData from "~/assets/content/results.json";
 import { delay } from "~/webgl/utils";
 import { useAudio } from "~/composables/useAudio";
+import { SplitText } from "gsap/SplitText";
 
 const { playSuccess, playMid, playDefeat } = useAudio();
 
@@ -110,13 +111,32 @@ async function revealResultsModal() {
     console.log("resultats envoyés", resultData);
   }
 
+  new SplitText(".result-description p", {
+    type: "words",
+    wordsClass: "word",
+  });
+
   gsap
     .timeline({ defaults: { ease: "cubic-bezier(0.25, 0.95, 0, 1)" } })
+    .set(modal.value!, {
+      xPercent: -50,
+      yPercent: -50,
+      display: "block", // ou "flex" selon ce dont tu as besoin
+    })
     .set([modal.value!, opacityLayer.value], { display: "block", opacity: 0 })
+    .fromTo(opacityLayer.value!, { opacity: 0 }, { opacity: 1 }, 0)
     .fromTo(
-      [modal.value!, opacityLayer.value],
-      { opacity: 0 },
-      { opacity: 1 },
+      modal.value!,
+      {
+        opacity: 0,
+        y: "50vh",
+      },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.85,
+        ease: "elastic.out(0.8,0.6)",
+      },
       0,
     )
     .fromTo(
@@ -125,11 +145,16 @@ async function revealResultsModal() {
       { opacity: 1, y: "0%" },
       0.35,
     )
-    .fromTo(".result-description p", { opacity: 0 }, { opacity: 1 }, "<+0.2")
+    .fromTo(
+      ".result-description p .word",
+      { y: "100%", opacity: 0 },
+      { y: "0%", opacity: 1, stagger: 0.025 },
+      "<+0.2",
+    )
     .fromTo(
       ".ranking .mascot",
       { opacity: 0, y: "100%", x: "-50%" },
-      { opacity: 1, y: "0%", x: "-50%", duration: 0.25 },
+      { opacity: 1, y: "0%", x: "-50%", duration: 0.45, ease: "power3.inOut" },
       "<+0.2",
     )
     .fromTo(
@@ -141,7 +166,7 @@ async function revealResultsModal() {
         duration: 0.725,
         ease: "elastic.out(0.65,0.4)",
       },
-      "<+0.135",
+      "<+0.235",
     );
 }
 
@@ -416,7 +441,6 @@ defineExpose({
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
     z-index: 1000;
     border-radius: 60px;
     background: var(

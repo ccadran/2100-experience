@@ -98,12 +98,15 @@ function changeExplanationQuestion() {
         </div>
       </div>
 
-      <div
+      <!--
+        <div
         class="experienceEnds-control"
         v-if="
-          configStore.currentStep === configStore.worldStateSteps.length - 1
+        configStore.currentStep === configStore.worldStateSteps.length - 1
         "
-      >
+        >
+        -->
+      <div class="experienceEnds-control">
         <h2>RESULTS</h2>
         <button @click="uiStore.toggleModalResult()">Finish experience</button>
         <button @click="uiStore.showExplanations()">Show explanations</button>
