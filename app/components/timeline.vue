@@ -18,14 +18,15 @@ const baseOffset = ref<number>(0);
 
 let lastTarget: number | null = null;
 
-
 const currentTemperature = computed(() => {
   if (!configStore.isFormValidated) return null;
   const step = uiStore.previewStep ?? configStore.currentStep;
   if (step == null) return null;
-  return configStore.worldStateSteps[step]?.temperature + 27;
+  return (
+    configStore.worldStateSteps[step]?.temperature +
+    configStore.configParams.baseTemperature
+  );
 });
-
 
 //video via temp
 
@@ -44,12 +45,11 @@ watch(isHot, (hot) => {
   }
 });
 
-
-
 watch(
   () => uiStore.previewStep ?? configStore.currentStep,
   (step) => {
     if (step == null || !worldYears.value) return;
+
     slideTimeline(step);
   },
 );
@@ -81,12 +81,12 @@ watch(
 function leaveTimeline() {
   const dateStep = timeline.value!.querySelectorAll(".step");
   gsap.to(dateStep, {
-    x: "100%",
+    x: "-100%",
     opacity: 0,
     ease: "cubic-bezier(0.25, 0.95, 0, 1)",
     stagger: {
       each: 0.075,
-      from: "end",
+      from: "start",
     },
   });
 }
@@ -146,9 +146,9 @@ function entryTimeline() {
       {
         x: "0%",
         opacity: 1,
-        stagger: 0.175,
+        stagger: 0.075,
         onStart() {
-          gsap.delayedCall(0.6, () => slideTimeline(0));
+          gsap.delayedCall(0.4, () => slideTimeline(0));
         },
       },
     )
@@ -158,8 +158,12 @@ function entryTimeline() {
         transform: "translateX(-100%) rotate(15deg)",
         opacity: 0,
       },
-      { transform: "translateX(0%) rotate(15deg)", opacity: 1 },
-
+      {
+        transform: "translateX(0%) rotate(15deg)",
+        opacity: 1,
+        duration: 0.75,
+        ease: "elastic.out(0.8,0.6)",
+      },
       0,
     );
 }
@@ -168,8 +172,24 @@ function entryTimeline() {
 <template>
   <div class="timeline-container">
     <div class="timeline-mascot">
-      <video ref="coucouVideo" src="/videos/3-coucou.webm" class="mascot-video mascot-video--base" :style="{ opacity: 1 }" autoplay loop muted></video>
-      <video ref="hotVideo" src="/videos/hot.webm" class="mascot-video mascot-video--overlay" :style="{ opacity: 0 }" autoplay loop muted></video>
+      <video
+        ref="coucouVideo"
+        src="/videos/3-coucou.webm"
+        class="mascot-video mascot-video--base"
+        :style="{ opacity: 1 }"
+        autoplay
+        loop
+        muted
+      ></video>
+      <video
+        ref="hotVideo"
+        src="/videos/hot.webm"
+        class="mascot-video mascot-video--overlay"
+        :style="{ opacity: 0 }"
+        autoplay
+        loop
+        muted
+      ></video>
     </div>
     <div class="timeline" ref="timeline">
       <div
@@ -202,12 +222,15 @@ function entryTimeline() {
 }
 .timeline-container {
   z-index: 2;
+
   width: 100vw;
   position: absolute;
   bottom: 0;
   > .timeline-mascot {
     position: fixed;
-    bottom: -16%;
+
+    bottom: -8vw;
+
     width: 32vw;
     height: auto;
     left: -8%;
@@ -231,7 +254,6 @@ function entryTimeline() {
       left: 0;
       height: 100%;
     }
-
   }
   .timeline {
     margin-left: 50%;

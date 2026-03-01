@@ -1,11 +1,14 @@
 import * as THREE from "three";
 
-export function addWorldSpaceFog(scene: THREE.Scene, options?: {
-  fogColor?: THREE.Color;
-  minFogDistance?: number;
-  maxFogDistance?: number;
-  fogDensity?: number;
-}) {
+export function addWorldSpaceFog(
+  scene: THREE.Scene,
+  options?: {
+    fogColor?: THREE.Color;
+    minFogDistance?: number;
+    maxFogDistance?: number;
+    fogDensity?: number;
+  },
+) {
   const fogColor = options?.fogColor || new THREE.Color(0xccdcff);
   const minFogDistance = options?.minFogDistance || 20;
   const maxFogDistance = options?.maxFogDistance || 50;
@@ -26,32 +29,38 @@ export function addWorldSpaceFog(scene: THREE.Scene, options?: {
         shader.uniforms.maxFogDist = { value: maxFogDistance };
         shader.uniforms.fogDensity = { value: fogDensity };
 
-        shader.vertexShader = 'varying vec3 vWorldPosition;\n' + shader.vertexShader;
+        shader.vertexShader =
+          "varying vec3 vWorldPosition;\n" + shader.vertexShader;
 
         shader.vertexShader = shader.vertexShader.replace(
-          '#include <begin_vertex>',
+          "#include <begin_vertex>",
           `
-          #include <begin_vertex>
-          vec4 worldPos = modelMatrix * vec4(transformed, 1.0);
-          vWorldPosition = worldPos.xyz;
-          `
+  #include <begin_vertex>
+  #ifdef USE_INSTANCING
+    vec4 worldPos = modelMatrix * instanceMatrix * vec4(transformed, 1.0);
+  #else
+    vec4 worldPos = modelMatrix * vec4(transformed, 1.0);
+  #endif
+  vWorldPosition = worldPos.xyz;
+  `,
         );
 
-        shader.fragmentShader = 'varying vec3 vWorldPosition;\n' + shader.fragmentShader;
-        
+        shader.fragmentShader =
+          "varying vec3 vWorldPosition;\n" + shader.fragmentShader;
+
         shader.fragmentShader = shader.fragmentShader.replace(
-          'uniform vec3 diffuse;',
+          "uniform vec3 diffuse;",
           `
           uniform vec3 diffuse;
           uniform vec3 fogColor;
           uniform float minFogDist;
           uniform float maxFogDist;
           uniform float fogDensity;
-          `
+          `,
         );
 
         shader.fragmentShader = shader.fragmentShader.replace(
-          '#include <dithering_fragment>',
+          "#include <dithering_fragment>",
           `
           #include <dithering_fragment>
 
@@ -61,7 +70,7 @@ export function addWorldSpaceFog(scene: THREE.Scene, options?: {
           fogFactor = pow(fogFactor, 0.8);
           
           gl_FragColor.rgb = mix(gl_FragColor.rgb, fogColor, fogFactor);
-          `
+          `,
         );
 
         material.userData.shader = shader;
@@ -85,11 +94,11 @@ export function addWorldSpaceFog(scene: THREE.Scene, options?: {
     updateFogColor: (color: THREE.Color) => {
       scene.traverse((object) => {
         if (object instanceof THREE.Mesh) {
-          const materials = Array.isArray(object.material) 
-            ? object.material 
+          const materials = Array.isArray(object.material)
+            ? object.material
             : [object.material];
-          
-          materials.forEach(mat => {
+
+          materials.forEach((mat) => {
             if (mat.userData.shader?.uniforms.fogColor) {
               mat.userData.shader.uniforms.fogColor.value = color;
             }
@@ -97,15 +106,15 @@ export function addWorldSpaceFog(scene: THREE.Scene, options?: {
         }
       });
     },
-    
+
     updateFogDistance: (min: number, max: number) => {
       scene.traverse((object) => {
         if (object instanceof THREE.Mesh) {
-          const materials = Array.isArray(object.material) 
-            ? object.material 
+          const materials = Array.isArray(object.material)
+            ? object.material
             : [object.material];
-          
-          materials.forEach(mat => {
+
+          materials.forEach((mat) => {
             if (mat.userData.shader?.uniforms) {
               mat.userData.shader.uniforms.minFogDist.value = min;
               mat.userData.shader.uniforms.maxFogDist.value = max;
@@ -114,21 +123,21 @@ export function addWorldSpaceFog(scene: THREE.Scene, options?: {
         }
       });
     },
-    
+
     updateFogDensity: (density: number) => {
       scene.traverse((object) => {
         if (object instanceof THREE.Mesh) {
-          const materials = Array.isArray(object.material) 
-            ? object.material 
+          const materials = Array.isArray(object.material)
+            ? object.material
             : [object.material];
-          
-          materials.forEach(mat => {
+
+          materials.forEach((mat) => {
             if (mat.userData.shader?.uniforms.fogDensity) {
               mat.userData.shader.uniforms.fogDensity.value = density;
             }
           });
         }
       });
-    }
+    },
   };
 }

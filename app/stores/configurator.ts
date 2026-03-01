@@ -15,6 +15,7 @@ export const useConfig = defineStore("useConfig", () => {
     minTemperature: 0,
     pivotScore: 25,
     currentImpactValue: 20,
+    baseTemperature: 27,
   };
 
   const worldParams = {
@@ -109,11 +110,23 @@ export const useConfig = defineStore("useConfig", () => {
   };
 
   const objectsData = {
-    trees: {
-      worst: 3.5,
-      bad: 2.0,
+    trees1: {
+      worst: 3.8,
+      bad: 2.2,
       normal: 1.2,
-      best: 0.8,
+      best: 0.6,
+    },
+    trees2: {
+      worst: 4.5,
+      bad: 2.4,
+      normal: 1.2,
+      best: 1.0,
+    },
+    trees3: {
+      worst: 3.8,
+      bad: 1.8,
+      normal: 1.2,
+      best: 0.4,
     },
     bushes: {
       worst: 4.0,

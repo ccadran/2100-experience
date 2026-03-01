@@ -5,13 +5,9 @@ import Camera from "./Camera";
 import Environment from "./Environment";
 import { moveToStep } from "./experience";
 
-import {
-  hideElements,
-  setupAllImpacts,
-  setupDecorInstances,
-  setupParamsInstances,
-  updateCity,
-} from "./elementsManager";
+import { hideElements, updateCity } from "./elementsManager";
+import { setupInstances } from "./createInstances";
+import { setupAllImpacts } from "./setupImpacts";
 
 export function initScene(): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -21,8 +17,8 @@ export function initScene(): Promise<void> {
     if (!container) return;
     const globalScene = new THREE.Scene();
 
-    worldStore.globalScene = globalScene;
-    worldStore.camera = new Camera();
+    worldStore.globalScene = markRaw(globalScene);
+    worldStore.camera = markRaw(new Camera());
     globalScene.add(worldStore.camera.instance);
 
     if (worldStore.camera.overlay) {
@@ -32,16 +28,17 @@ export function initScene(): Promise<void> {
     const canvas = container.querySelector("canvas");
     if (!canvas) return;
     const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+
     renderer.setSize(container.clientWidth, container.clientHeight);
 
     const environment = new Environment(globalScene, renderer);
 
-    worldStore.skyContext = environment.getSkyContext();
-    worldStore.skyTexture = environment.getSkyTexture();
-    worldStore.skyMesh = markRaw(environment.getSkyMesh()!);
-    worldStore.hemiLight = markRaw(environment.getHemiLight());
-    worldStore.sunLight = markRaw(environment.getSunLight());
-    worldStore.environment = markRaw(environment);
+    // worldStore.skyContext = environment.getSkyContext();
+    // worldStore.skyTexture = environment.getSkyTexture();
+    // worldStore.skyMesh = markRaw(environment.getSkyMesh()!);
+    // worldStore.hemiLight = markRaw(environment.getHemiLight());
+    // worldStore.sunLight = markRaw(environment.getSunLight());
+    // worldStore.environment = markRaw(environment);
     if (environment.getPollutionCloud()) {
       worldStore.pollutionCloud = markRaw(environment.getPollutionCloud()!);
     }
@@ -52,7 +49,7 @@ export function initScene(): Promise<void> {
       // "/3d/2100-map__V1.glb",
       // "/3d/map.glb",
       // "/3d/map-v10.glb",
-      "/3d/map-v30.glb",
+      "/3d/map-v36.glb",
       // "/3d/map-spots.glb",
       (gltf: any) => {
         gltf.scene.scale.set(1, 1, 1);
@@ -109,10 +106,10 @@ export function initScene(): Promise<void> {
 
         const sceneChildrens = worldStore.scene3d?.children;
 
+        setupInstances();
+
         sceneChildrens?.forEach((child) => {
-          if (child.name.includes("group")) {
-            worldStore.paramsParts.push(markRaw(child));
-          } else if (child.name.includes("IMPACTS")) {
+          if (child.name.includes("IMPACTS")) {
             child.children.forEach((c) => {
               if (c.name.includes("fields")) {
                 worldStore.impactsParts.fields = markRaw(c);
@@ -122,20 +119,22 @@ export function initScene(): Promise<void> {
                 worldStore.impactsParts.farmhouse = markRaw(c);
               }
             });
+          } else if (child.name.includes("City")) {
+            worldStore.sceneMeshes["city"] = markRaw(child);
           }
         });
-        let meshCount = 0;
-        globalScene.traverse((object) => {
-          meshCount++;
-        });
 
-        setupParamsInstances();
-        // setupImpactsInstances();
-        // setupImpactsPool();
         setupAllImpacts();
-        setupDecorInstances();
+
         updateCity(configStore.configParams.currentTemperature);
+
         hideElements();
+        console.log(
+          "CALLS",
+          renderer.info.render.calls,
+          "TRIANGLES",
+          renderer.info.render.triangles,
+        );
 
         environment.initFog();
         worldStore.fogControls = environment.getFogControls();
@@ -368,13 +367,11 @@ function setupObjectsData() {
   const configStore = useConfig();
 
   const objectDataMap: Record<string, any> = {
-    tree: configStore.objectsData.trees,
-    bush: configStore.objectsData.bushes,
+    trees1: configStore.objectsData.trees1,
+    trees2: configStore.objectsData.trees2,
+    trees3: configStore.objectsData.trees3,
+    bushes: configStore.objectsData.bushes,
     flowers: configStore.objectsData.flowers,
-    // trees: configStore.objectsData.trees,
-    // bushes: configStore.objectsData.bushes,
-    // flowers: configStore.objectsData.flowers,
-    // water: configStore.objectsData.water,
   };
 
   worldStore.paramsParts.forEach((paramPart) => {

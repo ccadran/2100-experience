@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import gsap from "gsap";
+import { SplitText } from "gsap/SplitText";
 
 const uiStore = useUi();
 
@@ -8,6 +9,14 @@ const loaderContainer = ref<HTMLElement>();
 const appLogo = ref<HTMLElement>();
 const qrCode = ref<HTMLElement>();
 const qrCodeText = ref<HTMLElement>();
+const qrCodeSplitText = ref();
+
+onMounted(() => {
+  qrCodeSplitText.value = new SplitText(qrCodeText.value!, {
+    type: "words",
+  });
+  console.log(qrCodeSplitText.value.words);
+});
 
 async function loaderAnim() {
   return gsap
@@ -41,6 +50,7 @@ async function completeLoader() {
 }
 
 async function revealQr() {
+  qrCodeText.value!.style.opacity = "1";
   return gsap
     .timeline({ defaults: { duration: 0.5 } })
     .fromTo(".scene", { opacity: 0 }, { opacity: 1, duration: 1 }, 0)
@@ -65,7 +75,12 @@ async function revealQr() {
       },
       0.15,
     )
-    .to(qrCodeText.value!, { opacity: 1 }, 0);
+    .fromTo(
+      qrCodeSplitText.value.words,
+      { y: "100%", opacity: 0 },
+      { y: "0%", opacity: 1, stagger: 0.025 },
+      0,
+    );
 }
 
 async function revealMap() {
@@ -81,7 +96,17 @@ async function revealMap() {
       opacity: 0,
       rotation: -90,
     })
-    .to(qrCodeText.value!, { opacity: 0 }, 0)
+    .fromTo(
+      qrCodeSplitText.value.words,
+      { y: "0%", opacity: 1 },
+      {
+        y: "-100%",
+        opacity: 0,
+        ease: "power3.inOut",
+        stagger: { each: 0.025 },
+      },
+      0,
+    )
     .to(appLogo.value!, { top: 0, width: "18vw" }, 0);
 }
 

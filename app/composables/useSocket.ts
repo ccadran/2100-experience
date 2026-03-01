@@ -4,7 +4,10 @@ import { io, Socket } from "socket.io-client";
 
 // 🚨 ATTENTION : L'URL est ici en dur. Pour la production, utilisez les variables d'environnement (comme discuté précédemment).
 // Mettez l'adresse où tourne votre serveur Fastify.
-const SOCKET_URL: string = "http://172.20.10.4:4000/"; //G
+// const SOCKET_URL: string =
+//   "accessible-nightingale-2100-experience-fee2d051.koyeb.app/"; //G
+
+// const SOCKET_URL: string = "http://172.20.10.3:4000/"; //G
 // const SOCKET_URL: string = "http://10.137.98.82:4000"; //GOB
 // const SOCKET_URL: string = "http://192.168.1.39:4000
 // "; //HOME
@@ -19,6 +22,8 @@ interface ActionPayload {
 }
 
 export function useSocket() {
+  const config = useRuntimeConfig();
+  const SOCKET_URL = config.public.socketUrl as string;
   const webSocketStore = useWebSocket();
   if (!socket) {
     // Initialisation de la connexion singleton

@@ -51,7 +51,6 @@ function connectToWsServer() {
   nextTick(() => {
     const id = Math.random().toString(36).substring(2, 10);
     const roomId = id;
-    // const roomId = "ROOM_1";
     connect();
     on("connect", () => {
       listenForUpdates();
@@ -59,11 +58,13 @@ function connectToWsServer() {
       joinRoom(roomId);
       webSocketStore.setRoomId(roomId);
 
+      const link = `https://2100-configurateur.netlify.app/#room=${roomId}`;
+
       const canvasQr = document.querySelector(
         ".qrcode .inner",
       ) as HTMLCanvasElement;
       if (canvasQr) {
-        QRCode.toCanvas(canvasQr, roomId, function (error: any) {
+        QRCode.toCanvas(canvasQr, link, function (error: any) {
           if (error) console.error(error);
         });
       } else {
@@ -80,9 +81,10 @@ watch(
   async (newValue) => {
     console.log("isRoomFull", newValue);
     if (newValue) {
-      await delay(1000);
+      await delay(200);
       introRef.value.revealMap();
-      await delay(1400);
+      await delay(4000);
+
       await modalPhone.value.animModal();
     }
   },
@@ -107,7 +109,6 @@ watch(
 </script>
 
 <template>
-  <Debug />
   <main>
     <Intro ref="introRef" />
     <ModalPhone ref="modalPhone" />
@@ -116,6 +117,8 @@ watch(
     <Timeline />
     <ModalResults ref="modalResults" />
     <Clouds />
+    <!-- <Debug /> -->
+    <BlockMobile />
   </main>
 </template>
 

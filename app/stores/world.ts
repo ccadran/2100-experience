@@ -14,7 +14,7 @@ export const useWorld = defineStore("useWorld", () => {
   const paramsParts = ref<THREE.Object3D[]>([]);
   const hiddenSceneParts = ref<any[]>([]);
   const camera = ref<Camera>();
-  const sceneMeshes = ref<Record<string, THREE.Group>>({});
+  const sceneMeshes = ref<Record<string, THREE.Group | THREE.Object3D>>({});
   const fogControls = ref<FogControls | null>(null);
   const ground = ref<THREE.Mesh | null>(null);
   const skyContext = ref<CanvasRenderingContext2D | null>(null);

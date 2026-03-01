@@ -6,6 +6,7 @@ import questionsData from "~/assets/content/questions.json";
 import resultsData from "~/assets/content/results.json";
 import { delay } from "~/webgl/utils";
 import { useAudio } from "~/composables/useAudio";
+import { SplitText } from "gsap/SplitText";
 
 const { playSuccess, playMid, playDefeat } = useAudio();
 
@@ -23,10 +24,19 @@ const userGlobalRanking = ref<number>(0);
 const currentQuestionUserRanking = ref<number>(0);
 const currentQuestionUserExplanation = ref<number>(0);
 const questionsList = ref<HTMLElement[]>([]);
+const isExplanationShown = ref<boolean>(false);
+watch(
+  () => uiStore.isExplanationsShown,
+  (newValue) => {
+    //leave results
+    //enter anim
+  },
+);
 
 const resultsReady = ref(false);
-{/* const rankEl = ref<HTMLElement | null>(null); */}
-
+{
+  /* const rankEl = ref<HTMLElement | null>(null); */
+}
 
 const userPercentages = ref<any>();
 
@@ -56,6 +66,8 @@ const explanationText = computed(() => {
 watch(
   () => uiStore.isModalResultShown,
   (newValue) => {
+    console.log("RESULT", newValue);
+
     if (newValue) {
       revealResultsModal();
     } else {
@@ -64,16 +76,14 @@ watch(
   },
 );
 
-
 //sounds resultats
 type ResultSound = "success" | "mid" | "defeat";
 
 function getResultSound(rankIndex: number): ResultSound {
   if (rankIndex <= 1) return "success";
-  if (rankIndex <= 3) return "mid"; 
+  if (rankIndex <= 3) return "mid";
   return "defeat";
 }
-
 
 // méthode pour révéler le modal des résultats
 async function revealResultsModal() {
@@ -89,15 +99,13 @@ async function revealResultsModal() {
 
   await nextTick();
 
-  await waitForImageLoad('.result-description .rank img');
-  
+  await waitForImageLoad(".result-description .rank img");
+
   const resultSound = getResultSound(userGlobalRanking.value);
 
   if (resultSound === "success") playSuccess();
   if (resultSound === "mid") playMid();
   if (resultSound === "defeat") playDefeat();
-
-
 
   const resultData = resultsData[userGlobalRanking.value];
   if (resultData && webSocketStore.isConnected && webSocketStore.roomId) {
@@ -111,13 +119,32 @@ async function revealResultsModal() {
     console.log("resultats envoyés", resultData);
   }
 
+  new SplitText(".result-description p", {
+    type: "words",
+    wordsClass: "word",
+  });
+
   gsap
     .timeline({ defaults: { ease: "cubic-bezier(0.25, 0.95, 0, 1)" } })
+    .set(modal.value!, {
+      xPercent: -50,
+      yPercent: -50,
+      display: "block", // ou "flex" selon ce dont tu as besoin
+    })
     .set([modal.value!, opacityLayer.value], { display: "block", opacity: 0 })
+    .fromTo(opacityLayer.value!, { opacity: 0 }, { opacity: 1 }, 0)
     .fromTo(
-      [modal.value!, opacityLayer.value],
-      { opacity: 0 },
-      { opacity: 1 },
+      modal.value!,
+      {
+        opacity: 0,
+        y: "50vh",
+      },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.85,
+        ease: "elastic.out(0.8,0.6)",
+      },
       0,
     )
     .fromTo(
@@ -126,11 +153,16 @@ async function revealResultsModal() {
       { opacity: 1, y: "0%" },
       0.35,
     )
-    .fromTo(".result-description p", { opacity: 0 }, { opacity: 1 }, "<+0.2")
+    .fromTo(
+      ".result-description p .word",
+      { y: "100%", opacity: 0 },
+      { y: "0%", opacity: 1, stagger: 0.025 },
+      "<+0.2",
+    )
     .fromTo(
       ".ranking .mascot",
       { opacity: 0, y: "100%", x: "-50%" },
-      { opacity: 1, y: "0%", x: "-50%", duration: 0.25 },
+      { opacity: 1, y: "0%", x: "-50%", duration: 0.45, ease: "power3.inOut" },
       "<+0.2",
     )
     .fromTo(
@@ -142,25 +174,50 @@ async function revealResultsModal() {
         duration: 0.725,
         ease: "elastic.out(0.65,0.4)",
       },
-      "<+0.135",
+      "<+0.235",
     );
+}
+
+function hideResults() {
+  const hideTl = gsap.timeline();
+  hideTl
+    .fromTo(
+      ".result-description p .word",
+      { y: "0%", opacity: 1 },
+      { y: "100%", opacity: 0, stagger: { each: 0.025, from: "end" } },
+    )
+    .fromTo(
+      ".ranking .mascot",
+      { opacity: 1, y: "0%", x: "-50%" },
+      {
+        opacity: 0,
+        y: "100%",
+        x: "-50%",
+        duration: 0.45,
+        ease: "power3.inOut",
+      },
+      0.15,
+    )
+    .to(".result-description .rank", { opacity: 0, ease: "power2.inOut" }, 0.15)
+    .set(".ranking", { display: "none" });
+  return hideTl;
 }
 
 watch(
   () => uiStore.isExplanationsShown,
-  (newValue) => {
+  async (newValue) => {
     if (newValue) {
+      await hideResults();
       showExplanations();
+      console.log("show explanations");
     } else {
       gsap.set(".explanations", { opacity: 0 });
     }
   },
 );
 
-
 // méthode pour afficher les explications
 async function showExplanations() {
-
   await nextTick();
 
   gsap.set(modal.value!, {
@@ -169,7 +226,9 @@ async function showExplanations() {
 
   const questions = document.querySelectorAll(".question");
 
-  const illuImg = document.querySelector('.explanation-illu .illu') as HTMLImageElement;
+  const illuImg = document.querySelector(
+    ".explanation-illu .illu",
+  ) as HTMLImageElement;
   if (illuImg && !illuImg.complete) {
     await new Promise((resolve) => {
       illuImg.onload = resolve;
@@ -201,6 +260,7 @@ async function showExplanations() {
       0.15,
     );
 
+  calculateCurrentRanking(0);
   changeBackgroundFocus(0);
 }
 
@@ -213,7 +273,7 @@ function changeBackgroundFocus(target: number) {
 
 // close les explications
 async function closeResultsModal() {
-  await gsap.to([ modal.value!, opacityLayer.value], {
+  await gsap.to([modal.value!, opacityLayer.value], {
     opacity: 0,
     duration: 0.5,
   });
@@ -229,29 +289,63 @@ watch(
   },
 );
 
-{/* async function closeExplanations() {
+{
+  /* async function closeExplanations() {
   await gsap.to(".explanations", {
     opacity: 0,
     duration: 0.4,
   });
 
   uiStore.isExplanationsShown = false;
-} */}
-
+} */
+}
 
 // méthode pour changer de question
 async function changeQuestion(target: number) {
   const currentBg =
     questionsList.value[currentQuestion.value]?.querySelector(".background");
-
   await gsap
     .timeline()
     .to(".explanations-content", { opacity: 0 })
-    .to(currentBg, { opacity: 0 });
+    .to(currentBg, { opacity: 0 }, 0);
+  await calculateCurrentRanking(target);
 
+  await nextTick();
+
+  // await waitForImageLoad(".explanation-illu .illu");
+
+  gsap
+    .timeline()
+    .add(changeBackgroundFocus(target))
+    .to(
+      ".explanations-content",
+      {
+        opacity: 1,
+      },
+      0,
+    )
+    .fromTo(
+      ".explanations-content .question-icon",
+      { opacity: 0, y: "8%" },
+      {
+        opacity: 1,
+        y: "0%",
+        ease: "power3.out",
+      },
+      0,
+    )
+    .fromTo(
+      ".explanation-illu .rank",
+      { scale: 3, opacity: 0 },
+      { scale: 1, opacity: 1, ease: "elastic.out(0.65,0.5)", duration: 0.7 },
+      0.45,
+    );
+}
+
+async function calculateCurrentRanking(target: number) {
   currentQuestion.value = target;
 
-  const currentParam = questionsData[currentQuestion.value]?.params;
+  const currentParam = questionsData[currentQuestion.value]!.params;
 
   const percentageValue = userPercentages.value[currentParam] ?? 0;
 
@@ -263,26 +357,7 @@ async function changeQuestion(target: number) {
     (percentageValue / 100) *
       (questionsData[currentQuestion.value]?.explanations.length - 1 || 0),
   );
-
-  await nextTick();
-
-  await waitForImageLoad('.explanation-illu .illu');
-
-  gsap
-    .timeline()
-    .add(changeBackgroundFocus(target))
-    .to(".explanations-content", {
-      opacity: 1,
-    })
-    .fromTo(
-      ".explanation-illu .rank",
-      { scale: 2, opacity: 0 },
-      { scale: 1, opacity: 1, ease: "elastic.out(0.65,0.5)", duration: 0.7 },
-      0.65,
-    );
 }
-
-
 
 //attendre img chargement
 
@@ -320,8 +395,8 @@ defineExpose({
     >
       <div class="title">
         <p>Résultats</p>
-      </div>  
-      <div class="ranking" v-if="!uiStore.isExplanationsShown">
+      </div>
+      <div class="ranking">
         <div class="result-description">
           <div v-if="resultsReady" class="rank">
             <img :src="resultsData[userGlobalRanking]?.rank" alt="" />
@@ -334,7 +409,7 @@ defineExpose({
           <video src="/videos/4 - resultst.webm" autoplay loop muted></video>
         </div>
       </div>
-      <div class="explanations" v-else>
+      <div class="explanations">
         <div class="explanations-content">
           <div class="question-icon">
             <img :src="questionsData[currentQuestion]?.icon" alt="" />
@@ -348,9 +423,13 @@ defineExpose({
               <p>{{ questionsData[currentQuestion]?.officialData.text }}</p>
               <p class="source">
                 Source :
-                <a :href="questionsData[currentQuestion]?.officialData.link" target="_blank">{{
-                  questionsData[currentQuestion]?.officialData.linkText
-                }}</a>
+                <a
+                  :href="questionsData[currentQuestion]?.officialData.link"
+                  target="_blank"
+                  >{{
+                    questionsData[currentQuestion]?.officialData.linkText
+                  }}</a
+                >
               </p>
             </div>
           </div>
@@ -410,7 +489,6 @@ defineExpose({
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%);
     z-index: 1000;
     border-radius: 60px;
     background: var(
@@ -430,7 +508,10 @@ defineExpose({
       -4px 13px 14px 0 rgba(0, 0, 0, 0.01),
       -1px 3px 8px 0 rgba(0, 0, 0, 0.02);
     &.explanation {
-      align-items: end;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      display: flex;
     }
     > .title {
       overflow: hidden;
@@ -481,7 +562,7 @@ defineExpose({
       display: flex;
       flex-direction: column;
       gap: 3vh;
-      margin-bottom: 64px;
+      margin-bottom: 6.6vh;
       opacity: 0;
       .explanations-content {
         display: flex;
@@ -545,18 +626,18 @@ defineExpose({
         > .explanation-illu {
           width: 48%;
           position: relative;
+          height: 100%;
           > .illu-container {
             border-radius: 48px;
             width: 100%;
             height: 100%;
             overflow: hidden;
-            
+
             > .illu {
               width: 100%;
               height: 100%;
               object-fit: cover;
             }
-
           }
           > .rank-container {
             bottom: 20%;
@@ -570,16 +651,19 @@ defineExpose({
               height: 100;
             }
           }
-          
-          
         }
       }
       .questions-list {
         display: flex;
         justify-content: space-between;
         padding: 0 56px;
+        width: 100%;
+        position: absolute;
+        bottom: 6.6vh;
+        left: 50%;
+        transform: translateX(-50%);
         > .question-container {
-          overflow: hidden;
+          overflow: visible;
           width: fit-content;
           > .question {
             display: flex;

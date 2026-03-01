@@ -10,19 +10,19 @@
     "explanations": [
       {
         "text": "%name prend très rarement l’avion. Ce choix limite fortement ses émissions liées aux transports longue distance, qui sont parmi les plus polluantes.",
-        "illustration": "/images/ilu2.png"
+        "illustration": "/images/ilu1.png"
       },
       {
         "text": "%name prend l’avion occasionnellement. L’impact reste modéré, surtout si ces vols sont exceptionnels et compensés par des modes de transport plus sobres le reste du temps.",
-        "illustration": "/images/ilu2.png"
+        "illustration": "/images/ilu1.png"
       },
       {
         "text": "%name prend l’avion régulièrement. Cela représente une part importante de son empreinte carbone annuelle, notamment à cause des vols courts et moyens courriers.",
-        "illustration": "/images/ilu2.png"
+        "illustration": "/images/ilu1.png"
       },
       {
         "text": "%name prend très souvent l’avion. Ce comportement a un impact climatique élevé, car l’aviation émet beaucoup de CO₂ et d’autres gaz à effet de serre en altitude.",
-        "illustration": "/images/ilu2.png"
+        "illustration": "/images/ilu1.png"
       }
     ],
     "params": "plane"
@@ -37,15 +37,11 @@
     },
     "explanations": [
       {
-        "text": "%name se déplace principalement en %reponse. Ce choix réduit fortement les émissions de CO₂ liées aux trajets du quotidien.",
+        "text": "%name se déplace principalement à pieds. Ce choix réduit fortement les émissions de CO₂ liées aux trajets du quotidien.",
         "illustration": "/images/ilu2.png"
       },
       {
-        "text": "%name alterne entre voiture et modes de transport plus sobres. Son impact reste intermédiaire, mais peut encore être réduit.",
-        "illustration": "/images/ilu2.png"
-      },
-      {
-        "text": "%name utilise majoritairement la voiture pour ses déplacements. Cela génère des émissions importantes, surtout sur les trajets courts.",
+        "text": "%name utilise majoritairement les transports en commun pour ses déplacements. Cela génère des émissions importantes, surtout sur les trajets courts.",
         "illustration": "/images/ilu2.png"
       },
       {
@@ -66,19 +62,19 @@
     "explanations": [
       {
         "text": "%name utilise l’intelligence artificielle de manière occasionnelle. L’impact environnemental reste faible à l’échelle individuelle.",
-        "illustration": "/images/ilu2.png"
+        "illustration": "/images/ilu3.png"
       },
       {
         "text": "%name utilise régulièrement des outils d’IA. Cela augmente la consommation énergétique liée aux serveurs et aux centres de données.",
-        "illustration": "/images/ilu2.png"
+        "illustration": "/images/ilu3.png"
       },
       {
         "text": "%name utilise très fréquemment l’IA pour de nombreux usages. Cette pratique contribue à une demande accrue en énergie numérique.",
-        "illustration": "/images/ilu2.png"
+        "illustration": "/images/ilu3.png"
       },
       {
         "text": "%name utilise intensivement l’IA. À grande échelle, ce type d’usage participe à l’augmentation de l’empreinte carbone du numérique.",
-        "illustration": "/images/ilu2.png"
+        "illustration": "/images/ilu3.png"
       }
     ],
     "params": "promptIA"
@@ -94,19 +90,19 @@
     "explanations": [
       {
         "text": "%name consomme peu ou pas de viande. Ce choix réduit fortement l’impact climatique lié à son alimentation.",
-        "illustration": "/images/ilu2.png"
+        "illustration": "/images/ilu4.png"
       },
       {
         "text": "%name consomme de la viande occasionnellement. L’impact reste modéré, surtout si les repas végétaux sont majoritaires.",
-        "illustration": "/images/ilu2.png"
+        "illustration": "/images/ilu4.png"
       },
       {
         "text": "%name consomme régulièrement de la viande. Cela augmente les émissions liées à l’élevage et à la production alimentaire.",
-        "illustration": "/images/ilu2.png"
+        "illustration": "/images/ilu4.png"
       },
       {
         "text": "%name consomme beaucoup de viande, notamment rouge. Ce type d’alimentation a un fort impact carbone.",
-        "illustration": "/images/ilu2.png"
+        "illustration": "/images/ilu4.png"
       }
     ],
     "params": "meat"
@@ -121,20 +117,20 @@
     },
     "explanations": [
       {
-        "text": "%name consomme principalement des produits %reponse. Cela limite les émissions liées au transport et à la production hors saison.",
-        "illustration": "/images/ilu2.png"
+        "text": "%name consomme principalement des produits locaux. Cela limite les émissions liées au transport et à la production hors saison.",
+        "illustration": "/images/ilu5.png"
       },
       {
         "text": "%name fait parfois attention à l’origine et à la saisonnalité des produits. L’impact reste intermédiaire.",
-        "illustration": "/images/ilu2.png"
+        "illustration": "/images/ilu5.png"
       },
       {
         "text": "%name consomme souvent des produits importés ou hors saison. Cela augmente l’empreinte carbone de son alimentation.",
-        "illustration": "/images/ilu2.png"
+        "illustration": "/images/ilu5.png"
       },
       {
         "text": "%name consomme majoritairement des produits très transformés ou importés de loin. Ce mode de consommation est plus émetteur.",
-        "illustration": "/images/ilu2.png"
+        "illustration": "/images/ilu5.png"
       }
     ],
     "params": "products"
@@ -150,19 +146,19 @@
     "explanations": [
       {
         "text": "%name garde son téléphone longtemps. Cela limite les impacts liés à l’extraction de ressources et à la fabrication.",
-        "illustration": "/images/ilu2.png"
+        "illustration": "/images/ilu6.png"
       },
       {
         "text": "%name change de téléphone occasionnellement. L’impact reste modéré.",
-        "illustration": "/images/ilu2.png"
+        "illustration": "/images/ilu6.png"
       },
       {
         "text": "%name change régulièrement de téléphone. Cela augmente la demande en ressources et en énergie.",
-        "illustration": "/images/ilu2.png"
+        "illustration": "/images/ilu6.png"
       },
       {
         "text": "%name change très souvent de téléphone. Ce comportement a un impact environnemental élevé.",
-        "illustration": "/images/ilu2.png"
+        "illustration": "/images/ilu6.png"
       }
     ],
     "params": "phone"
@@ -178,19 +174,19 @@
     "explanations": [
       {
         "text": "%name chauffe peu son logement. Cela réduit significativement les consommations d’énergie.",
-        "illustration": "/images/ilu2.png"
+        "illustration": "/images/ilu7.png"
       },
       {
         "text": "%name chauffe son logement de manière raisonnable. L’impact reste limité.",
-        "illustration": "/images/ilu2.png"
+        "illustration": "/images/ilu7.png"
       },
       {
         "text": "%name chauffe assez fort son logement. Cela augmente les émissions liées à l’énergie.",
-        "illustration": "/images/ilu2.png"
+        "illustration": "/images/ilu7.png"
       },
       {
         "text": "%name chauffe très fortement son logement. Ce choix a un impact climatique important.",
-        "illustration": "/images/ilu2.png"
+        "illustration": "/images/ilu7.png"
       }
     ],
     "params": "energy"
@@ -206,19 +202,19 @@
     "explanations": [
       {
         "text": "%name achète peu de vêtements neufs. Cela limite l’impact d’une industrie très consommatrice d’eau et d’énergie.",
-        "illustration": "/images/ilu2.png"
+        "illustration": "/images/ilu8.png"
       },
       {
         "text": "%name achète des vêtements de temps en temps. L’impact reste modéré.",
-        "illustration": "/images/ilu2.png"
+        "illustration": "/images/ilu8.png"
       },
       {
         "text": "%name achète régulièrement des vêtements neufs. Cela augmente l’empreinte carbone liée au textile.",
-        "illustration": "/images/ilu2.png"
+        "illustration": "/images/ilu8.png"
       },
       {
         "text": "%name renouvelle très souvent sa garde-robe. L’industrie textile est l’une des plus polluantes au monde.",
-        "illustration": "/images/ilu2.png"
+        "illustration": "/images/ilu8.png"
       }
     ],
     "params": "clothes"

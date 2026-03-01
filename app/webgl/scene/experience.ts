@@ -2,6 +2,7 @@ import * as THREE from "three";
 import gsap from "gsap";
 import { delay } from "../utils";
 import { useAudio } from "~/composables/useAudio";
+import { useAmbient } from "~/composables/useAmbient";
 
 // camera sound
 const { playCamera } = useAudio();
@@ -23,7 +24,8 @@ export async function moveToStep(target: number | "next" | "previous") {
   const worldStore = useWorld();
   const configStore = useConfig();
   const uiStore = useUi();
-  await uiStore.cloudsTransition?.showClouds();
+  uiStore.cloudsTransition?.showClouds();
+  await delay(200);
 
   let targetStep: number = configStore.currentStep;
   if (typeof target === "number") {
@@ -57,7 +59,6 @@ export async function moveToStep(target: number | "next" | "previous") {
     const firstChild = part.children[0];
 
     if (!firstChild) return;
-    console.log(part);
 
     const currentState = getCurrentState(
       firstChild.userData.states,
@@ -135,10 +136,7 @@ function updateImpact(
 
       break;
     case "farmhouse":
-      console.log("____________farmhouse case");
-
       const farmhouseState = getLevel(evolution);
-      console.log("____________farmhouse case", farmhouseState);
 
       worldStore.impactsParts.farmhouse?.children.forEach((child) => {
         if (child.name.includes(farmhouseState!)) {
@@ -147,7 +145,6 @@ function updateImpact(
           child.visible = false;
         }
       });
-      console.log(worldStore.impactsParts.farmhouse);
 
       break;
     default:
@@ -199,7 +196,12 @@ export function goToCameraSpot(index: number) {
   worldStore.camera?.goToSpot(index);
 }
 
-export function resetExperience() {
+export async function resetExperience() {
+  const { resetAmbient } = useAmbient();
+  console.log("experience resret");
+  resetAmbient();
+  const uiStore = useUi();
+  await uiStore.cloudsTransition?.showClouds();
   const configStore = useConfig();
   const worldStore = useWorld();
 
@@ -230,6 +232,7 @@ export function resetExperience() {
   hideElements();
 
   worldStore.camera?.goToSpot(0);
+  await uiStore.cloudsTransition?.hideClouds();
 }
 
 // couleur du sol via la temp

@@ -41,14 +41,19 @@ const userData = {
 };
 // const userData = {
 //   plane: 100,
-//   transport: 100,
+//   transport: 66,
 //   meat: 70,
 //   promptIA: 55,
 //   products: 30,
 //   phone: 10,
-//   energy: 100,
+//   energy: 0,
 //   clothes: 90,
 // };
+const currentExplanation = ref<number>(0);
+function changeExplanationQuestion() {
+  currentExplanation.value += 1;
+  uiStore.changeFocusedExplanationQuestion(currentExplanation.value);
+}
 </script>
 
 <template>
@@ -93,18 +98,19 @@ const userData = {
         </div>
       </div>
 
-      <div
+      <!--
+        <div
         class="experienceEnds-control"
         v-if="
-          configStore.currentStep === configStore.worldStateSteps.length - 1
+        configStore.currentStep === configStore.worldStateSteps.length - 1
         "
-      >
+        >
+        -->
+      <div class="experienceEnds-control">
         <h2>RESULTS</h2>
         <button @click="uiStore.toggleModalResult()">Finish experience</button>
         <button @click="uiStore.showExplanations()">Show explanations</button>
-        <button @click="uiStore.changeFocusedExplanationQuestion(3)">
-          changeQuestions
-        </button>
+        <button @click="changeExplanationQuestion">changeQuestions</button>
         <button @click="uiStore.toggleModalResult()">closeResults</button>
         <button @click="resetExperience">reset experience</button>
       </div>
@@ -117,7 +123,7 @@ const userData = {
   height: 100vh;
   width: 100vw;
   position: fixed;
-  z-index: 2;
+  z-index: 999;
   > button {
     padding: 14px;
     bottom: 60px;

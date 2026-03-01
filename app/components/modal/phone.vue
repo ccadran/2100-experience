@@ -12,19 +12,18 @@ async function revealModal() {
   gsap.set(modal.value!, { display: "flex" });
   gsap.set(mascot.value!, { display: "flex" });
 
-
   initAudioContext();
   playOnboarding();
 
   await gsap
     .timeline({
-      defaults: { ease: "cubic-bezier(0.25, 0.95, 0, 1)" },
+      defaults: { ease: "power2.inOut" },
       duration: 0.5,
     })
     .fromTo(
       modal.value!,
       { opacity: 0, rotate: -30 },
-      { opacity: 1, rotate: 0 },
+      { opacity: 1, rotate: 0, ease: "power2.Out" },
       0,
     )
     .fromTo(mascot.value!, { y: "100%" }, { y: "20%" }, 0)
@@ -34,21 +33,21 @@ async function revealModal() {
 async function hideModal() {
   await gsap
     .timeline({
-      defaults: { ease: "cubic-bezier(0.25, 0.95, 0, 1)" },
+      defaults: { ease: "power2.inOut" },
       duration: 0.5,
     })
     .to(
       modal.value!,
       { opacity: 0, rotate: -10, ease: "power2.out", duration: 0.35 },
-      0,
+      0.2,
     )
-    .to(mascot.value!, { y: "100%" }, 0)
+    .to(mascot.value!, { y: "100%", opacity: 0 }, 0)
     .then();
 }
 
 async function animModal() {
   await revealModal();
-  await delay(1000);
+  await delay(1800);
   await hideModal();
 }
 
