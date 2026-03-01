@@ -24,6 +24,14 @@ const userGlobalRanking = ref<number>(0);
 const currentQuestionUserRanking = ref<number>(0);
 const currentQuestionUserExplanation = ref<number>(0);
 const questionsList = ref<HTMLElement[]>([]);
+const isExplanationShown = ref<boolean>(false);
+watch(
+  () => uiStore.isExplanationsShown,
+  (newValue) => {
+    //leave results
+    //enter anim
+  },
+);
 
 const resultsReady = ref(false);
 {
@@ -170,10 +178,36 @@ async function revealResultsModal() {
     );
 }
 
+function hideResults() {
+  const hideTl = gsap.timeline();
+  hideTl
+    .fromTo(
+      ".result-description p .word",
+      { y: "0%", opacity: 1 },
+      { y: "100%", opacity: 0, stagger: { each: 0.025, from: "end" } },
+    )
+    .fromTo(
+      ".ranking .mascot",
+      { opacity: 1, y: "0%", x: "-50%" },
+      {
+        opacity: 0,
+        y: "100%",
+        x: "-50%",
+        duration: 0.45,
+        ease: "power3.inOut",
+      },
+      0.15,
+    )
+    .to(".result-description .rank", { opacity: 0, ease: "power2.inOut" }, 0.15)
+    .set(".ranking", { display: "none" });
+  return hideTl;
+}
+
 watch(
   () => uiStore.isExplanationsShown,
-  (newValue) => {
+  async (newValue) => {
     if (newValue) {
+      await hideResults();
       showExplanations();
       console.log("show explanations");
     } else {
@@ -362,7 +396,7 @@ defineExpose({
       <div class="title">
         <p>Résultats</p>
       </div>
-      <div class="ranking" v-if="!uiStore.isExplanationsShown">
+      <div class="ranking">
         <div class="result-description">
           <div v-if="resultsReady" class="rank">
             <img :src="resultsData[userGlobalRanking]?.rank" alt="" />
@@ -375,7 +409,7 @@ defineExpose({
           <video src="/videos/4 - resultst.webm" autoplay loop muted></video>
         </div>
       </div>
-      <div class="explanations" v-else>
+      <div class="explanations">
         <div class="explanations-content">
           <div class="question-icon">
             <img :src="questionsData[currentQuestion]?.icon" alt="" />
