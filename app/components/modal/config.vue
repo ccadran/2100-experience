@@ -137,7 +137,7 @@ defineExpose({ animConfigModals, hideModals });
   bottom: 5vh;
   right: 60px;
   z-index: 2;
-  z-index: 200;
+
   > .modals-container {
     position: relative;
     width: 100%;

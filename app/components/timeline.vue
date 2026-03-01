@@ -222,7 +222,7 @@ function entryTimeline() {
 }
 .timeline-container {
   z-index: 2;
-  z-index: 200;
+
   width: 100vw;
   position: absolute;
   bottom: 0;
