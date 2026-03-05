@@ -82,11 +82,11 @@ export const useAudio = () => {
   // Musique ambiance
   const playGoodAmbient = () => {
     if (ambient.playing() || isTransitioning) return;
-    
+
     isTransitioning = true;
     ambient.volume(0.1);
     ambient.play();
-    
+
     if (ambientDark.playing()) {
       ambientDark.fade(ambientDark.volume(), 0, 2000);
       setTimeout(() => {
@@ -100,11 +100,11 @@ export const useAudio = () => {
 
   const playDarkAmbient = () => {
     if (ambientDark.playing() || isTransitioning) return;
-    
+
     isTransitioning = true;
     ambientDark.volume(0.3);
     ambientDark.play();
-    
+
     if (ambient.playing()) {
       ambient.fade(ambient.volume(), 0, 2000);
       setTimeout(() => {
@@ -151,6 +151,15 @@ export const useAudio = () => {
     defeatSound.play();
   };
 
+  function muteSound() {
+    Howler.volume(0);
+    isMuted.value = true;
+  }
+  function unmuteSound() {
+    Howler.volume(1);
+    isMuted.value = false;
+  }
+
   return {
     initAudioContext,
     playGoodAmbient,
@@ -163,5 +172,7 @@ export const useAudio = () => {
     playMid,
     playDefeat,
     isMuted,
+    muteSound,
+    unmuteSound,
   };
 };

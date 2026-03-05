@@ -133,7 +133,7 @@ function changeExplanationQuestion() {
   }
   > .controls-debug {
     position: fixed;
-    top: 24px;
+    top: 144px;
     left: 24px;
     background-color: rgba(154, 154, 154, 0.4);
     border-radius: 24px;
