@@ -11,3 +11,7 @@ p {
   line-height: 125%;
   font-weight: 200;
 }
+
+* {
+  pointer-events: none;
+}

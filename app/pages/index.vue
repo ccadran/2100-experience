@@ -43,9 +43,15 @@ onMounted(async () => {
   uiStore.cloudsTransition = new CloudsTransition();
 
   await introRef.value.completeLoader();
-
-  await introRef.value.revealQr();
 });
+watch(
+  () => uiStore.isEntered,
+  (newValue) => {
+    if (newValue) {
+      introRef.value.revealQr();
+    }
+  },
+);
 
 function connectToWsServer() {
   nextTick(() => {

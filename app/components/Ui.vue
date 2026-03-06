@@ -1,7 +1,9 @@
 <script lang="ts" setup>
+import gsap from "gsap";
 const configStore = useConfig();
 const { muteSound, unmuteSound, isMuted } = useAudio();
 const socketStore = useWebSocket();
+const uiStore = useUi();
 
 function soundToggle() {
   console.log("btn clicked");
@@ -12,10 +14,49 @@ function soundToggle() {
     muteSound();
   }
 }
+
+watch(
+  () => uiStore.isLoaded,
+  (newValue) => {
+    if (newValue) {
+      revealEnterBtns();
+    }
+  },
+);
+let enterTl: gsap.core.Timeline;
+async function enterExperience(muted?: boolean) {
+  if (muted) muteSound();
+  await enterTl.reverse().then();
+  uiStore.isEntered = true;
+}
+
+function revealEnterBtns() {
+  const enterBtn = document.querySelector(".enter-btn");
+  const enterBtnMute = document.querySelector(".enter-btn-mute");
+
+  enterTl = gsap.timeline();
+  enterTl.set(".enter-container", { visibility: "visible " }).fromTo(
+    [enterBtn, enterBtnMute],
+    { opacity: 0, yPercent: 100 },
+    {
+      opacity: 1,
+      yPercent: 0,
+      stagger: 0.15,
+      duration: 0.75,
+      ease: "elastic.out(0.9,0.6)",
+    },
+  );
+}
 </script>
 
 <template>
   <div class="main-ui">
+    <div class="enter-container">
+      <button class="enter-btn" @click="enterExperience()">Commencer</button>
+      <button class="enter-btn-mute" @click="enterExperience(true)">
+        Commencer sans le son
+      </button>
+    </div>
     <div class="temperature-indicator" v-if="configStore.isFormValidated">
       <p>
         {{
@@ -42,9 +83,54 @@ function soundToggle() {
 .main-ui {
   height: 100%;
   width: 100%;
-  position: fixed;
-  z-index: 1;
+  position: static;
+
   pointer-events: none;
+  > .enter-container {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    top: 70%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 4;
+    pointer-events: all;
+    text-align: center;
+    gap: 8px;
+    visibility: hidden;
+    > .enter-btn {
+      pointer-events: all;
+      box-shadow:
+        0 -2px 4px 0 rgba(0, 0, 0, 0.25) inset,
+        -26px 82px 24px 0 rgba(0, 0, 0, 0),
+        -17px 52px 22px 0 rgba(0, 0, 0, 0),
+        -9px 29px 19px 0 rgba(0, 0, 0, 0.01),
+        -4px 13px 14px 0 rgba(0, 0, 0, 0.01),
+        -1px 3px 8px 0 rgba(0, 0, 0, 0.02);
+      background: var(
+        --white-gradient,
+        linear-gradient(
+          0deg,
+          rgba(255, 255, 255, 0.5) 0%,
+          rgba(255, 255, 255, 0.5) 100%
+        ),
+        linear-gradient(180deg, #fcfcfc 0%, #d1d1d1 100%)
+      );
+      border-radius: 32px;
+      padding: 1.56vw 2.06vw;
+      cursor: pointer;
+
+      font-size: 2vw;
+    }
+    > .enter-btn-mute {
+      cursor: pointer;
+
+      pointer-events: all;
+      font-size: 16px;
+      font-family: OpenRunde;
+      text-decoration: underline;
+    }
+  }
   > .temperature-indicator {
     position: absolute;
     right: 0;

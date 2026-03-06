@@ -124,14 +124,17 @@ function changeExplanationQuestion() {
   width: 100vw;
   position: fixed;
   z-index: 999;
+  pointer-events: none;
   > button {
     padding: 14px;
     bottom: 60px;
     left: 50%;
     transform: translateX(-50%);
     position: absolute;
+    pointer-events: all !important;
   }
   > .controls-debug {
+    pointer-events: all;
     position: fixed;
     top: 144px;
     left: 24px;
