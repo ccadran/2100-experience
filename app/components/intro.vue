@@ -40,13 +40,22 @@ async function loaderAnim() {
 }
 
 async function completeLoader() {
-  return gsap.timeline().to(loaderProgress.value!, {
-    width: "100%",
-    backgroundColor: "var(--green)",
-    onComplete: () => {
-      uiStore.isLoaded = true;
-    },
-  });
+  return gsap
+    .timeline()
+    .to(loaderProgress.value!, {
+      width: "100%",
+      backgroundColor: "var(--green)",
+    })
+    .to(
+      loaderContainer.value!,
+      {
+        opacity: 0,
+        onComplete: () => {
+          uiStore.isLoaded = true;
+        },
+      },
+      ">0.3",
+    );
 }
 
 async function revealQr() {
@@ -139,6 +148,7 @@ defineExpose({
 
 <style lang="scss">
 .intro {
+  pointer-events: none;
   z-index: 3;
   position: fixed;
   height: 100vh;
