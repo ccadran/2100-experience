@@ -123,7 +123,7 @@ watch(
     <Timeline />
     <ModalResults ref="modalResults" />
     <Clouds />
-    <!-- <Debug /> -->
+    <Debug />
     <Ui />
     <BlockMobile />
   </main>

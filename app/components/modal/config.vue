@@ -184,7 +184,7 @@ defineExpose({ animConfigModals, hideModals });
     height: auto;
     aspect-ratio: 459/334;
     // left: 50%;
-    transform: translateX(-50%);
+    // transform: translateX(-50%);
     z-index: -1;
     > video {
       width: 100%;
