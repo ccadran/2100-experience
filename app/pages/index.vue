@@ -38,7 +38,7 @@ onMounted(async () => {
 
   const tl = introRef.value.loaderAnim();
 
-  // await Promise.all([initScene(), tl.then()]);
+  await Promise.all([initScene(), tl.then()]);
 
   uiStore.cloudsTransition = new CloudsTransition();
 
@@ -123,7 +123,7 @@ watch(
     <Timeline />
     <ModalResults ref="modalResults" />
     <Clouds />
-    <Debug />
+    <!-- <Debug /> -->
     <Ui />
     <BlockMobile />
   </main>
