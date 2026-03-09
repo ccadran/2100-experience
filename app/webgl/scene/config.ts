@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import type { UserConfigType } from "~/types/config";
-import Camera from "./Camera";
+import Camera from "./camera";
 import Environment from "./Environment";
 import { moveToStep } from "./experience";
 
