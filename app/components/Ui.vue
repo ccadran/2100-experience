@@ -124,7 +124,7 @@ function revealEnterBtns() {
     }
     > .enter-btn-mute {
       cursor: pointer;
-
+      background: none;
       pointer-events: all;
       font-size: 16px;
       font-family: OpenRunde;
