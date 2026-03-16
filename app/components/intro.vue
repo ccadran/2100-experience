@@ -15,7 +15,7 @@ onMounted(() => {
   qrCodeSplitText.value = new SplitText(qrCodeText.value!, {
     type: "words",
   });
-  console.log(qrCodeSplitText.value.words);
+  console.log("ici c'est " + qrCodeSplitText.value.words);
 });
 
 async function loaderAnim() {
@@ -119,11 +119,19 @@ async function revealMap() {
     .to(appLogo.value!, { top: 0, width: "18vw" }, 0);
 }
 
+async function openConfigWindow(muted?: boolean) {
+  window.open(
+    `https://2100-configurateur.netlify.app/#room=${qrCode.value}`,
+    "_blank",
+  );
+}
+
 defineExpose({
   loaderAnim,
   completeLoader,
   revealQr,
   revealMap,
+  openConfigWindow,
 });
 </script>
 
@@ -143,6 +151,9 @@ defineExpose({
       Scan le code QR <br />
       pour te connecter
     </p>
+    <button class="open-config-btn" @click="openConfigWindow()">
+      Ouvrir dans une nouvelle fenêtre
+    </button>
   </div>
 </template>
 
@@ -234,6 +245,22 @@ defineExpose({
     transform: translateX(-50%);
     text-align: center;
     opacity: 0;
+  }
+
+  > .open-config-btn {
+    cursor: pointer;
+    position: absolute;
+    bottom: 60px;
+    opacity: 1;
+    // background: none;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+
+    pointer-events: all;
+    font-size: 16px;
+    font-family: OpenRunde;
+    text-decoration: underline;
   }
 }
 </style>
