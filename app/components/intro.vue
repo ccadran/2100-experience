@@ -3,19 +3,21 @@ import gsap from "gsap";
 import { SplitText } from "gsap/SplitText";
 
 const uiStore = useUi();
+const webSocketStore = useWebSocket();
 
 const loaderProgress = ref<HTMLElement>();
 const loaderContainer = ref<HTMLElement>();
 const appLogo = ref<HTMLElement>();
 const qrCode = ref<HTMLElement>();
 const qrCodeText = ref<HTMLElement>();
+const configOpenBtn = ref<HTMLElement>();
 const qrCodeSplitText = ref();
 
 onMounted(() => {
   qrCodeSplitText.value = new SplitText(qrCodeText.value!, {
     type: "words",
   });
-  console.log("ici c'est " + qrCodeSplitText.value.words);
+  console.log(qrCodeSplitText.value.words);
 });
 
 async function loaderAnim() {
@@ -89,6 +91,12 @@ async function revealQr() {
       { y: "100%", opacity: 0 },
       { y: "0%", opacity: 1, stagger: 0.025 },
       0,
+    )
+    .fromTo(
+      configOpenBtn.value!,
+      { y: 10, opacity: 0 },
+      { y: 0, opacity: 1, ease: "power1.inOut" },
+      ">0.5",
     );
 }
 
@@ -119,9 +127,9 @@ async function revealMap() {
     .to(appLogo.value!, { top: 0, width: "18vw" }, 0);
 }
 
-async function openConfigWindow(muted?: boolean) {
+async function openConfigWindow() {
   window.open(
-    `https://2100-configurateur.netlify.app/#room=${qrCode.value}`,
+    `https://2100-configurateur.netlify.app/#room=${webSocketStore.roomId}`,
     "_blank",
   );
 }
@@ -151,7 +159,7 @@ defineExpose({
       Scan le code QR <br />
       pour te connecter
     </p>
-    <button class="open-config-btn" @click="openConfigWindow()">
+    <button class="open-config-btn" @click="openConfigWindow()" ref="configOpenBtn">
       Ouvrir dans une nouvelle fenêtre
     </button>
   </div>
@@ -251,8 +259,8 @@ defineExpose({
     cursor: pointer;
     position: absolute;
     bottom: 60px;
-    opacity: 1;
-    // background: none;
+    opacity: 0;
+    background: none;
     left: 50%;
     transform: translateX(-50%);
     text-align: center;
