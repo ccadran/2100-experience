@@ -168,6 +168,7 @@ function revealEnterBtns() {
     width: 3.75vw;
     height: 3.75vw;
     pointer-events: all;
+    cursor: pointer;
     box-shadow:
       0 -2px 4px 0 rgba(0, 0, 0, 0.25) inset,
       -26px 82px 24px 0 rgba(0, 0, 0, 0),

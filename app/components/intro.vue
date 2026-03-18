@@ -113,6 +113,9 @@ async function revealMap() {
       opacity: 0,
       rotation: -90,
     })
+    .to(configOpenBtn.value!, {
+      opacity: 0,
+    })
     .fromTo(
       qrCodeSplitText.value.words,
       { y: "0%", opacity: 1 },
@@ -124,7 +127,10 @@ async function revealMap() {
       },
       0,
     )
-    .to(appLogo.value!, { top: 0, width: "18vw" }, 0);
+    .to(appLogo.value!, { 
+      top: 0,
+      width: "18vw"
+    }, 0)
 }
 
 async function openConfigWindow() {
