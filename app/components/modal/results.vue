@@ -568,6 +568,7 @@ defineExpose({
         align-items: center;
         justify-content: space-between;
         position: relative;
+
         > .question-icon {
           position: absolute;
           width: 13vw;
@@ -625,7 +626,7 @@ defineExpose({
         > .explanation-illu {
           width: 48%;
           position: relative;
-          height: 100%;
+          height: 40vh;
           > .illu-container {
             border-radius: 48px;
             width: 100%;
