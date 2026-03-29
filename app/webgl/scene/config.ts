@@ -45,12 +45,8 @@ export function initScene(): Promise<void> {
 
     const loader = new GLTFLoader();
     loader.load(
-      // "/3d/states.glb",
-      // "/3d/2100-map__V1.glb",
-      // "/3d/map.glb",
-      // "/3d/map-v10.glb",
-      "/3d/map-v36.glb",
-      // "/3d/map-spots.glb",
+      "/3d/map-v38.glb",
+
       (gltf: any) => {
         gltf.scene.scale.set(1, 1, 1);
 
@@ -121,6 +117,12 @@ export function initScene(): Promise<void> {
             });
           } else if (child.name.includes("City")) {
             worldStore.sceneMeshes["city"] = markRaw(child);
+          } else if (child.name.includes("DECORS")) {
+            child.children.forEach((c) => {
+              if (c.name.includes("-hide")) {
+                worldStore.sceneMeshes[c.name] = markRaw(c);
+              }
+            });
           }
         });
 
@@ -129,12 +131,6 @@ export function initScene(): Promise<void> {
         updateCity(configStore.configParams.currentTemperature);
 
         hideElements();
-        console.log(
-          "CALLS",
-          renderer.info.render.calls,
-          "TRIANGLES",
-          renderer.info.render.triangles,
-        );
 
         environment.initFog();
         worldStore.fogControls = environment.getFogControls();

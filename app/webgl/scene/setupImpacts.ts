@@ -3,9 +3,6 @@ import { updateImpactNumber } from "./experience";
 
 export function setupAllImpacts() {
   const worldStore = useWorld();
-  console.log(worldStore.impactsParts);
-
-  console.log(Object.entries(worldStore.impactsParts));
 
   Object.entries(worldStore.impactsParts).forEach(([key, value]) => {
     if (!value) return;
