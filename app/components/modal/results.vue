@@ -49,6 +49,28 @@ const rankingIcons = [
   "/icons/rank-f.webp",
 ];
 
+// Liste de toutes les images à précharger
+const imagesToPreload = computed(() => {
+  const urls: string[] = [...rankingIcons];
+
+  questionsData.forEach((q) => {
+    urls.push(q.icon);
+    q.explanations.forEach((e) => {
+      if (e.illustration) urls.push(e.illustration);
+    });
+  });
+
+  return urls;
+});
+
+// Fonction de préchargement au montage
+onMounted(() => {
+  imagesToPreload.value.forEach((url) => {
+    const img = new Image();
+    img.src = url;
+  });
+});
+
 // changer les %name par le vrai username
 const resultText = computed(() => {
   const rawText = resultsData[userGlobalRanking.value]?.text ?? "";
@@ -311,7 +333,7 @@ async function changeQuestion(target: number) {
 
   await nextTick();
 
-  // await waitForImageLoad(".explanation-illu .illu");
+  await waitForImageLoad(".explanation-illu .illu");
 
   gsap
     .timeline()
