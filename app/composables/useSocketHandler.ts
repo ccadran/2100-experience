@@ -25,17 +25,13 @@ export function useSocketHandler() {
   const YEAR_VALIDATION_DELAY = 500;
 
   function handleIncomingPayload(payload: IncomingPayload) {
-    console.log("Incoming payload:", payload);
-
     switch (payload.type) {
       /*------- FORMS -------*/
       case "REVEAL":
-        console.log("Payload → REVEAL");
         revealElements();
         break;
 
       case "VALIDATE_FORM":
-        console.log("Payload → VALIDATE_FORM", payload.data);
         handleFormValidations(payload.data);
         break;
 
@@ -78,33 +74,32 @@ export function useSocketHandler() {
       case "CAMERA_SPOT": {
         const index = payload.data.strength - 1;
         goToCameraSpot(index);
-        console.log("Camera → go to spot", index);
+
         break;
       }
 
       /*------- EXPERIENCE END -------*/
       case "END_EXPERIENCE":
         uiStore.showModalResult();
-        console.log(uiStore.isModalResultShown);
-        console.log("Payload → END_EXPERIENCE");
+
         break;
 
       /*------- SHOW EXPLANATIONS -------*/
       case "SHOW_EXPLANATIONS":
         uiStore.showExplanations();
-        console.log("Payload → SHOW_EXPLANATIONS");
+
         break;
 
       /*------- CLOSE EXPLANATIONS -------*/
       case "CLOSE_EXPLANATIONS":
         uiStore.toggleModalResult();
-        console.log("Payload → CLOSE_EXPLANATIONS");
+
         break;
 
       /*------- CHANGE QUESTION -------*/
       case "CHANGE_QUESTION_EXPLANATION":
         uiStore.changeFocusedExplanationQuestion(payload.data.question);
-        console.log("Payload → CHANGE_QUESTION_EXPLANATION");
+
         break;
 
       case "RESET_EXPERIENCE":
@@ -113,7 +108,6 @@ export function useSocketHandler() {
 
       /*------- WORLD STEPS (placeholder) -------*/
       case "WORLD_STEPS":
-        console.log("Payload → WORLD_STEPS", payload.data);
         break;
 
       default:
@@ -122,8 +116,6 @@ export function useSocketHandler() {
   }
 
   function handleRoomCo(payload: IncomingPayload) {
-    console.log("Room count payload:", payload);
-
     if (payload.type === "ROOM_COUNT") {
       if (payload.count > 1) {
         webSocketStore.isRoomFull = true;
@@ -132,7 +124,6 @@ export function useSocketHandler() {
   }
 
   function handleUserJoined(payload: { userName: string }) {
-    console.log("Nom du user:", payload.userName);
     webSocketStore.setUserName(payload.userName);
   }
 
@@ -140,14 +131,12 @@ export function useSocketHandler() {
     on("update-client", handleIncomingPayload);
     on("room-count", handleRoomCo);
     on("user-joined", handleUserJoined);
-    console.log("Écouteurs WebSocket activés");
   };
 
   const stopListening = () => {
     off("update-client", handleIncomingPayload);
     off("room-count", handleRoomCo);
     off("user-joined", handleUserJoined);
-    console.log("Écouteurs WebSocket désactivés");
   };
 
   return {

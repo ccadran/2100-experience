@@ -6,8 +6,6 @@ const socketStore = useWebSocket();
 const uiStore = useUi();
 
 function soundToggle() {
-  console.log("btn clicked");
-
   if (isMuted.value) {
     unmuteSound();
   } else {

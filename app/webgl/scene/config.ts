@@ -226,7 +226,6 @@ export function handleFormValidations(userData: UserConfigType) {
         };
         break;
       default:
-        console.log("unknow param");
         break;
     }
   });
@@ -322,7 +321,6 @@ function calculateExperienceSteps() {
     worldStateSteps.push(worldState);
   }
   configStore.worldStateSteps = worldStateSteps;
-  console.log(worldStateSteps);
 }
 
 function calculateMaxTemperature() {

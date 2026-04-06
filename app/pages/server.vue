@@ -25,9 +25,7 @@ function revealOneStep() {
 }
 
 onMounted(() => {
-  on("update-client", (data) => {
-    console.log(data);
-  });
+  on("update-client", (data) => {});
 });
 </script>
 

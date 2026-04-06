@@ -80,8 +80,6 @@ export async function moveToStep(target: number | "next" | "previous") {
   });
 
   Object.values(configStore.worldImpacts).forEach((impact) => {
-    console.log(impact.name);
-
     updateImpact(impact.name, currentStep.impacts[impact.name].value);
   });
   await delay(500);
@@ -197,7 +195,7 @@ export function goToCameraSpot(index: number) {
 
 export async function resetExperience() {
   const { resetAmbient } = useAmbient();
-  console.log("experience resret");
+
   resetAmbient();
   const uiStore = useUi();
   await uiStore.cloudsTransition?.showClouds();
@@ -218,12 +216,9 @@ export async function resetExperience() {
 
   updateGroundColor(configStore.configParams.currentTemperature);
   updateCity(configStore.configParams.currentTemperature);
-  console.log(worldStore.paramsParts);
 
   worldStore.paramsParts.forEach((part) => {
     part.children.forEach((child) => {
-      // console.log(child);
-
       resetParmasAssets(child as THREE.InstancedMesh);
     });
   });

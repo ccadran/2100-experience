@@ -34,12 +34,10 @@ export function useSocket() {
     // Gestion des événements d'état
     socket.on("connect", () => {
       webSocketStore.isConnected = true;
-      console.log("Client Socket.io connecté (Nuxt).");
     });
 
     socket.on("disconnect", () => {
       webSocketStore.isConnected = false;
-      console.log("Client Socket.io déconnecté (Nuxt).");
     });
   }
 

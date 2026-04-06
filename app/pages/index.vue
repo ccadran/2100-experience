@@ -85,7 +85,6 @@ const webSocketStore = useWebSocket();
 watch(
   () => webSocketStore.isRoomFull,
   async (newValue) => {
-    console.log("isRoomFull", newValue);
     if (newValue) {
       await delay(200);
       introRef.value.revealMap();

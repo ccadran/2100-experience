@@ -3,8 +3,6 @@ const configStore = useConfig();
 const { muteSound, unmuteSound, isMuted } = useAudio();
 
 function soundToggle() {
-  console.log("btn clicked");
-
   if (isMuted.value) {
     unmuteSound();
   } else {

@@ -88,8 +88,6 @@ const explanationText = computed(() => {
 watch(
   () => uiStore.isModalResultShown,
   (newValue) => {
-    console.log("RESULT", newValue);
-
     if (newValue) {
       revealResultsModal();
     } else {
@@ -234,7 +232,6 @@ watch(
     if (newValue) {
       await hideResults();
       showExplanations();
-      console.log("show explanations");
     } else {
       gsap.set(".explanations", { opacity: 0 });
     }
@@ -314,7 +311,6 @@ async function showExplanations() {
 
 function changeBackgroundFocus(target: number) {
   const bg = questionsList.value[target]?.querySelector(".background");
-  console.log(bg);
 
   return gsap.to(bg!, { opacity: 1 });
 }

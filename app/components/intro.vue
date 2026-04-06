@@ -17,7 +17,6 @@ onMounted(() => {
   qrCodeSplitText.value = new SplitText(qrCodeText.value!, {
     type: "words",
   });
-  console.log(qrCodeSplitText.value.words);
 });
 
 async function loaderAnim() {
@@ -127,10 +126,14 @@ async function revealMap() {
       },
       0,
     )
-    .to(appLogo.value!, { 
-      top: 0,
-      width: "18vw"
-    }, 0)
+    .to(
+      appLogo.value!,
+      {
+        top: 0,
+        width: "18vw",
+      },
+      0,
+    );
 }
 
 async function openConfigWindow() {
@@ -165,7 +168,11 @@ defineExpose({
       Scan le code QR <br />
       pour te connecter
     </p>
-    <button class="open-config-btn" @click="openConfigWindow()" ref="configOpenBtn">
+    <button
+      class="open-config-btn"
+      @click="openConfigWindow()"
+      ref="configOpenBtn"
+    >
       Ouvrir dans une nouvelle fenêtre
     </button>
   </div>
