@@ -37,7 +37,7 @@
     },
     "explanations": [
       {
-        "text": "%name se déplace principalement à pieds. Ce choix réduit fortement les émissions de CO₂ liées aux trajets du quotidien.",
+        "text": "%name se déplace principalement à pied. Ce choix réduit fortement les émissions de CO₂ liées aux trajets du quotidien.",
         "illustration": "/images/ilu2.png"
       },
       {
@@ -195,7 +195,7 @@
     "number": "Question 8",
     "icon": "/icons/clothes.webp",
     "officialData": {
-      "text": "Selon l’ADEME, acheter deux fois moins de vêtements peut réduire l’impact carbone lié au textile de 25 à 30 %.",
+      "text": "Selon GreenPeace, acheter deux fois moins de vêtements peut réduire l’impact carbone lié au textile de 25 à 30 %.",
       "linkText": "GreenPeace",
       "link": "https://www.greenpeace.fr/comment-opter-pour-une-mode-plus-ethique-et-responsable/"
     },

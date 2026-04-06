@@ -107,7 +107,7 @@ defineExpose({ animConfigModals, hideModals });
     <div class="modals-container">
       <div class="modal modal-1" ref="modal1">
         <p>
-          {{ userName ?? "Il" }} attend que tu configures son monde. Fait le sur
+          {{ userName ?? "Il" }} attend que tu configures son monde. Fais-le sur
           ton tel, il est impatient !
         </p>
       </div>
@@ -120,7 +120,7 @@ defineExpose({ animConfigModals, hideModals });
       <div class="modal modal-3" ref="modal3">
         <p>
           Pendant que tu configures son univers sur mobile,
-          {{ userName ?? "Il" }} retient son souffle… surprends-le !
+          {{ userName ?? "Il" }} retient son souffle… Surprends-le !
         </p>
       </div>
     </div>
