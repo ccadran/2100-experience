@@ -26,6 +26,8 @@ export default class Camera {
   private spots: THREE.Object3D[] = [];
   private lookAtTargets: THREE.Object3D[] = [];
   private currentSpotIndex = 0;
+  private idleSpinAnim: gsap.core.Animation | null = null;
+  private idleHeightAnim: gsap.core.Animation | null = null;
 
   constructor({
     startPosition = new THREE.Vector3(0, 38, 60),
@@ -110,7 +112,7 @@ export default class Camera {
     this.currentSpotIndex = 0;
   }
 
-  goToSpot(index: number) {
+  async goToSpot(index: number) {
     const spot = this.spots[index];
     const lookAt = this.lookAtTargets[index];
 
@@ -126,7 +128,7 @@ export default class Camera {
       ease: "power2.inOut",
     });
 
-    gsap.to(this.targetLookAt, {
+    await gsap.to(this.targetLookAt, {
       x: lookAt.position.x,
       y: lookAt.position.y,
       z: lookAt.position.z,
@@ -135,10 +137,51 @@ export default class Camera {
     });
   }
 
-  // zoom(value: number) {
-  //   const factor = 1 + value * this.zoomRangeMultiplier;
-  //   this.targetPosition.y = this.endPosition.y * factor;
-  // }
+  idleAnim() {
+    const diffX = this.targetPosition.x - this.targetLookAt.x;
+    const diffZ = this.targetPosition.z - this.targetLookAt.z;
+    const data = {
+      distance: this.targetPosition.distanceTo(this.targetLookAt),
+      updatedAngle: Math.atan2(diffZ, diffX),
+    };
+
+    this.idleSpinAnim = gsap.to(data, {
+      updatedAngle: data.updatedAngle + Math.PI * 2,
+      repeat: -1,
+      duration: 30,
+      ease: "none",
+      onUpdate: () => {
+        this.targetPosition.x =
+          this.targetLookAt.x + data.distance * Math.sin(data.updatedAngle);
+        this.targetPosition.z =
+          this.targetLookAt.z + data.distance * Math.cos(data.updatedAngle);
+      },
+    });
+    let initialYPosition = this.targetPosition.y;
+    this.idleHeightAnim = gsap
+      .timeline({ repeat: -1 })
+      .to(this.targetPosition, {
+        y: initialYPosition - 3,
+        duration: 5,
+        ease: "none",
+      })
+      .to(
+        this.targetPosition,
+        {
+          y: initialYPosition,
+          duration: 5,
+          ease: "none",
+        },
+        ">",
+      );
+  }
+
+  public killIdleAnim() {
+    if (this.idleHeightAnim && this.idleSpinAnim) {
+      this.idleHeightAnim.kill();
+      this.idleSpinAnim.kill();
+    }
+  }
 
   entryAnim() {
     gsap.fromTo(

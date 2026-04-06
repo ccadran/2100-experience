@@ -10,7 +10,7 @@ import { setupInstances } from "./createInstances";
 import { setupAllImpacts } from "./setupImpacts";
 
 export function initScene(): Promise<void> {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     const worldStore = useWorld();
     const configStore = useConfig();
     const container = document.querySelector(".scene");
@@ -45,16 +45,12 @@ export function initScene(): Promise<void> {
 
     const loader = new GLTFLoader();
     loader.load(
-      // "/3d/states.glb",
-      // "/3d/2100-map__V1.glb",
-      // "/3d/map.glb",
-      // "/3d/map-v10.glb",
-      "/3d/map-v36.glb",
-      // "/3d/map-spots.glb",
-      (gltf: any) => {
+      "/3d/map-v41.glb",
+
+      async (gltf: any) => {
         gltf.scene.scale.set(1, 1, 1);
 
-        gltf.scene.traverse((child: any) => {
+        gltf.scene.traverse(async (child: any) => {
           // booster les mat des objets
 
           if (child.isMesh) {
@@ -88,6 +84,7 @@ export function initScene(): Promise<void> {
           gltf.scene.getObjectByName("spot-1"),
           gltf.scene.getObjectByName("spot-2"),
           gltf.scene.getObjectByName("spot-3"),
+          gltf.scene.getObjectByName("spot-4"),
         ]
           .filter(Boolean)
           .map((s) => markRaw(s));
@@ -95,13 +92,15 @@ export function initScene(): Promise<void> {
           gltf.scene.getObjectByName("target-1"),
           gltf.scene.getObjectByName("target-2"),
           gltf.scene.getObjectByName("target-3"),
+          gltf.scene.getObjectByName("target-4"),
         ]
           .filter(Boolean)
           .map((s) => markRaw(s));
 
         if (worldStore.camera) {
           worldStore.camera.setSpots(spots, lookAts);
-          worldStore.camera.goToSpot(0);
+          await worldStore.camera.goToSpot(3);
+          worldStore.camera.idleAnim();
         }
 
         const sceneChildrens = worldStore.scene3d?.children;
@@ -121,6 +120,12 @@ export function initScene(): Promise<void> {
             });
           } else if (child.name.includes("City")) {
             worldStore.sceneMeshes["city"] = markRaw(child);
+          } else if (child.name.includes("DECORS")) {
+            child.children.forEach((c) => {
+              if (c.name.includes("-hide")) {
+                worldStore.sceneMeshes[c.name] = markRaw(c);
+              }
+            });
           }
         });
 
@@ -129,12 +134,6 @@ export function initScene(): Promise<void> {
         updateCity(configStore.configParams.currentTemperature);
 
         hideElements();
-        console.log(
-          "CALLS",
-          renderer.info.render.calls,
-          "TRIANGLES",
-          renderer.info.render.triangles,
-        );
 
         environment.initFog();
         worldStore.fogControls = environment.getFogControls();
@@ -237,6 +236,7 @@ export function handleFormValidations(userData: UserConfigType) {
   calculateExperienceSteps();
   setupObjectsData();
   moveToStep(0);
+  worldStore.camera?.killIdleAnim();
 }
 
 function calculateExperienceSteps() {

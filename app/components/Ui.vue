@@ -52,7 +52,11 @@ function revealEnterBtns() {
 <template>
   <div class="main-ui">
     <div class="enter-container">
-      <button class="enter-btn" @click="enterExperience()">Commencer</button>
+      <!-- <button class="enter-btn" @click="enterExperience()">Commencer</button> -->
+      <Button
+        textContent="Commencer la simulation"
+        @click="enterExperience()"
+      />
       <button class="enter-btn-mute" @click="enterExperience(true)">
         Commencer sans le son
       </button>
@@ -90,38 +94,15 @@ function revealEnterBtns() {
     display: flex;
     flex-direction: column;
     position: absolute;
-    top: 70%;
+    top: 80%;
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 4;
     pointer-events: all;
     text-align: center;
-    gap: 8px;
+    gap: 12px;
     visibility: hidden;
-    > .enter-btn {
-      pointer-events: all;
-      box-shadow:
-        0 -2px 4px 0 rgba(0, 0, 0, 0.25) inset,
-        -26px 82px 24px 0 rgba(0, 0, 0, 0),
-        -17px 52px 22px 0 rgba(0, 0, 0, 0),
-        -9px 29px 19px 0 rgba(0, 0, 0, 0.01),
-        -4px 13px 14px 0 rgba(0, 0, 0, 0.01),
-        -1px 3px 8px 0 rgba(0, 0, 0, 0.02);
-      background: var(
-        --white-gradient,
-        linear-gradient(
-          0deg,
-          rgba(255, 255, 255, 0.5) 0%,
-          rgba(255, 255, 255, 0.5) 100%
-        ),
-        linear-gradient(180deg, #fcfcfc 0%, #d1d1d1 100%)
-      );
-      border-radius: 32px;
-      padding: 1.56vw 2.06vw;
-      cursor: pointer;
 
-      font-size: 2vw;
-    }
     > .enter-btn-mute {
       cursor: pointer;
       background: none;
@@ -168,6 +149,7 @@ function revealEnterBtns() {
     width: 3.75vw;
     height: 3.75vw;
     pointer-events: all;
+    cursor: pointer;
     box-shadow:
       0 -2px 4px 0 rgba(0, 0, 0, 0.25) inset,
       -26px 82px 24px 0 rgba(0, 0, 0, 0),

@@ -24,8 +24,7 @@ export async function moveToStep(target: number | "next" | "previous") {
   const worldStore = useWorld();
   const configStore = useConfig();
   const uiStore = useUi();
-  uiStore.cloudsTransition?.showClouds();
-  await delay(200);
+  await uiStore.cloudsTransition?.showClouds();
 
   let targetStep: number = configStore.currentStep;
   if (typeof target === "number") {
@@ -231,7 +230,9 @@ export async function resetExperience() {
 
   hideElements();
 
-  worldStore.camera?.goToSpot(0);
+  worldStore.camera?.goToSpot(3);
+  worldStore.camera?.idleAnim();
+
   await uiStore.cloudsTransition?.hideClouds();
 }
 

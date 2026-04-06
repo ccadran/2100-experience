@@ -12,12 +12,18 @@ export function hideElements() {
   worldStore.hiddenSceneParts = [];
 
   Object.values(worldStore.sceneMeshes).forEach((meshGroup) => {
+    console.log(meshGroup.name);
+
     if (
       meshGroup.name.includes("sheeps") ||
       meshGroup.name.includes("chickens") ||
-      meshGroup.name.includes("City")
+      meshGroup.name.includes("City") ||
+      meshGroup.name.includes("-hide")
     ) {
       meshGroup.position.y = -10;
+      if (meshGroup.name.includes("-hide")) {
+        console.log(meshGroup);
+      }
       worldStore.hiddenSceneParts.push(markRaw(meshGroup));
     } else {
       meshGroup.children.forEach((mesh) => {

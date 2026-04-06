@@ -36,7 +36,6 @@ export function setupInstances() {
         });
       });
 
-      // console.log(sortedStates);
       Object.entries(sortedStates).forEach((state) => {
         const instance = createInstances(state[1], state[0], state[1].length);
         newGroup.add(instance);
@@ -196,7 +195,10 @@ function deleteBaseMeshes() {
       o.name.includes("normal") ||
       o.name.includes("bad") ||
       o.name.includes("worst") ||
-      o.name.includes("best")
+      o.name.includes("best") ||
+      o.name.includes("low") ||
+      o.name.includes("mid") ||
+      o.name.includes("high")
     ) {
       o.visible = false;
     }

@@ -49,6 +49,28 @@ const rankingIcons = [
   "/icons/rank-f.webp",
 ];
 
+// Liste de toutes les images à précharger
+const imagesToPreload = computed(() => {
+  const urls: string[] = [...rankingIcons];
+
+  questionsData.forEach((q) => {
+    urls.push(q.icon);
+    q.explanations.forEach((e) => {
+      if (e.illustration) urls.push(e.illustration);
+    });
+  });
+
+  return urls;
+});
+
+// Fonction de préchargement au montage
+onMounted(() => {
+  imagesToPreload.value.forEach((url) => {
+    const img = new Image();
+    img.src = url;
+  });
+});
+
 // changer les %name par le vrai username
 const resultText = computed(() => {
   const rawText = resultsData[userGlobalRanking.value]?.text ?? "";
@@ -183,7 +205,7 @@ function hideResults() {
     .fromTo(
       ".result-description p .word",
       { y: "0%", opacity: 1 },
-      { y: "100%", opacity: 0, stagger: { each: 0.025, from: "end" } },
+      { y: "-100%", opacity: 0, stagger: { each: 0.025, from: "start" } },
     )
     .fromTo(
       ".ranking .mascot",
@@ -197,7 +219,11 @@ function hideResults() {
       },
       0.15,
     )
-    .to(".result-description .rank", { opacity: 0, ease: "power2.inOut" }, 0.15)
+    .to(
+      ".result-description .rank",
+      { opacity: 0, y: "-50%", ease: "power2.inOut" },
+      0,
+    )
     .set(".ranking", { display: "none" });
   return hideTl;
 }
@@ -235,31 +261,54 @@ async function showExplanations() {
     });
   }
 
+  await calculateCurrentRanking(0);
   gsap
-    .timeline({ defaults: { ease: "cubic-bezier(0.25, 0.95, 0, 1)" } })
+    .timeline({ defaults: { ease: "power2.out" } })
     .set(".explanations", { opacity: 1 })
-    .fromTo(".explanation-text", { opacity: 0 }, { opacity: 1 })
+
     .fromTo(
-      ".explanation-illu .illu",
+      ".explanations-content .question-icon",
+      { yPercent: 20, opacity: 0 },
+      { yPercent: 0, opacity: 1 },
+      0.15,
+    )
+    .fromTo(
+      ".explanation-text .number",
+      { yPercent: 20, opacity: 0 },
+      { yPercent: 0, opacity: 1 },
+      0.15,
+    )
+    .fromTo(
+      ".explanation-text .explanation",
+      { yPercent: 20, opacity: 0 },
+      { yPercent: 0, opacity: 1 },
+      0.25,
+    )
+    .fromTo(
+      ".explanation-text .official-data",
+      { yPercent: 20, opacity: 0 },
+      { yPercent: 0, opacity: 1 },
+      0.35,
+    )
+    .fromTo(
+      ".explanation-illu",
       { filter: "blur(10px)", opacity: 0 },
       { filter: "blur(0px)", opacity: 1 },
-      0.125,
+      0.25,
     )
-    .fromTo(".question-icon", { opacity: 0 }, { opacity: 1 }, 0.35)
     .fromTo(
       ".explanation-illu .rank",
-      { scale: 2, opacity: 0 },
+      { scale: 3, opacity: 0 },
       { scale: 1, opacity: 1, ease: "elastic.out(0.65,0.5)", duration: 0.7 },
-      0.65,
+      0.45,
     )
     .fromTo(
       questions,
       { transform: "translateX(-100%)", opacity: 0 },
       { transform: "translateX(0%)", opacity: 1, stagger: 0.045 },
-      0.15,
+      0,
     );
 
-  calculateCurrentRanking(0);
   changeBackgroundFocus(0);
 }
 
@@ -304,34 +353,56 @@ async function changeQuestion(target: number) {
   const currentBg =
     questionsList.value[currentQuestion.value]?.querySelector(".background");
   await gsap
-    .timeline()
-    .to(".explanations-content", { opacity: 0 })
+    .timeline({ defaults: { ease: "power2.inOut" } })
+    .to(
+      ".explanations-content .question-icon",
+      { yPercent: -20, opacity: 0 },
+      0.05,
+    )
+    .to(".explanation-text .number", { yPercent: -20, opacity: 0 }, 0.05)
+    .to(".explanation-text .explanation", { yPercent: -20, opacity: 0 }, 0.15)
+    .to(".explanation-text .official-data", { yPercent: -20, opacity: 0 }, 0.25)
+    .to(".explanation-illu", { filter: "blur(10px)", opacity: 0 }, 0.15)
     .to(currentBg, { opacity: 0 }, 0);
   await calculateCurrentRanking(target);
 
   await nextTick();
 
-  // await waitForImageLoad(".explanation-illu .illu");
+  await waitForImageLoad(".explanation-illu .illu");
 
   gsap
-    .timeline()
+    .timeline({ defaults: { ease: "power2.out" } })
     .add(changeBackgroundFocus(target))
-    .to(
-      ".explanations-content",
-      {
-        opacity: 1,
-      },
-      0,
-    )
+
     .fromTo(
       ".explanations-content .question-icon",
-      { opacity: 0, y: "8%" },
-      {
-        opacity: 1,
-        y: "0%",
-        ease: "power3.out",
-      },
-      0,
+      { yPercent: 20, opacity: 0 },
+      { yPercent: 0, opacity: 1 },
+      0.15,
+    )
+    .fromTo(
+      ".explanation-text .number",
+      { yPercent: 20, opacity: 0 },
+      { yPercent: 0, opacity: 1 },
+      0.15,
+    )
+    .fromTo(
+      ".explanation-text .explanation",
+      { yPercent: 20, opacity: 0 },
+      { yPercent: 0, opacity: 1 },
+      0.25,
+    )
+    .fromTo(
+      ".explanation-text .official-data",
+      { yPercent: 20, opacity: 0 },
+      { yPercent: 0, opacity: 1 },
+      0.35,
+    )
+    .fromTo(
+      ".explanation-illu",
+      { filter: "blur(10px)", opacity: 0 },
+      { filter: "blur(0px)", opacity: 1 },
+      0.25,
     )
     .fromTo(
       ".explanation-illu .rank",
@@ -568,6 +639,7 @@ defineExpose({
         align-items: center;
         justify-content: space-between;
         position: relative;
+
         > .question-icon {
           position: absolute;
           width: 13vw;
@@ -625,7 +697,7 @@ defineExpose({
         > .explanation-illu {
           width: 48%;
           position: relative;
-          height: 100%;
+          height: 40vh;
           > .illu-container {
             border-radius: 48px;
             width: 100%;

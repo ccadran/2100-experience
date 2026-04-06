@@ -136,7 +136,7 @@ function changeExplanationQuestion() {
   > .controls-debug {
     pointer-events: all;
     position: fixed;
-    top: 144px;
+    top: 44px;
     left: 24px;
     background-color: rgba(154, 154, 154, 0.4);
     border-radius: 24px;
