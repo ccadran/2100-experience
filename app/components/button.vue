@@ -119,7 +119,6 @@ $shadow-complex:
 
     &::before {
       content: attr(data-text);
-      // display: contents retiré — empêche translate de fonctionner sur le pseudo-element
       translate: 0 0.75rem 0;
       transition: translate 0.95s var(--elastic-out);
     }
