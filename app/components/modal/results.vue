@@ -721,7 +721,9 @@ defineExpose({
         }
       }
       .questions-list {
-        display: flex;
+        display: grid;
+        grid-template-columns: repeat(8, 1fr);
+        gap: 4vw;
         justify-content: space-between;
         padding: 0 56px;
         width: 100%;
@@ -731,7 +733,7 @@ defineExpose({
         transform: translateX(-50%);
         > .question-container {
           overflow: visible;
-          width: fit-content;
+          width: 100%;
           > .question {
             display: flex;
             align-items: center;
@@ -742,9 +744,10 @@ defineExpose({
             font-size: 14px;
             letter-spacing: -2%;
             > .icon {
+              aspect-ratio: 1/1;
               position: relative;
-              width: 96px;
-              height: 96px;
+              width: 100%;
+              height: 100%;
               display: flex;
               justify-content: center;
               align-items: center;
