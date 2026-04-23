@@ -42,6 +42,9 @@ importers:
         specifier: ^4.6.3
         version: 4.6.3(vue@3.5.24)
     devDependencies:
+      '@types/howler':
+        specifier: ^2.2.12
+        version: 2.2.12
       '@types/qrcode':
         specifier: ^1.5.6
         version: 1.5.6
@@ -1061,6 +1064,9 @@ packages:
 
   '@types/estree@1.0.8':
     resolution: {integrity: sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==}
+
+  '@types/howler@2.2.12':
+    resolution: {integrity: sha512-hy769UICzOSdK0Kn1FBk4gN+lswcj1EKRkmiDtMkUGvFfYJzgaDXmVXkSShS2m89ERAatGIPnTUlp2HhfkVo5g==}
 
   '@types/node@24.10.1':
     resolution: {integrity: sha512-GNWcUTRBgIRJD5zj+Tq0fKOJ5XZajIiBroOF0yvj2bSU1WvNdYS/dn9UxwsujGW4JX06dnHyjV2y9rRaybH0iQ==}
@@ -4531,6 +4537,8 @@ snapshots:
       '@types/node': 24.10.1
 
   '@types/estree@1.0.8': {}
+
+  '@types/howler@2.2.12': {}
 
   '@types/node@24.10.1':
     dependencies:

@@ -152,12 +152,20 @@ export const useAudio = () => {
   };
 
   function muteSound() {
-    Howler.volume(0);
-    isMuted.value = true;
+    if (ambient.playing()) ambient.fade(0.1, 0.0, 500);
+    if (ambientDark.playing()) ambient.fade(0.1, 0.0, 500);
+    setTimeout(() => {
+      Howler.volume(0.0);
+      isMuted.value = true;
+    }, 500);
   }
   function unmuteSound() {
-    Howler.volume(1);
-    isMuted.value = false;
+    if (ambient.playing()) ambient.fade(0.0, 0.1, 500);
+    if (ambientDark.playing()) ambient.fade(0.0, 0.1, 500);
+    setTimeout(() => {
+      Howler.volume(1.0);
+      isMuted.value = false;
+    }, 500);
   }
 
   return {
