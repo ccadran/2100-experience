@@ -1,15 +1,15 @@
 <script setup>
-const { muteSound, unmuteSound } = useAudio();
-onMounted(() => {
-  addEventListener("blur", () => {
-    muteSound();
-  });
+// const { muteSound, unmuteSound } = useAudio();
+// onMounted(() => {
+//   addEventListener("blur", () => {
+//     muteSound();
+//   });
 
-  // When user come back to the tab, resume the game
-  addEventListener("focus", () => {
-    unmuteSound();
-  });
-});
+//   // When user come back to the tab, resume the game
+//   addEventListener("focus", () => {
+//     unmuteSound();
+//   });
+// });
 
 useHead({
   link: [
