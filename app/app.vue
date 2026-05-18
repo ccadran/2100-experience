@@ -3,13 +3,11 @@ const { muteSound, unmuteSound } = useAudio();
 onMounted(() => {
   addEventListener("blur", () => {
     muteSound();
-    console.log("muteee");
   });
 
   // When user come back to the tab, resume the game
   addEventListener("focus", () => {
     unmuteSound();
-    console.log("muteee");
   });
 });
 

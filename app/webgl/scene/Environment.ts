@@ -170,6 +170,7 @@ export default class Environment {
     if (!this.skyContext || !this.skyTexture || !this.fogControls) return;
 
     let ratio = currentFogValue / MAX_FOG_SCORE;
+
     const INTENSITY_FACTOR = 0.5;
     ratio = Math.max(0, Math.min(1, ratio * INTENSITY_FACTOR));
 

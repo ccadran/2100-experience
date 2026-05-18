@@ -50,8 +50,8 @@ function revealEnterBtns() {
 <template>
   <div class="main-ui">
     <div class="enter-container">
-      <!-- <button class="enter-btn" @click="enterExperience()">Commencer</button> -->
       <Button
+        class="enter-btn"
         textContent="Commencer la simulation"
         @click="enterExperience()"
       />

@@ -38,7 +38,7 @@ export function initScene(): Promise<void> {
     // worldStore.skyMesh = markRaw(environment.getSkyMesh()!);
     // worldStore.hemiLight = markRaw(environment.getHemiLight());
     // worldStore.sunLight = markRaw(environment.getSunLight());
-    // worldStore.environment = markRaw(environment);
+    worldStore.environment = markRaw(environment);
     if (environment.getPollutionCloud()) {
       worldStore.pollutionCloud = markRaw(environment.getPollutionCloud()!);
     }

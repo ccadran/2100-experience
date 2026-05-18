@@ -225,7 +225,7 @@ export async function resetExperience() {
 
   hideElements();
 
-  worldStore.camera?.goToSpot(3);
+  await worldStore.camera?.goToSpot(3);
   worldStore.camera?.idleAnim();
 
   await uiStore.cloudsTransition?.hideClouds();

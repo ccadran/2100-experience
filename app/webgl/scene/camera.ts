@@ -14,7 +14,6 @@ export default class Camera {
 
   overlay: THREE.Mesh;
 
-  startPosition: THREE.Vector3;
   endPosition: THREE.Vector3;
 
   targetPosition = new THREE.Vector3();
@@ -30,15 +29,11 @@ export default class Camera {
   private idleHeightAnim: gsap.core.Animation | null = null;
 
   constructor({
-    startPosition = new THREE.Vector3(0, 38, 60),
     endPosition = new THREE.Vector3(0, 1, 10),
     fov = 75,
-    // zoomRangeMultiplier = 0.035,
     lerpFactor = 0.1,
   }: CameraParams = {}) {
-    this.startPosition = startPosition;
     this.endPosition = endPosition;
-    // this.zoomRangeMultiplier = zoomRangeMultiplier;
     this.lerpFactor = lerpFactor;
 
     const container = document.querySelector(".scene")!;
@@ -107,6 +102,7 @@ export default class Camera {
 
   setSpots(spots: THREE.Object3D[], lookAtTargets: THREE.Object3D[]) {
     this.spots = spots;
+
     this.lookAtTargets = lookAtTargets;
 
     this.currentSpotIndex = 0;
@@ -183,21 +179,21 @@ export default class Camera {
     }
   }
 
-  entryAnim() {
-    gsap.fromTo(
-      this.targetPosition,
-      {
-        x: this.startPosition.x,
-        y: this.startPosition.y,
-        z: this.startPosition.z,
-      },
-      {
-        x: this.endPosition.x,
-        y: this.endPosition.y,
-        z: this.endPosition.z,
-        duration: 1.5,
-        ease: "power3.out",
-      },
-    );
-  }
+  // entryAnim() {
+  //   gsap.fromTo(
+  //     this.targetPosition,
+  //     {
+  //       x: this.startPosition.x,
+  //       y: this.startPosition.y,
+  //       z: this.startPosition.z,
+  //     },
+  //     {
+  //       x: this.endPosition.x,
+  //       y: this.endPosition.y,
+  //       z: this.endPosition.z,
+  //       duration: 1.5,
+  //       ease: "power3.out",
+  //     },
+  //   );
+  // }
 }
