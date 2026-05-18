@@ -136,15 +136,15 @@ export default class Environment {
 
   // nuage de pollution
   private setupPollution() {
-    // this.pollutionCloud = createPollutionCloud({
-    //   count: 200,
-    //   radius: 40,
-    //   height: 15,
-    //   color: "#ffffff",
-    //   opacity: 0,
-    //   size: 12,
-    // });
-    // this.scene.add(this.pollutionCloud);
+    this.pollutionCloud = createPollutionCloud({
+      count: 200,
+      radius: 40,
+      height: 15,
+      color: "#ffffff",
+      opacity: 0,
+      size: 12,
+    });
+    this.scene.add(this.pollutionCloud);
   }
 
   //anim nuage
