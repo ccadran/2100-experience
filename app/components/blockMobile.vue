@@ -3,7 +3,7 @@
 <template>
   <div class="block-mobile">
     <div class="modal">
-      <p>Sorry ! L'éxpérience est disponible sur desktop uniquement</p>
+      <p>Sorry ! L'expérience est disponible sur desktop uniquement</p>
     </div>
   </div>
 </template>
@@ -13,6 +13,8 @@
   width: 100vw;
   height: 100vh;
   z-index: 10000;
+  top: 0;
+  left: 0;
   position: fixed;
   display: flex;
   justify-content: center;

@@ -277,7 +277,7 @@ defineExpose({
     left: 50%;
     transform: translateX(-50%);
     text-align: center;
-
+    color: var(--black);
     pointer-events: all;
     font-size: 16px;
     font-family: OpenRunde;

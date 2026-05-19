@@ -108,6 +108,7 @@ function revealEnterBtns() {
       font-size: 16px;
       font-family: OpenRunde;
       text-decoration: underline;
+      color: var(--dark);
     }
   }
   > .temperature-indicator {
